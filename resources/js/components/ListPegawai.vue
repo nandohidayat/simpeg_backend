@@ -1,20 +1,15 @@
 <template>
   <v-expansion-panels>
     <v-expansion-panel v-for="pegawai in pegawais" :key="pegawai.id">
-      <v-expansion-panel-header>
+      <v-expansion-panel-header disable-icon-rotate>
         {{ pegawai.nik }}
         <v-divider class="mx-4" vertical> </v-divider>
         {{ pegawai.nama }}
+        <template v-slot:actions>
+          <v-icon color="green">mdi-alpha-a-box</v-icon>
+        </template>
       </v-expansion-panel-header>
-      <v-expansion-panel-content>
-        <v-form>
-          <v-row no-gutters>
-            <v-col cols="3">
-              <v-combobox label="Atasan"></v-combobox>
-            </v-col>
-          </v-row>
-        </v-form>
-      </v-expansion-panel-content>
+      <v-expansion-panel-content> </v-expansion-panel-content>
     </v-expansion-panel>
   </v-expansion-panels>
 </template>

@@ -2,8 +2,8 @@
   <v-container>
     <v-layout text-center wrap>
       <v-text-field
-        label="Pegawai"
-        placeholder="Nama / NIK Pegawai"
+        outlined
+        label="Cari Pegawai"
         class="mt-12"
         append-icon="mdi-magnify"
       >
