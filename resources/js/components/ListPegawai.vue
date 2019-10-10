@@ -9,12 +9,16 @@
           <v-icon color="green">mdi-alpha-a-box</v-icon>
         </template>
       </v-expansion-panel-header>
-      <v-expansion-panel-content> </v-expansion-panel-content>
+      <v-expansion-panel-content>
+        <ScheduleForm />
+      </v-expansion-panel-content>
     </v-expansion-panel>
   </v-expansion-panels>
 </template>
 
 <script>
+import ScheduleForm from "./ScheduleForm";
+
 export default {
   data() {
     return {
@@ -29,6 +33,9 @@ export default {
     rekan() {
       return this.pegawais.map(p => ({ value: p.id, text: p.nama }));
     }
+  },
+  components: {
+    ScheduleForm
   }
 };
 </script>
