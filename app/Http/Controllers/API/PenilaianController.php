@@ -6,6 +6,8 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
+use App\Penilaian;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 
@@ -18,24 +20,14 @@ class PenilaianController extends BaseController
      */
     public function index()
     {
-        $pegawais = Pegawai::select(
-            'pegawais.id',
-            'nik',
-            'nama',
-            'jabatans.bagian',
-            'jabatans.tingkat',
-            'jabatans.posisi'
-        )->join(
-            'jabatans',
-            'pegawais.jabatans_id',
-            '=',
-            'jabatans.id'
-        )->orderBy(
-            'nik',
-            'asc'
-        )->get();
+        // $data = DB::table('penilaians')
+        //     ->join('pegawais', 'penilaians.pegawais_id', '=', 'pegawais.id')
+        //     ->select('penilaians.id', 'penilaians.mulai', 'penilaians.selesai', 'pegawais.nik', 'pegawais.nama')
+        //     ->get();
 
-        return $this->sendResponse($pegawais->toArray(), 'Products retrieved successfully.');
+        $data = Penilaian::find(1)->rekans()->get();
+
+        return $this->sendResponse($data->toArray(), 'Data retrieved successfully.');
     }
 
 

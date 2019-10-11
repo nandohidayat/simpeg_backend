@@ -13,14 +13,40 @@ class PegawaiSeeder extends Seeder
     public function run()
     {
         //
-        $faker = Faker::create('id_ID');
-
-        for ($i = 0; $i < 50; $i++) {
-            DB::table('pegawais')->insert([
-                'nik' => $faker->numberBetween($min = 1000, $max = 3000),
-                'nama' => $faker->name(),
-                'jabatans_id' => $faker->numberBetween($min = 0, $max = 5)
-            ]);
-        }
+        DB::table('pegawais')->insert([
+            'nik' => '1659',
+            'nama' => 'Muhammad Nando Hidayat',
+            'jabatans_id' => 1
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1660',
+            'nama' => 'Rama',
+            'jabatans_id' => 1
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1661',
+            'nama' => 'Candra',
+            'jabatans_id' => 1
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1662',
+            'nama' => 'Laksita',
+            'jabatans_id' => 3
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1663',
+            'nama' => 'Raissa',
+            'jabatans_id' => 3
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1664',
+            'nama' => 'Dini',
+            'jabatans_id' => 3
+        ]);
+        DB::table('pegawais')->insert([
+            'nik' => '1665',
+            'nama' => 'Julian',
+            'jabatans_id' => 2
+        ]);
     }
 }

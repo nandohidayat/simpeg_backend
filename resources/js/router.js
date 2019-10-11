@@ -1,6 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
-import ScheduleList from "./views/ScheduleList.vue";
+import PenilaianList from "./views/PenilaianList.vue";
 import NProgress from "nprogress";
 
 Vue.use(Router);
@@ -11,8 +11,8 @@ const router = new Router({
     routes: [
         {
             path: "/",
-            name: "schedule",
-            component: ScheduleList,
+            name: "penilaian",
+            component: PenilaianList,
             meta: {
                 title: "SP360"
             }

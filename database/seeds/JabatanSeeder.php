@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Database\Seeder;
-use Faker\Factory as Faker;
 
 class JabatanSeeder extends Seeder
 {
@@ -13,14 +12,35 @@ class JabatanSeeder extends Seeder
     public function run()
     {
         //
-        $faker = Faker::create('id_ID');
-
-        for ($i = 0; $i < 20; $i++) {
-            DB::table('jabatans')->insert([
-                'bagian' => floor($i / 3),
-                'tingkat' => ($i % 3),
-                'posisi' => $faker->jobTitle()
-            ]);
-        }
+        DB::table('jabatans')->insert([
+            'bagian' => '3',
+            'tingkat' => '2',
+            'posisi' => 'SIM B'
+        ]);
+        DB::table('jabatans')->insert([
+            'bagian' => '3',
+            'tingkat' => '1',
+            'posisi' => 'SIM A'
+        ]);
+        DB::table('jabatans')->insert([
+            'bagian' => '3',
+            'tingkat' => '3',
+            'posisi' => 'SIM C'
+        ]);
+        DB::table('jabatans')->insert([
+            'bagian' => '2',
+            'tingkat' => '2',
+            'posisi' => 'KOS B'
+        ]);
+        DB::table('jabatans')->insert([
+            'bagian' => '2',
+            'tingkat' => '1',
+            'posisi' => 'KOS A'
+        ]);
+        DB::table('jabatans')->insert([
+            'bagian' => '2',
+            'tingkat' => '3',
+            'posisi' => 'KOS C'
+        ]);
     }
 }
