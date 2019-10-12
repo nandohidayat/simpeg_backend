@@ -1,6 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
 import PenilaianList from "./views/PenilaianList.vue";
+import PenilaianCreate from "./views/PenilaianCreate.vue";
 import NProgress from "nprogress";
 
 Vue.use(Router);
@@ -15,6 +16,14 @@ const router = new Router({
             component: PenilaianList,
             meta: {
                 title: "SP360"
+            }
+        },
+        {
+            path: "/create",
+            name: "penilaian-create",
+            component: PenilaianCreate,
+            meta: {
+                title: "SP360 | Create"
             }
         }
     ]

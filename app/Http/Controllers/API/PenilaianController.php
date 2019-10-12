@@ -7,6 +7,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Penilaian;
+use App\Rekan;
 use Illuminate\Support\Facades\DB;
 use Validator;
 
@@ -25,7 +26,8 @@ class PenilaianController extends BaseController
         //     ->select('penilaians.id', 'penilaians.mulai', 'penilaians.selesai', 'pegawais.nik', 'pegawais.nama')
         //     ->get();
 
-        $data = Penilaian::find(1)->rekans()->get();
+        $data = Penilaian::select(['id', 'mulai', 'selesai', 'pegawais_id'])->with('pegawais', 'atasans', 'setingkats', 'bawahans')->get();
+        // $data = Rekan::with('pegawais')->get();
 
         return $this->sendResponse($data->toArray(), 'Data retrieved successfully.');
     }

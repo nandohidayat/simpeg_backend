@@ -23,7 +23,6 @@ penilaianClient.interceptors.response.use(response => {
 
 export default {
     getPenilaians() {
-        return {};
-        // return penilaianClient.get("/api/pegawais");
+        return penilaianClient.get("/api/penilaian");
     }
 };

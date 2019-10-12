@@ -1,11 +1,11 @@
 <template>
   <div>
-    <span class="mx-5">
-      {{ pegawai.nik }}
+    <v-icon v-if="pegawai.done" color="success">mdi-check</v-icon>
+    <v-icon v-else color="error">mdi-close</v-icon>
+    <span class="mx-3">
+      {{ pegawai.pegawais.nik }}
     </span>
-    {{ pegawai.nama }}
-    <v-icon v-if="pegawai.done" color="success" class="ml-5">mdi-check</v-icon>
-    <v-icon v-else color="error" class="ml-5">mdi-close</v-icon>
+    {{ pegawai.pegawais.nama }}
   </div>
 </template>
 

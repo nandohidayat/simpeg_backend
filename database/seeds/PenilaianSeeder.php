@@ -17,10 +17,5 @@ class PenilaianSeeder extends Seeder
             'selesai' => date('2019-10-17'),
             'pegawais_id' => 1
         ]);
-        DB::table('penilaians')->insert([
-            'mulai' => date('2019-10-11'),
-            'selesai' => date('2019-10-18'),
-            'pegawais_id' => 1
-        ]);
     }
 }

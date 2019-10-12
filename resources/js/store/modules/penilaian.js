@@ -1,4 +1,4 @@
-import PenilaianService from "../../services/PegawaiService.js";
+import PenilaianService from "../../services/PenilaianService.js";
 
 export const namespaced = true;
 
@@ -7,7 +7,7 @@ export const state = {
 };
 
 export const mutations = {
-    ADD_PENILIAINS(state, penilaians) {
+    ADD_PENILAIANS(state, penilaians) {
         state.penilaians = penilaians;
     }
 };
@@ -16,7 +16,7 @@ export const actions = {
     fetchPenilaians({ commit }) {
         return PenilaianService.getPenilaians()
             .then(res => {
-                commit("ADD_PENILAIANS", res.data);
+                commit("ADD_PENILAIANS", res.data.data);
             })
             .catch(err => {
                 console.log(err.response);

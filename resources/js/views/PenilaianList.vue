@@ -1,8 +1,15 @@
 <template>
   <v-container>
-    <div class="text-right my-7">
-      <v-btn color="teal" dark><v-icon>mdi-plus</v-icon></v-btn>
+    <div class="text-right my-5">
+      <router-link :to="{ name: 'penilaian-create' }">
+        <v-btn color="teal" dark small><v-icon>mdi-plus</v-icon></v-btn>
+      </router-link>
     </div>
+    <PenilaianSummary
+      v-for="p in penilaian.penilaians"
+      :key="p.id"
+      :penilaian="p"
+    />
   </v-container>
 </template>
 
@@ -12,7 +19,7 @@ import { mapState } from "vuex";
 import store from "../store";
 
 function getPenilaians(to, next) {
-  store.dispatch("penilaian/fetchPenilaian").then(() => {
+  store.dispatch("penilaian/fetchPenilaians").then(() => {
     next();
   });
 }
@@ -31,4 +38,7 @@ export default {
 </script>
 
 <style scoped>
+a {
+  text-decoration: none;
+}
 </style>

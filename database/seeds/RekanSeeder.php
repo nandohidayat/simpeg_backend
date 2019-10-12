@@ -14,32 +14,32 @@ class RekanSeeder extends Seeder
         //
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 7,
+            'pegawais_id' => 7,
             'tingkat' => 1
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 2,
+            'pegawais_id' => 2,
             'tingkat' => 2
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 3,
+            'pegawais_id' => 3,
             'tingkat' => 2
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 4,
+            'pegawais_id' => 4,
             'tingkat' => 3
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 5,
+            'pegawais_id' => 5,
             'tingkat' => 3
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
-            'pegawai_id' => 6,
+            'pegawais_id' => 6,
             'tingkat' => 3
         ]);
     }
