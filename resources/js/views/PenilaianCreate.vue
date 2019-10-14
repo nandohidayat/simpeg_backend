@@ -6,7 +6,13 @@
 
 <script>
 import Datepicker from "vuejs-datepicker";
-export default {};
+export default {
+  methods: {
+    createEmpty() {
+      
+    }
+  }
+};
 </script>
 
 <style scoped>
