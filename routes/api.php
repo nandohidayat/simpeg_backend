@@ -18,6 +18,6 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::group(['middleware' => 'cors'], function () {
-    Route::resource('pegawais', 'API\PegawaiController');
+    Route::resource('pegawai', 'API\PegawaiController');
     Route::resource('penilaian', 'API\PenilaianController');
 });

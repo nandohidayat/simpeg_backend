@@ -19,24 +19,9 @@ class PegawaiController extends BaseController
      */
     public function index()
     {
-        $pegawais = Pegawai::select(
-            'pegawais.id',
-            'nik',
-            'nama',
-            'jabatans.bagian',
-            'jabatans.tingkat',
-            'jabatans.posisi'
-        )->join(
-            'jabatans',
-            'pegawais.jabatans_id',
-            '=',
-            'jabatans.id'
-        )->orderBy(
-            'nik',
-            'asc'
-        )->get();
+        $pegawais = Pegawai::select('id', 'nik', 'nama')->get();
 
-        return $this->sendResponse($pegawais->toArray(), 'Products retrieved successfully.');
+        return $this->sendResponse($pegawais->toArray(), 'Pegawais retrieved successfully.');
     }
 
 
