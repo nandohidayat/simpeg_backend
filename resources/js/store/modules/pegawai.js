@@ -3,8 +3,7 @@ import PegawaiService from "../../services/PegawaiService.js";
 export const namespaced = true;
 
 export const state = {
-    pegawais: [],
-    pegawaistotal: 0
+    pegawais: []
 };
 
 export const mutations = {

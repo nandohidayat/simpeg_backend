@@ -7,6 +7,7 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Pegawai;
+use Illuminate\Support\Facades\DB;
 use Validator;
 
 
@@ -19,7 +20,7 @@ class PegawaiController extends BaseController
      */
     public function index()
     {
-        $pegawais = Pegawai::select('id', 'nik', 'nama')->get();
+        $pegawais = Pegawai::select(DB::raw("CONCAT(nik, ' | ', nama) AS text"), 'id as value')->get();
 
         return $this->sendResponse($pegawais->toArray(), 'Pegawais retrieved successfully.');
     }

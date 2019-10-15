@@ -18,18 +18,14 @@ import PenilaianSummary from "../components/PenilaianSummary";
 import { mapState } from "vuex";
 import store from "../store";
 
-function getPenilaians(to, next) {
-  store.dispatch("penilaian/fetchPenilaians").then(() => {
-    next();
-  });
-}
-
 export default {
   components: {
     PenilaianSummary
   },
   beforeRouteEnter(to, from, next) {
-    getPenilaians(to, next);
+    store.dispatch("penilaian/fetchPenilaians").then(() => {
+      next();
+    });
   },
   computed: {
     ...mapState(["penilaian"])
