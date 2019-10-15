@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Pegawai;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 use Validator;
 
 
@@ -63,15 +64,27 @@ class PegawaiController extends BaseController
      */
     public function show($id)
     {
-        $product = Product::find($id);
+        $pegawai = Pegawai::with('jabatans')->where('id', '=', $id)->first();
 
+        $data = new stdClass();
+        $data->atasans = Pegawai::whereHas('jabatans', function ($query) use ($pegawai) {
+            $query->where('bagian', '=', $pegawai->jabatans->bagian)
+                ->where('tingkat', '=', $pegawai->jabatans->tingkat - 1);
+        })->select('id')->get();
+        $data->setingkats = Pegawai::whereHas('jabatans', function ($query) use ($pegawai) {
+            $query->where('bagian', '=', $pegawai->jabatans->bagian)
+                ->where('tingkat', '=', $pegawai->jabatans->tingkat);
+        })->where('id', '!=', $id)->select('id')->take(3)->get();
+        $data->bawahans = Pegawai::whereHas('jabatans', function ($query) use ($pegawai) {
+            $query->where('bagian', '=', $pegawai->jabatans->bagian)
+                ->where('tingkat', '=', $pegawai->jabatans->tingkat + 1);
+        })->select('id')->take(3)->get();
 
-        if (is_null($product)) {
-            return $this->sendError('Product not found.');
-        }
+        // if (is_null($data)) {
+        //     return $this->sendError('Product not found.');
+        // }
 
-
-        return $this->sendResponse($product->toArray(), 'Product retrieved successfully.');
+        return $this->sendResponse($data, 'Product retrieved successfully.');
     }
 
 

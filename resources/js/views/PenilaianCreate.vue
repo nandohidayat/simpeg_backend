@@ -14,6 +14,7 @@
             :item-text="obj => obj.text"
             :item-value="obj => obj.value"
             label="Pegawai"
+            @change="getRekans"
           ></v-autocomplete>
           <v-row>
             <v-col cols="6" sm="3">
@@ -73,10 +74,8 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-menu
-                ref="menu"
                 v-model="menu"
                 :close-on-content-click="false"
-                :return-value.sync="penilaian.mulai"
                 transition="scale-transition"
                 offset-y
                 min-width="290px"
@@ -91,25 +90,16 @@
                 </template>
                 <v-date-picker
                   v-model="penilaian.mulai"
+                  @input="menu = false"
                   color="teal"
                   no-title
                   scrollable
                 >
-                  <v-spacer></v-spacer>
-                  <v-btn text color="teal" @click="menu = false">Cancel</v-btn>
-                  <v-btn
-                    text
-                    color="teal"
-                    @click="$refs.menu.save(penilaian.mulai)"
-                    >OK</v-btn
-                  >
                 </v-date-picker>
               </v-menu>
               <v-menu
-                ref="menu1"
                 v-model="menu1"
                 :close-on-content-click="false"
-                :return-value.sync="penilaian.selesai"
                 transition="scale-transition"
                 offset-y
                 min-width="290px"
@@ -124,18 +114,12 @@
                 </template>
                 <v-date-picker
                   v-model="penilaian.selesai"
+                  @input="menu1 = false"
                   color="teal"
                   no-title
                   scrollable
+                  :min="penilaian.mulai"
                 >
-                  <v-spacer></v-spacer>
-                  <v-btn text color="teal" @click="menu1 = false">Cancel</v-btn>
-                  <v-btn
-                    text
-                    color="teal"
-                    @click="$refs.menu1.save(penilaian.selesai)"
-                    >OK</v-btn
-                  >
                 </v-date-picker>
               </v-menu>
             </v-col>
@@ -186,16 +170,21 @@ export default {
     },
     resetForm() {
       this.penilaian = this.createEmpty();
+    },
+    getRekans() {
+      store
+        .dispatch("pegawai/fetchRekans", this.penilaian.pegawai_id)
+        .then(() => {
+          this.penilaian.atasan = this.pegawai.rekans.atasans.map(a => a.id);
+          this.penilaian.setingkat = this.pegawai.rekans.setingkats.map(
+            s => s.id
+          );
+          this.penilaian.bawahan = this.pegawai.rekans.bawahans.map(b => b.id);
+        });
     }
   },
   computed: {
-    ...mapState(["pegawai"]),
-    pegawaiText() {
-      return this.pegawai.pegawais.map(p => p.text);
-    },
-    pegawaiValue() {
-      return this.pegawai.pegawais.map(p => p.value);
-    }
+    ...mapState(["pegawai"])
   }
 };
 </script>

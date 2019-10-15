@@ -16,4 +16,9 @@ class Pegawai extends Model
     {
         return $this->hasMany('App\Penilaian');
     }
+
+    public function jabatans()
+    {
+        return $this->belongsTo('App\Jabatan');
+    }
 }
