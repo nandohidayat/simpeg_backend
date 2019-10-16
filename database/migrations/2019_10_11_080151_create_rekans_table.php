@@ -18,6 +18,7 @@ class CreateRekansTable extends Migration
             $table->bigInteger('penilaian_id');
             $table->bigInteger('pegawais_id');
             $table->integer('tingkat');
+            $table->boolean('done')->default(false);
             $table->timestamps();
         });
     }

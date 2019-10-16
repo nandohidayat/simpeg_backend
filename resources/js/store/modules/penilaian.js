@@ -13,13 +13,19 @@ export const mutations = {
 };
 
 export const actions = {
-    fetchPenilaians({ commit }) {
-        return PenilaianService.getPenilaians()
-            .then(res => {
-                commit("ADD_PENILAIANS", res.data.data);
-            })
-            .catch(err => {
-                console.log(err.response);
-            });
+    async fetchPenilaians({ commit }) {
+        try {
+            const res = await PenilaianService.getPenilaians();
+            commit("ADD_PENILAIANS", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async createPenilaian({}, penilaian) {
+        try {
+            await PenilaianService.postPenilaian(penilaian);
+        } catch (err) {
+            console.log(err.response);
+        }
     }
 };

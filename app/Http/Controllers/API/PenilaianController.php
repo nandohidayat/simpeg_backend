@@ -41,24 +41,47 @@ class PenilaianController extends BaseController
      */
     public function store(Request $request)
     {
-        $input = $request->all();
+        // $input = $request->all();
 
+        // $validator = Validator::make($input, [
+        //     'name' => 'required',
+        //     'detail' => 'required'
+        // ]);
 
-        $validator = Validator::make($input, [
-            'name' => 'required',
-            'detail' => 'required'
-        ]);
+        // if ($validator->fails()) {
+        //     return $this->sendError('Validation Error.', $validator->errors());
+        // }
 
+        $penilaian = new Penilaian;
+        $penilaian->pegawais_id = $request->pegawai_id;
+        $penilaian->mulai = $request->mulai;
+        $penilaian->selesai = $request->selesai;
+        $penilaian->save();
 
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+        foreach ($request->atasan as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 1;
+            $rekan->save();
         }
 
+        foreach ($request->setingkat as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 2;
+            $rekan->save();
+        }
+        foreach ($request->bawahan as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 3;
+            $rekan->save();
+        }
 
-        $product = Product::create($input);
-
-
-        return $this->sendResponse($product->toArray(), 'Product created successfully.');
+        return $this->sendResponse([], 'Product created successfully.');
     }
 
 

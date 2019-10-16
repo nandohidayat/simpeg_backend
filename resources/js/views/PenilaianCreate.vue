@@ -134,13 +134,16 @@
         <v-btn color="warning" dark small class="ml-auto" @click="resetForm"
           ><v-icon>mdi-backup-restore</v-icon></v-btn
         >
-        <v-btn color="teal" dark small><v-icon>mdi-content-save</v-icon></v-btn>
+        <v-btn color="teal" dark small @click="createPenilaian"
+          ><v-icon>mdi-content-save</v-icon></v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-container>
 </template>
 
 <script>
+import NProgress from "nprogress";
 import store from "../store";
 import { mapState } from "vuex";
 
@@ -180,6 +183,20 @@ export default {
             s => s.id
           );
           this.penilaian.bawahan = this.pegawai.rekans.bawahans.map(b => b.id);
+        });
+    },
+    createPenilaian() {
+      NProgress.start();
+      store
+        .dispatch("penilaian/createPenilaian", this.penilaian)
+        .then(() => {
+          this.$router.push({
+            name: "penilaian"
+          });
+          this.penilaian = this.createEmpty();
+        })
+        .catch(() => {
+          NProgress.done();
         });
     }
   },
