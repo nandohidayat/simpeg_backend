@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="pegawai.pegawais">
     <v-icon v-if="pegawai.done" color="success">mdi-check</v-icon>
     <v-icon v-else color="error">mdi-close</v-icon>
     <span class="mx-3">

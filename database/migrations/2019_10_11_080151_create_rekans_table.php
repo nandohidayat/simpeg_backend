@@ -16,7 +16,7 @@ class CreateRekansTable extends Migration
         Schema::create('rekans', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->bigInteger('penilaian_id');
-            $table->bigInteger('pegawais_id');
+            $table->bigInteger('pegawais_id')->nullable();
             $table->integer('tingkat');
             $table->boolean('done')->default(false);
             $table->timestamps();

@@ -9,6 +9,7 @@ use App\Http\Controllers\API\BaseController as BaseController;
 use App\Penilaian;
 use App\Rekan;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 use Validator;
 
 
@@ -41,7 +42,7 @@ class PenilaianController extends BaseController
      */
     public function store(Request $request)
     {
-        // $input = $request->all();
+        $input = $request->all();
 
         // $validator = Validator::make($input, [
         //     'name' => 'required',
@@ -52,34 +53,11 @@ class PenilaianController extends BaseController
         //     return $this->sendError('Validation Error.', $validator->errors());
         // }
 
-        $penilaian = new Penilaian;
-        $penilaian->pegawais_id = $request->pegawai_id;
-        $penilaian->mulai = $request->mulai;
-        $penilaian->selesai = $request->selesai;
-        $penilaian->save();
+        $penilaian = Penilaian::create($input);
 
-        foreach ($request->atasan as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 1;
-            $rekan->save();
-        }
-
-        foreach ($request->setingkat as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 2;
-            $rekan->save();
-        }
-        foreach ($request->bawahan as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 3;
-            $rekan->save();
-        }
+        $atasan = $penilaian->rekans()->createMany($request->atasans);
+        $setingkat = $penilaian->rekans()->createMany($request->setingkats);
+        $bawahan = $penilaian->rekans()->createMany($request->bawahans);
 
         return $this->sendResponse([], 'Product created successfully.');
     }
@@ -113,28 +91,51 @@ class PenilaianController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Product $product)
+    public function update(Request $request, Penilaian $penilaian)
     {
-        $input = $request->all();
+        // $input = $request->all();
 
+        // $validator = Validator::make($input, [
+        //     'name' => 'required',
+        //     'detail' => 'required'
+        // ]);
 
-        $validator = Validator::make($input, [
-            'name' => 'required',
-            'detail' => 'required'
-        ]);
+        // if ($validator->fails()) {
+        //     return $this->sendError('Validation Error.', $validator->errors());
+        // }
 
+        $penilaian->pegawais_id = $request->pegawai_id;
+        $penilaian->mulai = $request->mulai;
+        $penilaian->selesai = $request->selesai;
+        $penilaian->save();
 
-        if ($validator->fails()) {
-            return $this->sendError('Validation Error.', $validator->errors());
+        Rekan::where('penilaian_id', '=', $penilaian->id)->delete();
+
+        foreach ($request->atasan as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 1;
+            $rekan->save();
         }
 
+        foreach ($request->setingkat as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 2;
+            $rekan->save();
+        }
 
-        $product->name = $input['name'];
-        $product->detail = $input['detail'];
-        $product->save();
+        foreach ($request->bawahan as $a) {
+            $rekan = new Rekan;
+            $rekan->penilaian_id = $penilaian->id;
+            $rekan->pegawais_id = $a;
+            $rekan->tingkat = 3;
+            $rekan->save();
+        }
 
-
-        return $this->sendResponse($product->toArray(), 'Product updated successfully.');
+        return $this->sendResponse([], 'Product created successfully.');
     }
 
 

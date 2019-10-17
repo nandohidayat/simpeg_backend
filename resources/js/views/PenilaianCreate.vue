@@ -12,7 +12,7 @@
       <v-card-text>
         <form>
           <v-autocomplete
-            v-model="newPenilaian.pegawai_id"
+            v-model="newPenilaian.pegawais_id"
             :items="pegawai.pegawais"
             :item-text="obj => obj.text"
             :item-value="obj => obj.value"
@@ -22,7 +22,7 @@
           <v-row>
             <v-col cols="6" sm="3">
               <v-autocomplete
-                v-model="newPenilaian.atasan[0]"
+                v-model="newPenilaian.atasans[0].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
@@ -31,21 +31,21 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-autocomplete
-                v-model="newPenilaian.setingkat[0]"
+                v-model="newPenilaian.setingkats[0].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
                 label="Setingkat 1"
               ></v-autocomplete>
               <v-autocomplete
-                v-model="newPenilaian.setingkat[1]"
+                v-model="newPenilaian.setingkats[1].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
                 label="Setingkat 2"
               ></v-autocomplete>
               <v-autocomplete
-                v-model="newPenilaian.setingkat[2]"
+                v-model="newPenilaian.setingkats[2].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
@@ -54,21 +54,21 @@
             </v-col>
             <v-col cols="6" sm="3">
               <v-autocomplete
-                v-model="newPenilaian.bawahan[0]"
+                v-model="newPenilaian.bawahans[0].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
                 label="Bawahan 1"
               ></v-autocomplete>
               <v-autocomplete
-                v-model="newPenilaian.bawahan[1]"
+                v-model="newPenilaian.bawahans[1].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
                 label="Bawahan 2"
               ></v-autocomplete>
               <v-autocomplete
-                v-model="newPenilaian.bawahan[2]"
+                v-model="newPenilaian.bawahans[2].pegawais_id"
                 :items="pegawai.pegawais"
                 :item-text="obj => obj.text"
                 :item-value="obj => obj.value"
@@ -167,29 +167,27 @@ export default {
   },
   created() {
     if (this.$route.params.id) {
-      this.newPenilaian.pegawai_id = this.penilaian.update.pegawais_id;
-      this.newPenilaian.mulai = this.penilaian.update.mulai;
-      this.newPenilaian.selesai = this.penilaian.update.selesai;
-      this.newPenilaian.atasan = this.penilaian.update.atasans.map(
-        a => a.pegawais_id
-      );
-      this.newPenilaian.setingkat = this.penilaian.update.setingkats.map(
-        s => s.pegawais_id
-      );
-      this.newPenilaian.bawahan = this.penilaian.update.bawahans.map(
-        b => b.pegawais_id
-      );
+      this.newPenilaian = this.penilaian.update;
     }
   },
   methods: {
     createEmpty() {
       return {
-        pegawai_id: "",
+        pegawais_id: "",
         mulai: "",
         selesai: "",
-        atasan: [],
-        setingkat: [],
-        bawahan: []
+        atasans: [...Array(1).keys()].map(i => ({
+          pegawais_id: undefined,
+          tingkat: 1
+        })),
+        setingkats: [...Array(3).keys()].map(i => ({
+          pegawais_id: undefined,
+          tingkat: 2
+        })),
+        bawahans: [...Array(3).keys()].map(i => ({
+          pegawais_id: undefined,
+          tingkat: 3
+        }))
       };
     },
     resetForm() {
@@ -197,15 +195,26 @@ export default {
     },
     getRekans() {
       store
-        .dispatch("pegawai/fetchRekans", this.newPenilaian.pegawai_id)
+        .dispatch("pegawai/fetchRekans", this.newPenilaian.pegawais_id)
         .then(() => {
-          this.newPenilaian.atasan = this.pegawai.rekans.atasans.map(a => a.id);
-          this.newPenilaian.setingkat = this.pegawai.rekans.setingkats.map(
-            s => s.id
-          );
-          this.newPenilaian.bawahan = this.pegawai.rekans.bawahans.map(
-            b => b.id
-          );
+          this.newPenilaian.atasans.forEach((a, i) => {
+            a.pegawais_id = this.pegawai.rekans.atasans[i]
+              ? this.pegawai.rekans.atasans[i].id
+              : undefined;
+          });
+          this.newPenilaian.setingkats.forEach((s, i) => {
+            s.pegawais_id = this.pegawai.rekans.setingkats[i]
+              ? this.pegawai.rekans.setingkats[i].id
+              : undefined;
+          });
+          this.newPenilaian.bawahans.forEach((b, i) => {
+            b.pegawais_id = this.pegawai.rekans.bawahans[i]
+              ? this.pegawai.rekans.bawahans[i].id
+              : undefined;
+          });
+        })
+        .catch(e => {
+          console.log(e);
         });
     },
     createPenilaian() {
@@ -216,7 +225,7 @@ export default {
           this.$router.push({
             name: "penilaian"
           });
-          this.newPenilaian = this.createEmpty();
+          this.resetForm();
         })
         .catch(() => {
           NProgress.done();

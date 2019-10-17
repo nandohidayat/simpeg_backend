@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 class Penilaian extends Model
 {
     //
+    protected $fillable = [
+        'pegawais_id', 'mulai', 'selesai'
+    ];
+
     public function rekans()
     {
         # code...
