@@ -49,9 +49,11 @@
     </v-card-text>
     <v-divider></v-divider>
     <v-card-actions class="pr-6">
-      <v-btn color="info" dark class="ml-auto" small
-        ><v-icon>mdi-pencil</v-icon></v-btn
-      >
+      <router-link :to="{ name: 'penilaian-update', params: { id: penilaian.id }}" class="ml-auto mr-1">
+        <v-btn color="info" dark small
+          ><v-icon>mdi-pencil</v-icon></v-btn
+        >
+      </router-link>
       <v-btn color="error" dark small><v-icon>mdi-delete</v-icon></v-btn>
     </v-card-actions>
   </v-card>
@@ -70,4 +72,7 @@ export default {
 </script>
 
 <style scoped>
+a {
+  text-decoration: none;
+}
 </style>

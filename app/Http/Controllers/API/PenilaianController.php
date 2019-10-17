@@ -93,15 +93,16 @@ class PenilaianController extends BaseController
      */
     public function show($id)
     {
-        $product = Product::find($id);
+        $data = Penilaian::where('id', '=', $id)
+            ->select(['id', 'mulai', 'selesai', 'pegawais_id'])
+            ->with('pegawais', 'atasans', 'setingkats', 'bawahans')
+            ->get();
 
+        // if (is_null($product)) {
+        //     return $this->sendError('Product not found.');
+        // }
 
-        if (is_null($product)) {
-            return $this->sendError('Product not found.');
-        }
-
-
-        return $this->sendResponse($product->toArray(), 'Product retrieved successfully.');
+        return $this->sendResponse($data->toArray(), 'Product retrieved successfully.');
     }
 
 
@@ -149,5 +150,16 @@ class PenilaianController extends BaseController
 
 
         return $this->sendResponse($product->toArray(), 'Product deleted successfully.');
+    }
+
+    public function updateDetail($id)
+    {
+        # code...
+        $data = Penilaian::where('id', '=', $id)
+            ->select(['id', 'mulai', 'selesai', 'pegawais_id'])
+            ->with('atasans', 'setingkats', 'bawahans')
+            ->first();
+
+        return $this->sendResponse($data, 'Product retrieved successfully.');
     }
 }

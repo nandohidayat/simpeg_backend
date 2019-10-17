@@ -6,5 +6,8 @@ export default {
     },
     postPenilaian(penilaian) {
         return client.post("/api/penilaian", penilaian);
+    },
+    getPenilaianUpdate(id) {
+        return client.get(`/api/penilaian/${id}/update`);
     }
 };

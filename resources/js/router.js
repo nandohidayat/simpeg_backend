@@ -16,14 +16,23 @@ const router = new Router({
             component: PenilaianList,
             meta: {
                 title: "SP360"
-            }
+            },
+            alias: "/penilaian"
         },
         {
-            path: "/create",
+            path: "/penilaian/create",
             name: "penilaian-create",
             component: PenilaianCreate,
             meta: {
                 title: "SP360 | Create"
+            }
+        },
+        {
+            path: "/penilaian/:id/update",
+            name: "penilaian-update",
+            component: PenilaianCreate,
+            meta: {
+                title: "SP360 | Update"
             }
         }
     ]

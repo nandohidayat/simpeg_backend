@@ -17,6 +17,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
+
 Route::group(['middleware' => 'cors'], function () {
     Route::resource('pegawai', 'API\PegawaiController');
     Route::resource('penilaian', 'API\PenilaianController');
