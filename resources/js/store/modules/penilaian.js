@@ -39,5 +39,12 @@ export const actions = {
         } catch (err) {
             console.log(err.response);
         }
+    },
+    async updatePenilaian({}, { id, penilaian }) {
+        try {
+            await PenilaianService.putPenilaian(id, penilaian);
+        } catch (err) {
+            console.log(err.response);
+        }
     }
 };

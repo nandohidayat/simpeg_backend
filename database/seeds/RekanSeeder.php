@@ -29,6 +29,11 @@ class RekanSeeder extends Seeder
         ]);
         DB::table('rekans')->insert([
             'penilaian_id' => 1,
+            'pegawais_id' => null,
+            'tingkat' => 2
+        ]);
+        DB::table('rekans')->insert([
+            'penilaian_id' => 1,
             'pegawais_id' => 4,
             'tingkat' => 3
         ]);

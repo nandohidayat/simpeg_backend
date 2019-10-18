@@ -93,7 +93,7 @@ class PenilaianController extends BaseController
      */
     public function update(Request $request, Penilaian $penilaian)
     {
-        // $input = $request->all();
+        $input = $request->all();
 
         // $validator = Validator::make($input, [
         //     'name' => 'required',
@@ -104,36 +104,14 @@ class PenilaianController extends BaseController
         //     return $this->sendError('Validation Error.', $validator->errors());
         // }
 
-        $penilaian->pegawais_id = $request->pegawai_id;
+        $penilaian->pegawais_id = $request->pegawais_id;
         $penilaian->mulai = $request->mulai;
         $penilaian->selesai = $request->selesai;
         $penilaian->save();
 
-        Rekan::where('penilaian_id', '=', $penilaian->id)->delete();
-
-        foreach ($request->atasan as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 1;
-            $rekan->save();
-        }
-
-        foreach ($request->setingkat as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 2;
-            $rekan->save();
-        }
-
-        foreach ($request->bawahan as $a) {
-            $rekan = new Rekan;
-            $rekan->penilaian_id = $penilaian->id;
-            $rekan->pegawais_id = $a;
-            $rekan->tingkat = 3;
-            $rekan->save();
-        }
+        $this->updateRekans($request->atasans);
+        $this->updateRekans($request->setingkats);
+        $this->updateRekans($request->bawahans);
 
         return $this->sendResponse([], 'Product created successfully.');
     }
@@ -162,5 +140,17 @@ class PenilaianController extends BaseController
             ->first();
 
         return $this->sendResponse($data, 'Product retrieved successfully.');
+    }
+
+    protected function updateRekans($rekans)
+    {
+        foreach ($rekans as $rekan) {
+            $data = Rekan::find($rekan['id']);
+            if ($rekan['pegawais_id'] != $data->pegawais_id) {
+                $data->pegawais_id = $rekan['pegawais_id'];
+                $data->done = false;
+            }
+            $data->save();
+        }
     }
 }

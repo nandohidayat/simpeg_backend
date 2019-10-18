@@ -137,7 +137,7 @@
         <v-btn color="warning" dark small class="ml-auto" @click="resetForm"
           ><v-icon>mdi-backup-restore</v-icon></v-btn
         >
-        <v-btn color="teal" dark small @click="createPenilaian"
+        <v-btn color="teal" dark small @click="submitPenilaian"
           ><v-icon>mdi-content-save</v-icon></v-btn
         >
       </v-card-actions>
@@ -173,19 +173,23 @@ export default {
   methods: {
     createEmpty() {
       return {
+        id: "",
         pegawais_id: "",
         mulai: "",
         selesai: "",
         atasans: [...Array(1).keys()].map(i => ({
-          pegawais_id: undefined,
+          id: "",
+          pegawais_id: "",
           tingkat: 1
         })),
         setingkats: [...Array(3).keys()].map(i => ({
-          pegawais_id: undefined,
+          id: "",
+          pegawais_id: "",
           tingkat: 2
         })),
         bawahans: [...Array(3).keys()].map(i => ({
-          pegawais_id: undefined,
+          id: "",
+          pegawais_id: "",
           tingkat: 3
         }))
       };
@@ -217,10 +221,31 @@ export default {
           console.log(e);
         });
     },
+    submitPenilaian() {
+      if (this.$route.params.id) this.updatePenilaian();
+      else this.createPenilaian();
+    },
     createPenilaian() {
       NProgress.start();
       store
         .dispatch("penilaian/createPenilaian", this.newPenilaian)
+        .then(() => {
+          this.$router.push({
+            name: "penilaian"
+          });
+          this.resetForm();
+        })
+        .catch(() => {
+          NProgress.done();
+        });
+    },
+    updatePenilaian() {
+      NProgress.start();
+      store
+        .dispatch("penilaian/updatePenilaian", {
+          id: this.newPenilaian.id,
+          penilaian: this.newPenilaian
+        })
         .then(() => {
           this.$router.push({
             name: "penilaian"

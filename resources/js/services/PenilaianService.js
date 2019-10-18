@@ -9,5 +9,8 @@ export default {
     },
     getPenilaianUpdate(id) {
         return client.get(`/api/penilaian/${id}/update`);
+    },
+    putPenilaian(id, penilaian) {
+        return client.put(`/api/penilaian/${id}`, penilaian);
     }
 };
