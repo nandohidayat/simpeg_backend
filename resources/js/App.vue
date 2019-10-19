@@ -1,5 +1,6 @@
 <template>
-  <v-app id="inspire">
+  <Login v-if="$route.name === 'login'"></Login>
+  <v-app v-else id="inspire">
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list dense>
         <v-list-item @click="">
@@ -36,10 +37,15 @@
 </template>
 
 <script>
+import Login from "./views/Login";
+
 export default {
   name: "App",
   data: () => ({
     drawer: false
-  })
+  }),
+  components: {
+    Login
+  }
 };
 </script>
