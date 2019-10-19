@@ -13,6 +13,9 @@ export const mutations = {
     },
     ADD_UPDATE(state, update) {
         state.update = update;
+    },
+    UPDATE_PENILAIANS(state, id) {
+        state.penilaians = state.penilaians.filter(p => p.id != id);
     }
 };
 
@@ -43,6 +46,14 @@ export const actions = {
     async updatePenilaian({}, { id, penilaian }) {
         try {
             await PenilaianService.putPenilaian(id, penilaian);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async deletePenilaian({ commit }, id) {
+        try {
+            await PenilaianService.deletePenilaian(id);
+            commit("UPDATE_PENILAIANS", id);
         } catch (err) {
             console.log(err.response);
         }

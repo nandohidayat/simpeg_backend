@@ -54,16 +54,29 @@
           ><v-icon>mdi-pencil</v-icon></v-btn
         >
       </router-link>
-      <v-btn color="error" dark small><v-icon>mdi-delete</v-icon></v-btn>
+      <v-btn color="error" dark small @click="deleteThis"><v-icon>mdi-delete</v-icon></v-btn>
     </v-card-actions>
   </v-card>
 </template>
 
 <script>
 import PegawaiStatus from "./PegawaiStatus";
+import store from "../store";
+import NProgress from "nprogress";
+
 export default {
   props: {
     penilaian: Object
+  },
+  methods: {
+    async deleteThis() {
+      try {
+        NProgress.start();
+        await store.dispatch("penilaian/deletePenilaian", this.penilaian.id);
+      } catch (err) {
+        NProgress.done();
+      }
+    }
   },
   components: {
     PegawaiStatus

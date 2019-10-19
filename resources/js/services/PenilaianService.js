@@ -12,5 +12,8 @@ export default {
     },
     putPenilaian(id, penilaian) {
         return client.put(`/api/penilaian/${id}`, penilaian);
+    },
+    deletePenilaian(id) {
+        return client.delete(`/api/penilaian/${id}`);
     }
 };

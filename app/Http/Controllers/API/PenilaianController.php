@@ -93,7 +93,7 @@ class PenilaianController extends BaseController
      */
     public function update(Request $request, Penilaian $penilaian)
     {
-        $input = $request->all();
+        // $input = $request->all();
 
         // $validator = Validator::make($input, [
         //     'name' => 'required',
@@ -123,12 +123,11 @@ class PenilaianController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Product $product)
+    public function destroy(Penilaian $penilaian)
     {
-        $product->delete();
+        $penilaian->delete();
 
-
-        return $this->sendResponse($product->toArray(), 'Product deleted successfully.');
+        return $this->sendResponse([], 'Product deleted successfully.');
     }
 
     public function updateDetail($id)

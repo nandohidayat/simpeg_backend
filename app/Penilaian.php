@@ -37,4 +37,11 @@ class Penilaian extends Model
     {
         return $this->belongsTo('App\Pegawai')->select(['id', 'nama', 'nik']);
     }
+
+    public function delete()
+    {
+        $this->rekans()->delete();
+
+        return parent::delete();
+    }
 }
