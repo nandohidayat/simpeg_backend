@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class Pegawai extends Model
 {
     //
+    public function users()
+    {
+        return $this->hasOne('App\User');
+    }
+
     public function rekans()
     {
         return $this->hasMany('App\Rekans');

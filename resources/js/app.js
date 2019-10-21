@@ -2,6 +2,7 @@ import "./bootstrap";
 
 import Vue from "vue";
 import Vuetify from "vuetify";
+import axios from "axios";
 
 Vue.use(Vuetify);
 
@@ -46,5 +47,25 @@ new Vue({
     router,
     store,
     vuetify,
-    render: h => h(App)
+    render: h => h(App),
+    beforeCreate() {
+        const userString = localStorage.getItem("user");
+        if (userString) {
+            const userData = JSON.parse(userString);
+            console.log(userData);
+            this.$store.commit("user/SET_USER", userData, { root: true });
+        }
+        //
+        axios.interceptors.response.use(
+            response => response,
+            error => {
+                console.log(error.response);
+                if (error.response.status === 401) {
+                    this.$router.push("/login");
+                    this.$store.dispatch("user/logout");
+                }
+                return Promise.reject(error);
+            }
+        );
+    }
 }).$mount("#app");

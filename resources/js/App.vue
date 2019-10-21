@@ -3,7 +3,7 @@
   <v-app v-else id="inspire">
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list dense>
-        <v-list-item @click="">
+        <v-list-item @click="$router.push({ name: 'penilaian' })">
           <v-list-item-action>
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>
@@ -11,15 +11,20 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-item @click="">
+        <!-- <v-list-item @click="">
           <v-list-item-action>
             <v-icon>mdi-contact-mail</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title>Contact</v-list-item-title>
           </v-list-item-content>
-        </v-list-item>
+        </v-list-item> -->
       </v-list>
+      <template v-slot:append>
+        <div class="pa-2">
+          <v-btn block color="error" dark @click="logout">Logout</v-btn>
+        </div>
+      </template>
     </v-navigation-drawer>
 
     <v-app-bar app color="teal" dark>
@@ -37,7 +42,9 @@
 </template>
 
 <script>
+import NProgress from "nprogress";
 import Login from "./views/Login";
+import store from "./store";
 
 export default {
   name: "App",
@@ -46,6 +53,17 @@ export default {
   }),
   components: {
     Login
+  },
+  methods: {
+    async logout() {
+      NProgress.start();
+      try {
+        await store.dispatch("user/logout");
+        $this.router.push({ name: "login" });
+      } catch (err) {
+        NProgress.done();
+      }
+    }
   }
 };
 </script>

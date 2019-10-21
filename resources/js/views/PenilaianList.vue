@@ -22,10 +22,8 @@ export default {
   components: {
     PenilaianSummary
   },
-  beforeRouteEnter(to, from, next) {
-    store.dispatch("penilaian/fetchPenilaians").then(() => {
-      next();
-    });
+  async created() {
+    await store.dispatch("penilaian/fetchPenilaians");
   },
   computed: {
     ...mapState(["penilaian"])

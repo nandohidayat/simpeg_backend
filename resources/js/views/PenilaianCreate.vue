@@ -159,14 +159,13 @@ export default {
     };
   },
   async beforeRouteEnter(to, from, next) {
-    if (to.params.id) {
-      await store.dispatch("penilaian/fetchUpdate", to.params.id);
-    }
-    await store.dispatch("pegawai/fetchPegawais");
     next();
   },
-  created() {
+  async created() {
+    await store.dispatch("pegawai/fetchPegawais");
+
     if (this.$route.params.id) {
+      await store.dispatch("penilaian/fetchUpdate", to.params.id);
       this.newPenilaian = this.penilaian.update;
     }
   },
