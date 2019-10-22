@@ -51,7 +51,7 @@ class AuthController extends BaseController
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
-            'pegawai' => $pegawai
+            'user' => ['username' => $user->username, 'role' => $user->role]
         ]);
     }
 

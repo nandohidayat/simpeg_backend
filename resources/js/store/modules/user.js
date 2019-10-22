@@ -13,7 +13,7 @@ export const mutations = {
         client.defaults.headers.common[
             "Authorization"
         ] = `Bearer ${user.token}`;
-        state.user = user.pegawai;
+        state.user = user.user;
     },
     REMOVE_USER() {
         localStorage.removeItem("user");

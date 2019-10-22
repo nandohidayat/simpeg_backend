@@ -1,7 +1,7 @@
 <template>
   <v-app id="inspire">
     <v-content>
-      <v-container class="fill-height bg" fluid>
+      <v-container class="fill-height" fluid>
         <v-row align="center" justify="center">
           <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-12">
@@ -13,14 +13,14 @@
               <v-card-text>
                 <v-form>
                   <v-text-field
-                    v-model="user.username"
+                    v-model="newUser.username"
                     label="Username"
                     name="username"
                     type="text"
                   ></v-text-field>
 
                   <v-text-field
-                    v-model="user.password"
+                    v-model="newUser.password"
                     id="password"
                     label="Password"
                     name="password"
@@ -44,10 +44,11 @@
 <script>
 import NProgress from "nprogress";
 import store from "../store";
+import { mapState } from "vuex";
 
 export default {
   data: () => ({
-    user: {
+    newUser: {
       username: "",
       password: ""
     }
@@ -56,12 +57,20 @@ export default {
     async login() {
       NProgress.start();
       try {
-        await store.dispatch("user/login", this.user);
-        this.$router.push({ name: "penilaian" });
+        await store.dispatch("user/login", this.newUser);
+        console.log(this.user.user.role);
+        if (this.user.user.role < 10) {
+          this.$router.push({ name: "penilaian-answer" });
+        } else {
+          this.$router.push({ name: "penilaian" });
+        }
       } catch (err) {
         NProgress.done();
       }
     }
+  },
+  computed: {
+    ...mapState(["user"])
   }
 };
 </script>
