@@ -18,6 +18,7 @@ export const mutations = {
     REMOVE_USER() {
         localStorage.removeItem("user");
         location.reload();
+        $this.router.push({ name: "login" });
     }
 };
 

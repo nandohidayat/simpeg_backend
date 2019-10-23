@@ -11,14 +11,41 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <!-- <v-list-item @click="">
-          <v-list-item-action>
-            <v-icon>mdi-contact-mail</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title>Contact</v-list-item-title>
-          </v-list-item-content>
-        </v-list-item> -->
+        <v-list-group no-action>
+          <template v-slot:activator>
+            <v-list-item-action>
+              <v-icon>mdi-account-badge-horizontal-outline</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Penilaian</v-list-item-title>
+            </v-list-item-content>
+          </template>
+          <v-list-item link>
+            <v-list-item-title>Daftar Penilaian</v-list-item-title>
+          </v-list-item>
+          <v-list-item link>
+            <v-list-item-title>Beri Penilaian</v-list-item-title>
+          </v-list-item>
+        </v-list-group>
+        <v-list-group no-action>
+          <template v-slot:activator>
+            <v-list-item-action>
+              <v-icon>mdi-database</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Data</v-list-item-title>
+            </v-list-item-content>
+          </template>
+          <v-list-item link>
+            <v-list-item-title>Admin</v-list-item-title>
+          </v-list-item>
+          <v-list-item link>
+            <v-list-item-title>Pegawai</v-list-item-title>
+          </v-list-item>
+          <v-list-item link>
+            <v-list-item-title>Penilaian</v-list-item-title>
+          </v-list-item>
+        </v-list-group>
       </v-list>
       <template v-slot:append>
         <div class="pa-2">
@@ -59,7 +86,6 @@ export default {
       NProgress.start();
       try {
         await store.dispatch("user/logout");
-        $this.router.push({ name: "login" });
       } catch (err) {
         NProgress.done();
       }
