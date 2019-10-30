@@ -60,9 +60,9 @@ export default {
         await store.dispatch("user/login", this.newUser);
         console.log(this.user.user.role);
         if (this.user.user.role < 10) {
-          this.$router.push({ name: "penilaian-answer" });
+          this.$router.push({ name: "dashboard" });
         } else {
-          this.$router.push({ name: "penilaian" });
+          this.$router.push({ name: "dashboard" });
         }
       } catch (err) {
         NProgress.done();

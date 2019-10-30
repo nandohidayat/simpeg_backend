@@ -14,6 +14,25 @@
         <v-list-group no-action>
           <template v-slot:activator>
             <v-list-item-action>
+              <v-icon>mdi-account-badge</v-icon>
+            </v-list-item-action>
+            <v-list-item-content>
+              <v-list-item-title>Karyawan</v-list-item-title>
+            </v-list-item-content>
+          </template>
+          <v-list-item link>
+            <v-list-item-title>Karyawan</v-list-item-title>
+          </v-list-item>
+          <v-list-item link>
+            <v-list-item-title>Shift</v-list-item-title>
+          </v-list-item>
+          <v-list-item link>
+            <v-list-item-title>Absen</v-list-item-title>
+          </v-list-item>
+        </v-list-group>
+        <v-list-group no-action>
+          <template v-slot:activator>
+            <v-list-item-action>
               <v-icon>mdi-account-badge-horizontal-outline</v-icon>
             </v-list-item-action>
             <v-list-item-content>
@@ -56,7 +75,7 @@
 
     <v-app-bar app color="teal" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      <v-toolbar-title>Sistem Penilaian 360</v-toolbar-title>
+      <v-toolbar-title>Alpha System</v-toolbar-title>
     </v-app-bar>
 
     <v-content>

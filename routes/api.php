@@ -20,6 +20,8 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::resource('karyawan', 'API\KaryawanController');
+
 Route::middleware('auth:api')->group(function () {
     Route::get("logout", "API\AuthController@logout");
     Route::post("user", "API\AuthController@user");

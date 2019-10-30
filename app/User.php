@@ -11,13 +11,16 @@ class User extends Authenticatable
 {
     use HasApiTokens, Notifiable;
 
+    protected $primaryKey = 'nik';
+    public $incrementing = false;
+
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'pegawai_id', 'username', 'password', 'role'
+        'nik', 'username', 'password'
     ];
 
     /**
@@ -41,5 +44,10 @@ class User extends Authenticatable
     public function pegawais()
     {
         return $this->belongsTo('App\Pegawai');
+    }
+
+    public function karyawans()
+    {
+        return $this->belongsTo('App\Karyawan', 'nik');
     }
 }

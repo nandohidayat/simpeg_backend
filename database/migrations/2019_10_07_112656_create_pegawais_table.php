@@ -14,10 +14,9 @@ class CreatePegawaisTable extends Migration
     public function up()
     {
         Schema::create('pegawais', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->string('nik');
+            $table->bigIncrements('nik')->unique();
             $table->string('nama');
-            $table->bigInteger('jabatans_id');
+            $table->bigInteger('bagian_id');
             $table->timestamps();
         });
     }

@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
+import Dashboard from "./views/Dashboard.vue";
 import PenilaianList from "./views/PenilaianList.vue";
 import PenilaianCreate from "./views/PenilaianCreate.vue";
 import AnswerCreate from "./views/AnswerCreate.vue";
@@ -14,6 +15,14 @@ const router = new Router({
     base: process.env.BASE_URL,
     routes: [
         {
+            path: "/",
+            name: "dashboard",
+            component: Dashboard,
+            meta: {
+                title: "Alpha System"
+            }
+        },
+        {
             path: "/login",
             name: "login",
             component: Login,
@@ -27,8 +36,7 @@ const router = new Router({
             component: PenilaianList,
             meta: {
                 title: "SP360"
-            },
-            alias: "/"
+            }
         },
         {
             path: "/penilaian/create",
@@ -72,19 +80,19 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
     NProgress.start();
 
-    const publicPages = ["/login"];
-    const commonPages = ["/penilaian/answer", ...publicPages];
+    // const publicPages = ["/login"];
+    // const commonPages = ["/penilaian/answer", ...publicPages];
 
-    const authRequired = !publicPages.includes(to.path);
-    const adminRequired = !commonPages.includes(to.path);
+    // const authRequired = !publicPages.includes(to.path);
+    // const adminRequired = !commonPages.includes(to.path);
 
-    const loggedIn = localStorage.getItem("user");
-    if (authRequired && !loggedIn) {
-        return next("/login");
-    }
-    if (adminRequired && JSON.parse(loggedIn).user.role < 10) {
-        return next("/404");
-    }
+    // const loggedIn = localStorage.getItem("user");
+    // if (authRequired && !loggedIn) {
+    //     return next("/login");
+    // }
+    // if (adminRequired && JSON.parse(loggedIn).user.role < 10) {
+    //     return next("/404");
+    // }
     next();
 });
 
