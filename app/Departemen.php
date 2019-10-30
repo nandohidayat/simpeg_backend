@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Departemen extends Model
 {
     //
-    protected $hidden = ['created_at', 'updated_at', 'id'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     protected $fillable = [
         'departemen'

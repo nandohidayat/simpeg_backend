@@ -4,6 +4,9 @@ import Dashboard from "./views/Dashboard.vue";
 import PenilaianList from "./views/PenilaianList.vue";
 import PenilaianCreate from "./views/PenilaianCreate.vue";
 import AnswerCreate from "./views/AnswerCreate.vue";
+
+import KaryawanList from "./views/KaryawanList.vue";
+
 import Page404 from "./views/Page404.vue";
 import Login from "./views/Login.vue";
 import NProgress from "nprogress";
@@ -28,6 +31,14 @@ const router = new Router({
             component: Login,
             meta: {
                 title: "SP360 | Login"
+            }
+        },
+        {
+            path: "/karyawan",
+            name: "karyawan-list",
+            component: KaryawanList,
+            meta: {
+                title: "SP360 | Karyawan List"
             }
         },
         {

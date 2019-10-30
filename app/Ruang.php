@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class Ruang extends Model
 {
     //
-    protected $hidden = ['created_at', 'updated_at', 'id'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     protected $fillable = [
         'ruang'
