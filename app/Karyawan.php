@@ -27,11 +27,11 @@ class Karyawan extends Model
 
     public function departemen()
     {
-        return $this->belongsTo('App\Departemen', 'departemen_id');
+        return $this->belongsTo('App\Departemen', 'departemen_id')->select("id");
     }
 
     public function ruang()
     {
-        return $this->belongsTo("App\Ruang", 'ruang_id');
+        return $this->belongsTo("App\Ruang", 'ruang_id')->select("id");
     }
 }

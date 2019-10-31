@@ -20,7 +20,7 @@
               <v-list-item-title>Karyawan</v-list-item-title>
             </v-list-item-content>
           </template>
-          <v-list-item link>
+          <v-list-item @click="$router.push({ name: 'karyawan-list' })">
             <v-list-item-title>Karyawan</v-list-item-title>
           </v-list-item>
           <v-list-item link>
