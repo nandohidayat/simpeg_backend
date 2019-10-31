@@ -6,7 +6,9 @@
           <v-text-field
             label="NIK / Nama Karyawan"
             dense
+            clearable
             v-model="search.nama"
+            class="mt-4"
           ></v-text-field>
         </v-col>
         <v-col cols="3">
@@ -18,6 +20,7 @@
             dense
             clearable
             v-model="search.departemen"
+            class="mt-4"
           ></v-select>
         </v-col>
         <v-col cols="3">
@@ -29,13 +32,15 @@
             dense
             clearable
             v-model="search.ruang"
+            class="mt-4"
           ></v-select>
         </v-col>
         <v-col cols="1" class="d-flex align-center">
           <v-divider vertical></v-divider>
+          <v-spacer></v-spacer>
           <v-dialog v-model="dialog" max-width="500px">
             <template v-slot:activator="{ on }">
-              <v-btn color="teal" dark small v-on="on" class="ml-4"
+              <v-btn color="teal" dark small v-on="on"
                 ><v-icon>mdi-plus</v-icon></v-btn
               >
             </template>
@@ -66,7 +71,7 @@
                       :item-value="obj => obj.id"
                       label="Departemen"
                       dense
-                      v-model="newKaryawan.departemen"
+                      v-model="newKaryawan.departemen_id"
                     ></v-select>
                   </v-col>
                   <v-col cols="6">
@@ -76,7 +81,7 @@
                       :item-value="obj => obj.id"
                       label="Ruang"
                       dense
-                      v-model="newKaryawan.ruang"
+                      v-model="newKaryawan.ruang_id"
                     ></v-select>
                   </v-col>
                 </v-row>
@@ -84,7 +89,9 @@
               <v-divider></v-divider>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="teal" dark small>Create</v-btn>
+                <v-btn color="teal" dark small @click="createKaryawan"
+                  >Create</v-btn
+                >
               </v-card-actions>
             </v-card>
           </v-dialog>
@@ -104,6 +111,11 @@
       <template v-slot:item.departemen.id="{ item }">
         {{ departemenText(item.departemen.id) }}
       </template>
+      <template v-slot:item.action="{ item }">
+        <v-icon @click="">
+          mdi-arrow-right
+        </v-icon>
+      </template>
     </v-data-table>
   </v-container>
 </template>
@@ -111,6 +123,7 @@
 <script>
 import store from "../store";
 import { mapState } from "vuex";
+import NProgress from "nprogress";
 
 export default {
   data() {
@@ -121,7 +134,8 @@ export default {
       headers: [
         {
           text: "NIK",
-          value: "nik"
+          value: "nik",
+          width: "100px"
         },
         { text: "Nama", value: "nama", align: "start" },
         {
@@ -131,7 +145,8 @@ export default {
         {
           text: "Ruang",
           value: "ruang.id"
-        }
+        },
+        { text: "Detail", value: "action", sortable: false, width: "80px" }
       ]
     };
   },
@@ -168,8 +183,8 @@ export default {
       return {
         nik: "",
         nama: "",
-        departemen: undefined,
-        ruang: undefined
+        departemen_id: undefined,
+        ruang_id: undefined
       };
     },
     close() {
@@ -177,6 +192,15 @@ export default {
       setTimeout(() => {
         this.newKaryawan = Object.assign({}, this.defaultKaryawan);
       }, 300);
+    },
+    async createKaryawan() {
+      NProgress.start();
+      try {
+        await store.dispatch("karyawan/createKaryawan", this.newKaryawan);
+        this.close();
+      } catch (err) {
+        NProgress.done();
+      }
     }
   }
 };

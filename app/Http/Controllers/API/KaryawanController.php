@@ -24,7 +24,7 @@ class KaryawanController extends BaseController
      */
     public function index()
     {
-        $data = Karyawan::with('ruang', 'departemen')->get();
+        $data = Karyawan::with('departemen', 'ruang')->get();
         // $data = DB::table('karyawans')
         //     ->join('ruangs', 'karyawans.ruang_id', '=', 'ruangs.id')
         //     ->join('departemens', 'karyawans.departemen_id', '=', 'departemens.id')
@@ -42,7 +42,12 @@ class KaryawanController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { }
+    {
+        $input = $request->all();
+        Karyawan::create($input);
+
+        return $this->sendResponse([], 'Product retrieved successfully.');
+    }
 
 
     /**

@@ -21,7 +21,7 @@
             </v-list-item-content>
           </template>
           <v-list-item @click="$router.push({ name: 'karyawan-list' })">
-            <v-list-item-title>Karyawan</v-list-item-title>
+            <v-list-item-title>Daftar Karyawan</v-list-item-title>
           </v-list-item>
           <v-list-item link>
             <v-list-item-title>Shift</v-list-item-title>
@@ -81,7 +81,7 @@
     <v-content>
       <router-view :key="$route.fullPath" />
     </v-content>
-    <v-footer color="teal" app>
+    <v-footer color="teal">
       <span class="white--text">&copy; 2019</span>
     </v-footer>
   </v-app>

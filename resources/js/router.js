@@ -38,7 +38,7 @@ const router = new Router({
             name: "karyawan-list",
             component: KaryawanList,
             meta: {
-                title: "SP360 | Karyawan List"
+                title: "Alpha System | Daftar Karyawan"
             }
         },
         {

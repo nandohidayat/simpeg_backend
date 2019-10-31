@@ -9,6 +9,9 @@ export const state = {
 export const mutations = {
     ADD_KARYAWANS(state, karyawans) {
         state.karyawans = karyawans;
+    },
+    ADD_KARYAWAN(state, karyawan) {
+        state.karyawans.push(karyawan);
     }
 };
 
@@ -17,6 +20,19 @@ export const actions = {
         try {
             const res = await KaryawanService.getKaryawans();
             commit("ADD_KARYAWANS", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async createKaryawan({ commit }, karyawan) {
+        try {
+            await KaryawanService.postKaryawan(karyawan);
+            const k = {
+                ...karyawan,
+                departemen: { id: karyawan.departemen_id },
+                ruang: { id: karyawan.ruang_id }
+            };
+            commit("ADD_KARYAWAN", k);
         } catch (err) {
             console.log(err.response);
         }
