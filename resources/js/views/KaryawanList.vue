@@ -112,9 +112,13 @@
         {{ departemenText(item.departemen.id) }}
       </template>
       <template v-slot:item.action="{ item }">
-        <v-icon @click="">
-          mdi-arrow-right
-        </v-icon>
+        <router-link
+          :to="{ name: 'karyawan-detail', params: { id: item.nik } }"
+        >
+          <v-icon>
+            mdi-arrow-right
+          </v-icon>
+        </router-link>
       </template>
     </v-data-table>
   </v-container>
@@ -207,4 +211,7 @@ export default {
 </script>
 
 <style scoped>
+a {
+  text-decoration: none;
+}
 </style>

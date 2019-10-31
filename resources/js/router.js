@@ -6,6 +6,7 @@ import PenilaianCreate from "./views/PenilaianCreate.vue";
 import AnswerCreate from "./views/AnswerCreate.vue";
 
 import KaryawanList from "./views/KaryawanList.vue";
+import KaryawanDetail from "./views/KaryawanDetail.vue";
 
 import Page404 from "./views/Page404.vue";
 import Login from "./views/Login.vue";
@@ -39,6 +40,14 @@ const router = new Router({
             component: KaryawanList,
             meta: {
                 title: "Alpha System | Daftar Karyawan"
+            }
+        },
+        {
+            path: "/karyawan/:id",
+            name: "karyawan-detail",
+            component: KaryawanDetail,
+            meta: {
+                title: "Alpha System | Data Karyawan"
             }
         },
         {
