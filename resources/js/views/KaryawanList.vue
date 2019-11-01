@@ -38,7 +38,7 @@
         <v-col cols="1" class="d-flex align-center">
           <v-divider vertical></v-divider>
           <v-spacer></v-spacer>
-          <FormKaryawan></FormKaryawan>
+          <FormKaryawan> </FormKaryawan>
         </v-col>
       </v-row>
     </v-card>

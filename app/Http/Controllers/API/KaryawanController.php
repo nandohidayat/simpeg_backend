@@ -59,7 +59,6 @@ class KaryawanController extends BaseController
     public function show($id)
     {
         $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
-        error_log($data);
         return $this->sendResponse($data, 'Product retrieved successfully.');
     }
 
@@ -71,8 +70,18 @@ class KaryawanController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Penilaian $penilaian)
-    { }
+    public function update(Request $request, Karyawan $karyawan)
+    {
+        $input = $request->all();
+        $k = $karyawan->all();
+
+        error_log($k);
+        error_log($input);
+
+        Karyawan::updateOrCreate($k, $input);
+
+        return $this->sendResponse([], 'Product retrieved successfully.');
+    }
 
 
     /**

@@ -32,7 +32,7 @@
             <v-icon large left>mdi-clipboard-account-outline</v-icon
             ><span class="title font-weight-light">Data Karyawan</span>
             <v-spacer></v-spacer>
-            <v-btn text icon color="teal"><v-icon>mdi-pencil</v-icon></v-btn>
+            <FormKaryawan :edited="true" :karyawan="karyawan"> </FormKaryawan>
           </v-card-title>
           <v-card-text>
             <v-row>
@@ -69,6 +69,7 @@
 <script>
 import store from "../store";
 import { mapState } from "vuex";
+import FormKaryawan from "../components/FormKaryawan.vue";
 
 export default {
   data: () => ({
@@ -82,6 +83,9 @@ export default {
   }),
   props: {
     karyawan: Object
+  },
+  components: {
+    FormKaryawan
   },
   computed: {
     ...mapState(["departemen", "ruang"])

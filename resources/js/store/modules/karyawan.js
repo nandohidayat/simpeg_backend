@@ -44,5 +44,12 @@ export const actions = {
         } catch (err) {
             console.log(err.response);
         }
+    },
+    async updateKaryawan({ commit }, karyawan) {
+        try {
+            await KaryawanService.putKaryawan(karyawan, karyawan.nik);
+        } catch (err) {
+            console.log(err.response);
+        }
     }
 };

@@ -1,7 +1,12 @@
 <template>
   <v-dialog v-model="dialog" max-width="500px">
     <template v-slot:activator="{ on }">
-      <v-btn color="teal" dark small v-on="on"><v-icon>mdi-plus</v-icon></v-btn>
+      <v-btn v-if="edited" text icon color="teal" v-on="on"
+        ><v-icon>mdi-pencil</v-icon></v-btn
+      >
+      <v-btn v-else color="teal" dark small v-on="on"
+        ><v-icon>mdi-plus</v-icon></v-btn
+      >
     </template>
     <v-card>
       <v-card-title>
@@ -48,7 +53,12 @@
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn color="teal" dark small @click="createKaryawan">Create</v-btn>
+        <v-btn v-if="edited" color="teal" dark small @click="updateKaryawan"
+          >Update</v-btn
+        >
+        <v-btn v-else color="teal" dark small @click="createKaryawan"
+          >Create</v-btn
+        >
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -70,7 +80,8 @@ export default {
     edited: {
       type: Boolean,
       default: false
-    }
+    },
+    karyawan: Object
   },
   watch: {
     dialog(val) {
@@ -80,16 +91,16 @@ export default {
   methods: {
     defaultKaryawan() {
       return {
-        nik: "",
-        nama: "",
-        departemen_id: undefined,
-        ruang_id: undefined
+        nik: this.karyawan ? this.karyawan.nik : "",
+        nama: this.karyawan ? this.karyawan.nama : "",
+        departemen_id: this.karyawan ? this.karyawan.departemen.id : undefined,
+        ruang_id: this.karyawan ? this.karyawan.ruang.id : undefined
       };
     },
     close() {
       this.dialog = false;
       setTimeout(() => {
-        this.newKaryawan = Object.assign({}, this.defaultKaryawan);
+        this.newKaryawan = Object.assign({}, this.defaultKaryawan());
       }, 300);
     },
     async createKaryawan() {
@@ -99,6 +110,14 @@ export default {
         this.close();
       } catch (err) {
         NProgress.done();
+      }
+    },
+    async updateKaryawan() {
+      NProgress.start();
+      try {
+        await store.dispatch("karyawan/updateKaryawan", this.newKaryawan);
+      } catch (err) {
+        console.log(err);
       }
     }
   },
