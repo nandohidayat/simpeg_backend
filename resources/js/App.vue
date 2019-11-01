@@ -3,7 +3,7 @@
   <v-app v-else id="inspire">
     <v-navigation-drawer v-model="drawer" app temporary>
       <v-list dense>
-        <v-list-item @click="$router.push({ name: 'penilaian' })">
+        <v-list-item @click="$router.push({ name: 'dashboard' })">
           <v-list-item-action>
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>

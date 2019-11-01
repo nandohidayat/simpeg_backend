@@ -7,7 +7,7 @@ export const state = {
 };
 
 export const mutations = {
-    ADD_KARYAWANS(state, karyawans) {
+    SET_KARYAWANS(state, karyawans) {
         state.karyawans = karyawans;
     },
     ADD_KARYAWAN(state, karyawan) {
@@ -19,7 +19,15 @@ export const actions = {
     async fetchKaryawans({ commit }) {
         try {
             const res = await KaryawanService.getKaryawans();
-            commit("ADD_KARYAWANS", res.data.data);
+            commit("SET_KARYAWANS", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async fetchKaryawan({}, nik) {
+        try {
+            const res = await KaryawanService.getKaryawan(nik);
+            return res.data.data;
         } catch (err) {
             console.log(err.response);
         }

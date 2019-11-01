@@ -57,7 +57,11 @@ class KaryawanController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    { }
+    {
+        $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
+        error_log($data);
+        return $this->sendResponse($data, 'Product retrieved successfully.');
+    }
 
 
     /**

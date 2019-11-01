@@ -1,5 +1,7 @@
 import Vue from "vue";
 import Router from "vue-router";
+import store from "./store";
+
 import Dashboard from "./views/Dashboard.vue";
 import PenilaianList from "./views/PenilaianList.vue";
 import PenilaianCreate from "./views/PenilaianCreate.vue";
@@ -48,6 +50,18 @@ const router = new Router({
             component: KaryawanDetail,
             meta: {
                 title: "Alpha System | Data Karyawan"
+            },
+            props: true,
+            async beforeEnter(to, from, next) {
+                try {
+                    to.params.karyawan = await store.dispatch(
+                        "karyawan/fetchKaryawan",
+                        to.params.id
+                    );
+                    next();
+                } catch (err) {
+                    console.log(err);
+                }
             }
         },
         {
