@@ -70,7 +70,9 @@
               >Hapus Karyawan</span
             >
             <v-spacer></v-spacer>
-            <v-btn outlined color="error">Hapus Karyawan</v-btn>
+            <v-btn outlined color="error" @click="deleteKaryawan"
+              >Hapus Karyawan</v-btn
+            >
           </v-card-title>
         </v-card>
       </v-col>
@@ -110,6 +112,18 @@ export default {
       next();
     } catch (e) {
       console.log(e);
+    }
+  },
+  methods: {
+    async deleteKaryawan() {
+      const res = confirm("Apakah anda yakin akan menghapus karyawan ini?");
+      if (res) {
+        await store.dispatch(
+          "karyawan/deleteKaryawan",
+          this.karyawan.karyawan.nik
+        );
+        this.$router.push({ name: "karyawan-list" });
+      }
     }
   }
 };

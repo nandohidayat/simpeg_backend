@@ -32,7 +32,7 @@ class KaryawanController extends BaseController
         //     ->select('karyawans.nik', 'karyawans.nama', 'ruangs.ruang', 'departemens.departemen')
         //     ->get();
 
-        return $this->sendResponse($data, 'Product retrieved successfully.');
+        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
     }
 
 
@@ -47,7 +47,7 @@ class KaryawanController extends BaseController
         $input = $request->all();
         Karyawan::create($input);
 
-        return $this->sendResponse([], 'Product retrieved successfully.');
+        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
     }
 
 
@@ -60,7 +60,7 @@ class KaryawanController extends BaseController
     public function show($id)
     {
         $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
-        return $this->sendResponse($data, 'Product retrieved successfully.');
+        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
     }
 
 
@@ -74,7 +74,7 @@ class KaryawanController extends BaseController
     public function update(Request $request, Karyawan $karyawan)
     {
         Karyawan::updateOrCreate(['nik' => $request->nik], $request->all());
-        return $this->sendResponse([], 'Product retrieved successfully.');
+        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
     }
 
 
@@ -84,6 +84,9 @@ class KaryawanController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Penilaian $penilaian)
-    { }
+    public function destroy(Karyawan $karyawan)
+    {
+        $karyawan->delete();
+        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+    }
 }

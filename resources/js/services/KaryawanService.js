@@ -12,5 +12,8 @@ export default {
     },
     putKaryawan(karyawan, nik) {
         return client.put(`/api/karyawan/${nik}`, karyawan);
+    },
+    deleteKaryawan(nik) {
+        return client.delete(`/api/karyawan/${nik}`);
     }
 };

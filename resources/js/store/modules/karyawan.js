@@ -56,5 +56,12 @@ export const actions = {
         } catch (err) {
             console.log(err.response);
         }
+    },
+    async deleteKaryawan({ commit }, nik) {
+        try {
+            await KaryawanService.deleteKaryawan(nik);
+        } catch (err) {
+            console.log(err.response);
+        }
     }
 };
