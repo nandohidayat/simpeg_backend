@@ -67,6 +67,11 @@ export default {
           { header: "Daftar Karyawan", link: "karyawan-list" },
           { header: "Shift Karyawan", link: "shift-list" }
         ]
+      },
+      {
+        icon: "mdi-database",
+        header: "Database",
+        child: [{ header: "Data Bagian", link: "data-bagian" }]
       }
     ]
   }),

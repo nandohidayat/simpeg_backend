@@ -10,6 +10,8 @@ import AnswerCreate from "./views/AnswerCreate.vue";
 import KaryawanList from "./views/KaryawanList.vue";
 import KaryawanDetail from "./views/KaryawanDetail.vue";
 
+import DataBagian from "./views/DataBagian.vue";
+
 import Page404 from "./views/Page404.vue";
 import Login from "./views/Login.vue";
 import NProgress from "nprogress";
@@ -50,6 +52,14 @@ const router = new Router({
             component: KaryawanDetail,
             meta: {
                 title: "Alpha System | Data Karyawan"
+            }
+        },
+        {
+            path: "/data-bagian",
+            name: "data-bagian",
+            component: DataBagian,
+            meta: {
+                title: "Alpha System | Data Bagian"
             }
         },
         {
