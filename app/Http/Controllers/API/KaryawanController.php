@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 use stdClass;
 use Validator;
 
+use function GuzzleHttp\Promise\all;
 
 class KaryawanController extends BaseController
 {
@@ -72,14 +73,7 @@ class KaryawanController extends BaseController
      */
     public function update(Request $request, Karyawan $karyawan)
     {
-        $input = $request->all();
-        $k = $karyawan->all();
-
-        error_log($k);
-        error_log($input);
-
-        Karyawan::updateOrCreate($k, $input);
-
+        Karyawan::updateOrCreate(['nik' => $request->nik], $request->all());
         return $this->sendResponse([], 'Product retrieved successfully.');
     }
 

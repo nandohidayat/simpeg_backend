@@ -32,34 +32,46 @@
             <v-icon large left>mdi-clipboard-account-outline</v-icon
             ><span class="title font-weight-light">Data Karyawan</span>
             <v-spacer></v-spacer>
-            <FormKaryawan :edited="true" :karyawan="karyawan"> </FormKaryawan>
+            <FormKaryawan :edited="true" :karyawan="karyawan.karyawan">
+            </FormKaryawan>
           </v-card-title>
           <v-card-text>
             <v-row>
               <v-col cols="6">
                 <span>NIK :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  karyawan.nik
+                  karyawan.karyawan.nik
                 }}</span>
                 <span>Nama :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  karyawan.nama
+                  karyawan.karyawan.nama
                 }}</span>
               </v-col>
               <v-col cols="6">
                 <span>Departemen :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
                   departemen.departemens.find(
-                    d => d.id == karyawan.departemen.id
+                    d => d.id == karyawan.karyawan.departemen.id
                   ).departemen
                 }}</span>
                 <span>Ruang :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  ruang.ruangs.find(r => r.id == karyawan.ruang.id).ruang
+                  ruang.ruangs.find(r => r.id == karyawan.karyawan.ruang.id)
+                    .ruang
                 }}</span>
               </v-col>
             </v-row>
           </v-card-text>
+        </v-card>
+        <v-card outlined class="mt-5 colored-border">
+          <v-card-title id="hapus-karyawan" class="mb-2">
+            <v-icon large left color="error">mdi-alert</v-icon
+            ><span class="title font-weight-light error--text"
+              >Hapus Karyawan</span
+            >
+            <v-spacer></v-spacer>
+            <v-btn outlined color="error">Hapus Karyawan</v-btn>
+          </v-card-title>
         </v-card>
       </v-col>
     </v-row>
@@ -78,17 +90,27 @@ export default {
         icon: "mdi-clipboard-account-outline",
         text: "Data Karyawan",
         id: "data-karyawan"
+      },
+      {
+        icon: "mdi-alert",
+        text: "Hapus Karyawan",
+        id: "hapus-karyawan"
       }
     ]
   }),
-  props: {
-    karyawan: Object
-  },
   components: {
     FormKaryawan
   },
   computed: {
-    ...mapState(["departemen", "ruang"])
+    ...mapState(["karyawan", "departemen", "ruang"])
+  },
+  async beforeRouteEnter(to, from, next) {
+    try {
+      await store.dispatch("karyawan/fetchKaryawan", to.params.id);
+      next();
+    } catch (e) {
+      console.log(e);
+    }
   }
 };
 </script>

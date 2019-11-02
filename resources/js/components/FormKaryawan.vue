@@ -116,6 +116,7 @@ export default {
       NProgress.start();
       try {
         await store.dispatch("karyawan/updateKaryawan", this.newKaryawan);
+        this.close();
       } catch (err) {
         console.log(err);
       }

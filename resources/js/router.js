@@ -50,18 +50,6 @@ const router = new Router({
             component: KaryawanDetail,
             meta: {
                 title: "Alpha System | Data Karyawan"
-            },
-            props: true,
-            async beforeEnter(to, from, next) {
-                try {
-                    to.params.karyawan = await store.dispatch(
-                        "karyawan/fetchKaryawan",
-                        to.params.id
-                    );
-                    next();
-                } catch (err) {
-                    console.log(err);
-                }
             }
         },
         {
