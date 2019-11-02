@@ -25,13 +25,7 @@ class KaryawanController extends BaseController
      */
     public function index()
     {
-        $data = Karyawan::with('departemen', 'ruang')->get();
-        // $data = DB::table('karyawans')
-        //     ->join('ruangs', 'karyawans.ruang_id', '=', 'ruangs.id')
-        //     ->join('departemens', 'karyawans.departemen_id', '=', 'departemens.id')
-        //     ->select('karyawans.nik', 'karyawans.nama', 'ruangs.ruang', 'departemens.departemen')
-        //     ->get();
-
+        $data = Karyawan::with('departemen', 'ruang')->orderBy('nik', 'asc')->get();
         return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
     }
 
