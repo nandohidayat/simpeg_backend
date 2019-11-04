@@ -21,7 +21,14 @@
             </v-list-item-content>
           </template>
           <v-list-item
-            @click="$router.push({ name: c.link })"
+            @click="
+              c.params
+                ? $router.push({
+                    name: c.link,
+                    params: c.params
+                  })
+                : $router.push({ name: c.link })
+            "
             v-for="(c, i) in m.child"
             :key="i"
           >
@@ -57,24 +64,32 @@ import store from "./store";
 
 export default {
   name: "App",
-  data: () => ({
-    drawer: false,
-    menu: [
-      {
-        icon: "mdi-account-badge",
-        header: "Karyawan",
-        child: [
-          { header: "Daftar Karyawan", link: "karyawan-list" },
-          { header: "Shift Karyawan", link: "shift-list" }
-        ]
-      },
-      {
-        icon: "mdi-database",
-        header: "Database",
-        child: [{ header: "Data Bagian", link: "data-bagian" }]
-      }
-    ]
-  }),
+  data() {
+    const date = new Date();
+
+    return {
+      drawer: false,
+      menu: [
+        {
+          icon: "mdi-account-badge",
+          header: "Karyawan",
+          child: [
+            { header: "Daftar Karyawan", link: "karyawan-list" },
+            {
+              header: "Jadwal Karyawan",
+              link: "schedule-list",
+              params: { year: date.getFullYear(), month: date.getMonth() + 1 }
+            }
+          ]
+        },
+        {
+          icon: "mdi-database",
+          header: "Database",
+          child: [{ header: "Data Bagian", link: "data-bagian" }]
+        }
+      ]
+    };
+  },
   components: {
     Login
   },

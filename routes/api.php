@@ -23,6 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::resource('karyawan', 'API\KaryawanController');
 Route::resource('ruang', 'API\RuangController');
 Route::resource('departemen', 'API\DepartemenController');
+Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
 
 Route::middleware('auth:api')->group(function () {
     Route::get("logout", "API\AuthController@logout");

@@ -2,10 +2,13 @@
 
 namespace App;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
 class Karyawan extends Model
 {
+    protected $today;
+
     protected $primaryKey = 'nik';
     public $incrementing = false;
     protected $hidden = ['created_at', 'updated_at', 'ruang_id', 'departemen_id'];
@@ -33,5 +36,12 @@ class Karyawan extends Model
     public function ruang()
     {
         return $this->belongsTo("App\Ruang", 'ruang_id')->select("id");
+    }
+
+    public function schedules()
+    {
+        $first = Carbon::now()->firstOfMonth();
+        $last = Carbon::now()->lastOfMonth();
+        return $this->hasMany("App\Schedule", 'nik')->whereBetween('tgl', [$first, $last]);
     }
 }

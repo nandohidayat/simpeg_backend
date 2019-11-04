@@ -10,6 +10,8 @@ import AnswerCreate from "./views/AnswerCreate.vue";
 import KaryawanList from "./views/KaryawanList.vue";
 import KaryawanDetail from "./views/KaryawanDetail.vue";
 
+import ScheduleList from "./views/ScheduleList.vue";
+
 import DataBagian from "./views/DataBagian.vue";
 
 import Page404 from "./views/Page404.vue";
@@ -60,6 +62,14 @@ const router = new Router({
             component: DataBagian,
             meta: {
                 title: "Alpha System | Data Bagian"
+            }
+        },
+        {
+            path: "/schedule/:year/:month",
+            name: "schedule-list",
+            component: ScheduleList,
+            meta: {
+                title: "Alpha System | Schedule List"
             }
         },
         {
