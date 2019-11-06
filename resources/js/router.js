@@ -1,5 +1,6 @@
 import Vue from "vue";
 import Router from "vue-router";
+import NProgress from "nprogress";
 import store from "./store";
 
 import Dashboard from "./views/Dashboard.vue";
@@ -16,7 +17,8 @@ import DataBagian from "./views/DataBagian.vue";
 
 import Page404 from "./views/Page404.vue";
 import Login from "./views/Login.vue";
-import NProgress from "nprogress";
+
+import WhereToTry from "./views/_WhereToTry.vue";
 
 Vue.use(Router);
 
@@ -65,7 +67,7 @@ const router = new Router({
             }
         },
         {
-            path: "/schedule/:year/:month",
+            path: "/schedule",
             name: "schedule-list",
             component: ScheduleList,
             meta: {
@@ -102,6 +104,14 @@ const router = new Router({
             component: AnswerCreate,
             meta: {
                 title: "SP360 | Answer"
+            }
+        },
+        {
+            path: "/try",
+            name: "try",
+            component: WhereToTry,
+            meta: {
+                title: "TRY HERE"
             }
         },
         {

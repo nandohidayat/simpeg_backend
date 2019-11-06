@@ -15,10 +15,10 @@ class CreateShiftsTable extends Migration
     {
         Schema::create('shifts', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->date('mulai');
-            $table->date('selesai');
+            $table->time('mulai');
+            $table->time('selesai');
             $table->string('kode');
-            $table->string('warna');
+            $table->string('warna')->nullable();
             $table->timestamps();
         });
     }

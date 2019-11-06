@@ -1,5 +1,6 @@
 <?php
 
+use Carbon\Carbon;
 use Illuminate\Database\Seeder;
 
 class ShiftSeeder extends Seeder
@@ -13,15 +14,15 @@ class ShiftSeeder extends Seeder
     {
         //
         DB::table('shifts')->insert([
-            'mulai' => date("F d, Y h:i:s", mktime(7, 0, 0, 1, 1, 2011)),
-            'selesai' => date("F d, Y h:i:s", mktime(14, 0, 0, 1, 1, 2011)),
+            'mulai' => Carbon::createFromTime(7, 0, 0, 'Asia/Jakarta'),
+            'selesai' => Carbon::createFromTime(14, 0, 0, 'Asia/Jakarta'),
             'kode' => 'P',
             'warna' => 'red lighten-3'
         ]);
         DB::table('shifts')->insert([
-            'mulai' => date("F d, Y h:i:s", mktime(14, 0, 0, 1, 1, 2011)),
-            'selesai' => date("F d, Y h:i:s", mktime(21, 0, 0, 1, 1, 2011)),
-            'kode' => 'P',
+            'mulai' => Carbon::createFromTime(14, 0, 0, 'Asia/Jakarta'),
+            'selesai' => Carbon::createFromTime(21, 0, 0, 'Asia/Jakarta'),
+            'kode' => 'S',
             'warna' => 'purple lighten-3'
         ]);
     }

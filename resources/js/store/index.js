@@ -7,6 +7,7 @@ import * as departemen from "../store/modules/departemen.js";
 import * as karyawan from "../store/modules/karyawan.js";
 import * as user from "../store/modules/user.js";
 import * as schedule from "../store/modules/schedule.js";
+import * as shift from "../store/modules/shift.js";
 
 Vue.use(Vuex);
 
@@ -18,7 +19,8 @@ export default new Vuex.Store({
         departemen,
         karyawan,
         user,
-        schedule
+        schedule,
+        shift
     },
     state: {},
     mutations: {},
