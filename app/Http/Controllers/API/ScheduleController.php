@@ -10,6 +10,7 @@ use App\Karyawan;
 use App\Penilaian;
 use App\Rekan;
 use App\Ruang;
+use App\Schedule;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use stdClass;
@@ -19,13 +20,6 @@ use function GuzzleHttp\Promise\all;
 
 class ScheduleController extends BaseController
 {
-    private $objFoo;
-
-    public function __construct(Karyawan $karyawan)
-    {
-        $this->objFoo = $karyawan;
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -33,8 +27,25 @@ class ScheduleController extends BaseController
      */
     public function index($tahun, $bulan)
     {
-        $this->objFoo->today = Carbon::now();
-        $data = Karyawan::with('schedules')->orderBy('nik', 'asc')->get();
+        $firstday = Carbon::create($tahun, $bulan)->firstOfMonth();
+        $lastday = Carbon::create($tahun, $bulan)->lastOfMonth();
+
+        $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
+            $query->whereBetween('tgl', [$firstday, $lastday]);
+        }])->orderBy('nik', 'asc')->get();
+
+        $data = array();
+        $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
+
+        foreach ($schedules as $s) {
+            $obj = new stdClass();
+            $obj->nik = $s->nik;
+            $obj->nama = $s->nama;
+            for ($i = 0; $i < $last; $i++) {
+                $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->shift_id;
+            }
+            array_push($data, $obj);
+        }
 
         return $this->sendResponse($data, "Sukses mang, yeyeyeyeye");
     }
@@ -46,10 +57,20 @@ class ScheduleController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $tahun, $bulan)
     {
         $input = $request->all();
-        Karyawan::create($input);
+        $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
+
+        foreach ($input as $inp) {
+            for ($i = 0; $i < $last; $i++) {
+                $obj = array();
+                $obj['nik'] = $inp['nik'];
+                $obj['tgl'] = Carbon::create($tahun, $bulan, $i + 1);
+                $obj['shift_id'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
+                Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
+            }
+        }
 
         return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
     }

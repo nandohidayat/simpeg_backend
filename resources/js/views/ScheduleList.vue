@@ -32,8 +32,10 @@
             </v-date-picker>
           </v-menu>
         </v-col>
-        <v-col cols="1">
-          <v-btn color="teal" dark><v-icon>mdi-content-save</v-icon></v-btn>
+        <v-col cols="1" style="margin-top: 2px;">
+          <v-btn color="teal" dark @click="saveSchedules"
+            ><v-icon>mdi-content-save</v-icon></v-btn
+          >
         </v-col>
       </v-row>
     </v-card>
@@ -46,6 +48,7 @@
       <template v-slot:item.nama="{ item }">
         <v-edit-dialog
           large
+          persistent
           offset-y
           @save="updateShift"
           @open="ranged.nik = item.nik"
@@ -114,12 +117,7 @@ export default {
         dates: [],
         shift: undefined,
         nik: undefined
-      },
-      last: new Date(
-        new Date().getFullYear(),
-        new Date().getMonth() + 1,
-        0
-      ).getDate()
+      }
     };
   },
   async created() {
@@ -138,6 +136,9 @@ export default {
     },
     month() {
       return parseInt(this.current.slice(-2));
+    },
+    last() {
+      return new Date(this.year, this.month, 0).getDate();
     },
     dateMoment() {
       return this.current
@@ -160,6 +161,13 @@ export default {
     updateShift() {
       if (this.ranged.dates.length == 0) return;
 
+      if (parseInt(this.ranged.dates[0].substring(5, 7)) != this.month) return;
+      if (
+        parseInt(this.ranged.dates[1]) &&
+        parseInt(this.ranged.dates[1].substring(5, 7)) != this.month
+      )
+        return;
+
       let first = this.ranged.dates[0];
       let last = this.ranged.dates[1] || this.ranged.dates[0];
       first = parseInt(first.slice(-2));
@@ -169,10 +177,12 @@ export default {
         [first, last] = [last, first];
       }
 
+      const idx = this.schedule.schedules.findIndex(
+        s => s.nik == this.ranged.nik
+      );
+
       for (let i = first; i <= last; i++) {
-        this.schedule.schedules.find(s => s.nik == this.ranged.nik)[
-          `day${i}`
-        ] = this.ranged.shift;
+        this.schedule.schedules[idx][`day${i}`] = this.ranged.shift;
       }
     },
     resetShift() {
@@ -185,6 +195,19 @@ export default {
       this.menu = false;
       try {
         await store.dispatch("schedule/fetchSchedules", {
+          year: this.year,
+          month: this.month
+        });
+      } catch (e) {
+        NProgress.done();
+        console.log(e);
+      }
+    },
+    async saveSchedules() {
+      NProgress.start();
+      try {
+        await store.dispatch("schedule/createSchedules", {
+          schedules: this.schedule.schedules,
           year: this.year,
           month: this.month
         });

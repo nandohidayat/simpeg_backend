@@ -7,8 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Karyawan extends Model
 {
-    protected $today;
-
     protected $primaryKey = 'nik';
     public $incrementing = false;
     protected $hidden = ['created_at', 'updated_at', 'ruang_id', 'departemen_id'];
@@ -40,8 +38,6 @@ class Karyawan extends Model
 
     public function schedules()
     {
-        $first = Carbon::now()->firstOfMonth();
-        $last = Carbon::now()->lastOfMonth();
-        return $this->hasMany("App\Schedule", 'nik')->whereBetween('tgl', [$first, $last]);
+        return $this->hasMany("App\Schedule", 'nik')->orderBy('tgl', 'asc');
     }
 }

@@ -16,27 +16,14 @@ export const actions = {
     async fetchSchedules({ commit }, { year, month }) {
         try {
             const res = await ScheduleService.getSchedules(year, month);
-            let arr = [];
-
-            const last = new Date(
-                new Date().getFullYear(),
-                new Date().getMonth() + 1,
-                0
-            ).getDate();
-
-            res.data.data.forEach(s => {
-                let obj = {};
-                obj.nik = s.nik;
-                obj.nama = s.nama;
-                for (let i = 0; i < last; i++) {
-                    obj[`day${i + 1}`] = s.schedules[i]
-                        ? s.schedules[i].kode
-                        : undefined;
-                }
-                arr.push(obj);
-            });
-
-            commit("ADD_SCHEDULES", arr);
+            commit("ADD_SCHEDULES", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async createSchedules({}, { schedules, year, month }) {
+        try {
+            await ScheduleService.postSchedules(schedules, year, month);
         } catch (err) {
             console.log(err.response);
         }
