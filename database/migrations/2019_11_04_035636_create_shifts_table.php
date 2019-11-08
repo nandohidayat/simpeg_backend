@@ -18,7 +18,6 @@ class CreateShiftsTable extends Migration
             $table->time('mulai');
             $table->time('selesai');
             $table->string('kode');
-            $table->string('warna')->nullable();
             $table->timestamps();
         });
     }

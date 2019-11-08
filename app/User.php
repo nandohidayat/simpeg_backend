@@ -48,6 +48,6 @@ class User extends Authenticatable
 
     public function karyawans()
     {
-        return $this->belongsTo('App\Karyawan', 'nik');
+        return $this->belongsTo('App\Karyawan', 'nik', 'nik');
     }
 }

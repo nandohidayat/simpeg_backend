@@ -6,18 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class Bagian extends Model
 {
-    //
-    protected $fillable = [
-        'ruang_id', 'departemen_id'
-    ];
-
-    public function ruangs()
-    {
-        return $this->belongsTo('App\Ruangs');
-    }
+    protected $primaryKey = 'id_bagian';
+    protected $fillable = ['bagian'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function departemens()
     {
-        return $this->belongsTo('App\Departemen');
+        return $this->hasMany('App\Departemen', 'id_bagian', 'id_bagian');
     }
 }

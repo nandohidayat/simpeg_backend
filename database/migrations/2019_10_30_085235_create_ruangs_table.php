@@ -14,7 +14,7 @@ class CreateRuangsTable extends Migration
     public function up()
     {
         Schema::create('ruangs', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id_ruang');
             $table->string('ruang');
             $table->timestamps();
         });

@@ -16,8 +16,8 @@ class CreateKaryawansTable extends Migration
         Schema::create('karyawans', function (Blueprint $table) {
             $table->bigInteger('nik')->unique();
             $table->string('nama');
-            $table->bigInteger('departemen_id');
-            $table->bigInteger('ruang_id');
+            $table->bigInteger('id_departemen');
+            $table->bigInteger('id_ruang');
             $table->timestamps();
         });
     }

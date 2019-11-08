@@ -17,13 +17,16 @@ class ShiftSeeder extends Seeder
             'mulai' => Carbon::createFromTime(7, 0, 0, 'Asia/Jakarta'),
             'selesai' => Carbon::createFromTime(14, 0, 0, 'Asia/Jakarta'),
             'kode' => 'P',
-            'warna' => 'red lighten-3'
         ]);
         DB::table('shifts')->insert([
             'mulai' => Carbon::createFromTime(14, 0, 0, 'Asia/Jakarta'),
             'selesai' => Carbon::createFromTime(21, 0, 0, 'Asia/Jakarta'),
             'kode' => 'S',
-            'warna' => 'purple lighten-3'
+        ]);
+        DB::table('shifts')->insert([
+            'mulai' => Carbon::createFromTime(21, 0, 0, 'Asia/Jakarta'),
+            'selesai' => Carbon::createFromTime(07, 0, 0, 'Asia/Jakarta'),
+            'kode' => 'M',
         ]);
     }
 }

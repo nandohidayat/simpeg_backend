@@ -22,10 +22,7 @@ class RuangSeeder extends Seeder
             'ruang' => 'Ayyub 3'
         ]);
         DB::table('ruangs')->insert([
-            'ruang' => 'Sulaiman 1'
-        ]);
-        DB::table('ruangs')->insert([
-            'ruang' => 'Sulaiman 2'
+            'ruang' => 'SIM'
         ]);
     }
 }

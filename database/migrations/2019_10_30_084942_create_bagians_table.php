@@ -14,9 +14,8 @@ class CreateBagiansTable extends Migration
     public function up()
     {
         Schema::create('bagians', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->bigInteger('ruang_id');
-            $table->bigInteger('departemen_id');
+            $table->bigIncrements('id_bagian');
+            $table->string('bagian');
             $table->timestamps();
         });
     }

@@ -14,12 +14,10 @@ class CreateSchedulesTable extends Migration
     public function up()
     {
         Schema::create('schedules', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id_schedule');
             $table->bigInteger('nik');
             $table->date('tgl');
             $table->bigInteger('shift_id')->nullable();
-            $table->date('masuk')->nullable();
-            $table->date('keluar')->nullable();
             $table->timestamps();
         });
     }

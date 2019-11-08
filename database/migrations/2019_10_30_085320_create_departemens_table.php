@@ -14,8 +14,10 @@ class CreateDepartemensTable extends Migration
     public function up()
     {
         Schema::create('departemens', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id_departemen');
             $table->string('departemen');
+            $table->integer('tingkat');
+            $table->bigInteger('id_bagian');
             $table->timestamps();
         });
     }

@@ -9,35 +9,26 @@ class Karyawan extends Model
 {
     protected $primaryKey = 'nik';
     public $incrementing = false;
-    protected $hidden = ['created_at', 'updated_at', 'ruang_id', 'departemen_id'];
-
-    //
-    protected $fillable = [
-        'nik', 'nama', 'departemen_id', 'ruang_id'
-    ];
+    protected $fillable = ['nik', 'nama', 'id_departemen', 'id_ruang'];
+    protected $hidden = ['created_at', 'updated_at', 'id_departemen', 'id_ruang'];
 
     public function users()
     {
-        return $this->hasOne('App\User', 'nik');
-    }
-
-    public function bagians()
-    {
-        return $this->belongsTo('App\Bagian');
+        return $this->hasOne('App\User', 'nik', 'nik');
     }
 
     public function departemen()
     {
-        return $this->belongsTo('App\Departemen', 'departemen_id')->select("id");
+        return $this->belongsTo('App\Departemen', 'id_departemen', 'id_departemen')->select("id_departemen");
     }
 
     public function ruang()
     {
-        return $this->belongsTo("App\Ruang", 'ruang_id')->select("id");
+        return $this->belongsTo("App\Ruang", 'id_ruang', 'id_ruang')->select("id_ruang");
     }
 
     public function schedules()
     {
-        return $this->hasMany("App\Schedule", 'nik')->orderBy('tgl', 'asc');
+        return $this->hasMany("App\Schedule", 'nik', 'nik')->orderBy('tgl', 'asc');
     }
 }
