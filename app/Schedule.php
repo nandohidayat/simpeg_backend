@@ -6,9 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Schedule extends Model
 {
-    //
+    protected $primaryKey = 'id_schedule';
     protected $fillable = [
-        'nik', 'tgl', 'shift_id', 'masuk', 'keluar'
+        'nik', 'tgl', 'id_shift', 'masuk', 'keluar'
     ];
 
     public function karyawans()
@@ -18,6 +18,6 @@ class Schedule extends Model
 
     public function shifts()
     {
-        return $this->belongsTo('App\Shift', 'shift_id', 'id');
+        return $this->belongsTo('App\Shift', 'id_shift', 'id_shift');
     }
 }

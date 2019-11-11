@@ -42,7 +42,7 @@ class ScheduleController extends BaseController
             $obj->nik = $s->nik;
             $obj->nama = $s->nama;
             for ($i = 0; $i < $last; $i++) {
-                $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->shift_id;
+                $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
             }
             array_push($data, $obj);
         }
@@ -67,7 +67,7 @@ class ScheduleController extends BaseController
                 $obj = array();
                 $obj['nik'] = $inp['nik'];
                 $obj['tgl'] = Carbon::create($tahun, $bulan, $i + 1);
-                $obj['shift_id'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
+                $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
                 Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
             }
         }

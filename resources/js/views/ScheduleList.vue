@@ -27,6 +27,7 @@
               v-model="current"
               type="month"
               no-title
+              locale="id-id"
               @change="changedMonth"
             >
             </v-date-picker>
@@ -43,7 +44,7 @@
       :headers="header"
       :items="schedule.schedules"
       class="elevation-2 mt-3"
-      :loading="schedule.schedules.length > 0 ? false : true"
+      :loading="loaded"
     >
       <template v-slot:item.nama="{ item }">
         <v-edit-dialog
@@ -60,6 +61,7 @@
               v-model="ranged.dates"
               no-title
               range
+              locale="id-id"
               color="teal"
               class="mt-3"
             >
@@ -68,7 +70,7 @@
               v-model="ranged.shift"
               :items="shift.shifts"
               :item-text="obj => obj.kode"
-              :item-value="obj => obj.id"
+              :item-value="obj => obj.id_shift"
               label="Shift"
               dense
               clearable
@@ -81,8 +83,8 @@
       <template :slot="`item.day${l}`" slot-scope="{ item }" v-for="l in last">
         <v-edit-dialog>
           {{
-            shift.shifts.find(s => s.id == item[`day${l}`])
-              ? shift.shifts.find(s => s.id == item[`day${l}`]).kode
+            shift.shifts.find(s => s.id_shift == item[`day${l}`])
+              ? shift.shifts.find(s => s.id_shift == item[`day${l}`]).kode
               : undefined
           }}
           <template v-slot:input>
@@ -90,7 +92,7 @@
               v-model="item[`day${l}`]"
               :items="shift.shifts"
               :item-text="obj => obj.kode"
-              :item-value="obj => obj.id"
+              :item-value="obj => obj.id_shift"
               label="Shift"
               clearable
             ></v-select>
@@ -111,6 +113,7 @@ import store from "../store";
 export default {
   data() {
     return {
+      loaded: true,
       current: new Date().toISOString().substr(0, 7),
       menu: false,
       ranged: {
@@ -128,6 +131,7 @@ export default {
       }),
       store.dispatch("shift/fetchShifts")
     ]);
+    this.loaded = false;
   },
   computed: {
     ...mapState(["schedule", "shift"]),
@@ -148,7 +152,9 @@ export default {
         : "";
     },
     header() {
-      const h = [{ text: "Nama", value: "nama", width: "250px" }];
+      const h = [
+        { text: "Nama", value: "nama", width: "250px", ["fixed-header"]: true }
+      ];
 
       for (let i = 0; i < this.last; i++) {
         h.push({ text: `${i + 1}`, value: `day${i + 1}`, sortable: false });
@@ -191,7 +197,7 @@ export default {
       this.ranged.nik = undefined;
     },
     async changedMonth() {
-      NProgress.start();
+      this.loaded = true;
       this.menu = false;
       try {
         await store.dispatch("schedule/fetchSchedules", {
@@ -202,9 +208,11 @@ export default {
         NProgress.done();
         console.log(e);
       }
+      this.loaded = false;
     },
     async saveSchedules() {
       NProgress.start();
+      this.loaded = true;
       try {
         await store.dispatch("schedule/createSchedules", {
           schedules: this.schedule.schedules,
@@ -215,6 +223,7 @@ export default {
         NProgress.done();
         console.log(e);
       }
+      this.loaded = false;
     }
   }
 };

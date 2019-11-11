@@ -14,7 +14,7 @@ class CreateShiftsTable extends Migration
     public function up()
     {
         Schema::create('shifts', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id_shift');
             $table->time('mulai');
             $table->time('selesai');
             $table->string('kode');
