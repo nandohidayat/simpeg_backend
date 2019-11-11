@@ -49,23 +49,22 @@ new Vue({
     vuetify,
     render: h => h(App),
     async beforeCreate() {
-        // const userString = localStorage.getItem("user");
-        // if (userString) {
-        //     const userData = JSON.parse(userString);
-        //     console.log(userData);
-        //     this.$store.commit("user/SET_USER", userData, { root: true });
-        // }
-        // //
-        // axios.interceptors.response.use(
-        //     response => response,
-        //     error => {
-        //         console.log(error.response);
-        //         if (error.response.status === 401) {
-        //             this.$router.push("/login");
-        //             this.$store.dispatch("user/logout");
-        //         }
-        //         return Promise.reject(error);
-        //     }
-        // );
+        const userString = localStorage.getItem("user");
+        if (userString) {
+            const userData = JSON.parse(userString);
+            console.log(userData);
+            this.$store.commit("user/SET_USER", userData, { root: true });
+        }
+        axios.interceptors.response.use(
+            response => response,
+            error => {
+                console.log(error.response);
+                if (error.response.status === 401) {
+                    this.$store.dispatch("user/logout");
+                    this.$router.push("/login");
+                }
+                return Promise.reject(error);
+            }
+        );
     }
 }).$mount("#app");

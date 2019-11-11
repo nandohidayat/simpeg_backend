@@ -4,7 +4,7 @@ import client from "../../services/client";
 export const namespaced = true;
 
 export const state = {
-    user: null
+    user: undefined
 };
 
 export const mutations = {
@@ -18,7 +18,6 @@ export const mutations = {
     REMOVE_USER() {
         localStorage.removeItem("user");
         location.reload();
-        $this.router.push({ name: "login" });
     }
 };
 

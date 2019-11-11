@@ -6,7 +6,7 @@ namespace App\Http\Controllers\API;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
-use App\Pegawai;
+use App\Karyawan;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -23,35 +23,27 @@ class AuthController extends BaseController
 
     public function login(Request $request)
     {
-        // $request->validate([
-        //     'email' => 'required|string|email',
-        //     'password' => 'required|string',
-        //     'remember_me' => 'boolean'
-        // ]);
-
         $credentials = request(['username', 'password']);
         if (!Auth::attempt($credentials))
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
 
-        $user = $request->user();
+        $user = Auth::user();
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
 
-        if ($request->remember_me)
-            $token->expires_at = Carbon::now()->addWeeks(1);
-
+        $token->expires_at = Carbon::now()->addWeeks(1);
         $token->save();
 
-        $pegawai = Pegawai::find($user->pegawai_id);
+        $karyawan = Karyawan::where('nik', $user->nik)->first();
 
         return response()->json([
             'token' => $tokenResult->accessToken,
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
-            'user' => ['username' => $user->username, 'role' => $user->role]
+            'user' => ['nik' => $karyawan->nik, 'nama' => $karyawan->nama]
         ]);
     }
 
@@ -62,12 +54,6 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-        // $request->validate([
-        //     'name' => 'required|string',
-        //     'email' => 'required|string|email|unique:users',
-        //     'password' => 'required|string|confirmed'
-        // ]);
-
         $user = new User([
             'username' => $request->username,
             'password' => bcrypt($request->password)
