@@ -48,7 +48,7 @@
       :items-per-page="20"
       :search="search.nama"
       class="elevation-2 mt-3"
-      :loading="karyawan.karyawans.length > 0 ? false : true"
+      :loading="loading"
     >
       <template v-slot:item.action="{ item }">
         <router-link
@@ -72,6 +72,7 @@ import FormKaryawan from "../components/FormKaryawan.vue";
 export default {
   data() {
     return {
+      loading: true,
       search: { nama: undefined, departemen: undefined, ruang: undefined },
       headers: [
         {
@@ -111,6 +112,8 @@ export default {
       ]);
     } catch (err) {
       console.log(err);
+    } finally {
+      this.loading = false;
     }
   },
   components: {
@@ -120,8 +123,7 @@ export default {
     ...mapState(["departemen", "ruang", "karyawan"]),
     filteredKaryawans() {
       return this.karyawan.karyawans.map(k => ({
-        nik: k.nik,
-        nama: k.nama,
+        ...k,
         departemen: this.departemen.departemens.find(
           d => d.id_departemen === k.departemen.id_departemen
         ).departemen,

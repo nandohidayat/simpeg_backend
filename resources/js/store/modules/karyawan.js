@@ -39,6 +39,11 @@ export const actions = {
     async createKaryawan({ commit }, karyawan) {
         try {
             await KaryawanService.postKaryawan(karyawan);
+            const k = {
+                ...karyawan,
+                departemen: { id_departemen: karyawan.id_departemen },
+                ruang: { id_ruang: karyawan.id_ruang }
+            };
             commit("ADD_KARYAWAN", k);
         } catch (err) {
             console.log(err.response);
@@ -49,8 +54,8 @@ export const actions = {
             await KaryawanService.putKaryawan(karyawan, karyawan.nik);
             const k = {
                 ...karyawan,
-                departemen: { id: karyawan.departemen_id },
-                ruang: { id: karyawan.ruang_id }
+                departemen: { id_departemen: karyawan.id_departemen },
+                ruang: { id_ruang: karyawan.id_ruang }
             };
             commit("SET_KARYAWAN", k);
         } catch (err) {

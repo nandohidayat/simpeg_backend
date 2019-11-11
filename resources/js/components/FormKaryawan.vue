@@ -53,12 +53,10 @@
       <v-divider></v-divider>
       <v-card-actions>
         <v-spacer></v-spacer>
-        <v-btn v-if="edited" color="teal" dark small @click="updateKaryawan"
-          >Update</v-btn
-        >
-        <v-btn v-else color="teal" dark small @click="createKaryawan"
-          >Create</v-btn
-        >
+        <v-btn color="teal" dark small @click="createKaryawan">
+          <span v-if="edited">Update</span>
+          <span v-else>Create</span>
+        </v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -91,8 +89,8 @@ export default {
   methods: {
     defaultKaryawan() {
       return {
-        nik: this.karyawan ? this.karyawan.nik : "",
-        nama: this.karyawan ? this.karyawan.nama : "",
+        nik: this.karyawan ? this.karyawan.nik : undefined,
+        nama: this.karyawan ? this.karyawan.nama : undefined,
         id_departemen: this.karyawan
           ? this.karyawan.departemen.id_departemen
           : undefined,
@@ -101,26 +99,19 @@ export default {
     },
     close() {
       this.dialog = false;
-      setTimeout(() => {
-        this.newKaryawan = Object.assign({}, this.defaultKaryawan());
-      }, 300);
+      this.newKaryawan = this.defaultKaryawan();
     },
     async createKaryawan() {
       NProgress.start();
       try {
-        await store.dispatch("karyawan/createKaryawan", this.newKaryawan);
+        if (this.edited) {
+          await store.dispatch("karyawan/updateKaryawan", this.newKaryawan);
+        } else {
+          await store.dispatch("karyawan/createKaryawan", this.newKaryawan);
+        }
         this.close();
       } catch (err) {
         NProgress.done();
-      }
-    },
-    async updateKaryawan() {
-      NProgress.start();
-      try {
-        await store.dispatch("karyawan/updateKaryawan", this.newKaryawan);
-        this.close();
-      } catch (err) {
-        console.log(err);
       }
     }
   },

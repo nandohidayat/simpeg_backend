@@ -27,16 +27,20 @@
         </v-card>
       </v-col>
       <v-col cols="9">
-        <v-card outlined>
+        <v-card outlined :loading="loaded">
           <v-card-title id="data-karyawan">
             <v-icon large left>mdi-clipboard-account-outline</v-icon
             ><span class="title font-weight-light">Data Karyawan</span>
             <v-spacer></v-spacer>
-            <FormKaryawan :edited="true" :karyawan="karyawan.karyawan">
+            <FormKaryawan
+              :edited="true"
+              :karyawan="karyawan.karyawan"
+              v-if="!loaded"
+            >
             </FormKaryawan>
           </v-card-title>
           <v-card-text>
-            <v-row>
+            <v-row v-if="!loaded">
               <v-col cols="6">
                 <span>NIK :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
@@ -51,13 +55,16 @@
                 <span>Departemen :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
                   departemen.departemens.find(
-                    d => d.id == karyawan.karyawan.departemen.id
+                    d =>
+                      d.id_departemen ==
+                      karyawan.karyawan.departemen.id_departemen
                   ).departemen
                 }}</span>
                 <span>Ruang :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  ruang.ruangs.find(r => r.id == karyawan.karyawan.ruang.id)
-                    .ruang
+                  ruang.ruangs.find(
+                    r => r.id_ruang == karyawan.karyawan.ruang.id_ruang
+                  ).ruang
                 }}</span>
               </v-col>
             </v-row>
@@ -87,6 +94,7 @@ import FormKaryawan from "../components/FormKaryawan.vue";
 
 export default {
   data: () => ({
+    loaded: true,
     menu: [
       {
         icon: "mdi-clipboard-account-outline",
@@ -100,19 +108,23 @@ export default {
       }
     ]
   }),
+  async created() {
+    try {
+      await Promise.all([
+        store.dispatch("departemen/fetchDepartemens"),
+        store.dispatch("ruang/fetchRuangs"),
+        store.dispatch("karyawan/fetchKaryawan", this.$route.params.id)
+      ]);
+      this.loaded = false;
+    } catch (e) {
+      console.log(e);
+    }
+  },
   components: {
     FormKaryawan
   },
   computed: {
-    ...mapState(["karyawan", "departemen", "ruang"])
-  },
-  async beforeRouteEnter(to, from, next) {
-    try {
-      await store.dispatch("karyawan/fetchKaryawan", to.params.id);
-      next();
-    } catch (e) {
-      console.log(e);
-    }
+    ...mapState(["departemen", "ruang", "karyawan"])
   },
   methods: {
     async deleteKaryawan() {
