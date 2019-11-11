@@ -67,9 +67,5 @@ new Vue({
         //         return Promise.reject(error);
         //     }
         // );
-        await Promise.all([
-            store.dispatch("departemen/fetchDepartemens"),
-            store.dispatch("ruang/fetchRuangs")
-        ]);
     }
 }).$mount("#app");

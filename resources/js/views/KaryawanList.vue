@@ -15,7 +15,7 @@
           <v-select
             :items="departemen.departemens"
             :item-text="obj => obj.departemen"
-            :item-value="obj => obj.id"
+            :item-value="obj => obj.departemen"
             label="Departemen"
             dense
             clearable
@@ -27,7 +27,7 @@
           <v-select
             :items="ruang.ruangs"
             :item-text="obj => obj.ruang"
-            :item-value="obj => obj.id"
+            :item-value="obj => obj.ruang"
             label="Ruang"
             dense
             clearable
@@ -48,13 +48,8 @@
       :items-per-page="20"
       :search="search.nama"
       class="elevation-2 mt-3"
+      :loading="karyawan.karyawans.length > 0 ? false : true"
     >
-      <template v-slot:item.ruang.id="{ item }">
-        {{ ruangText(item.ruang.id) }}
-      </template>
-      <template v-slot:item.departemen.id="{ item }">
-        {{ departemenText(item.departemen.id) }}
-      </template>
       <template v-slot:item.action="{ item }">
         <router-link
           :to="{ name: 'karyawan-detail', params: { id: item.nik } }"
@@ -77,7 +72,7 @@ import FormKaryawan from "../components/FormKaryawan.vue";
 export default {
   data() {
     return {
-      search: { nama: "", departemen: undefined, ruang: undefined },
+      search: { nama: undefined, departemen: undefined, ruang: undefined },
       headers: [
         {
           text: "NIK",
@@ -87,20 +82,33 @@ export default {
         { text: "Nama", value: "nama", align: "start" },
         {
           text: "Departemen",
-          value: "departemen.id"
+          value: "departemen",
+          filter: value => {
+            if (!this.search.departemen) return true;
+
+            return value === this.search.departemen;
+          }
         },
         {
           text: "Ruang",
-          value: "ruang.id"
+          value: "ruang",
+          filter: value => {
+            if (!this.search.ruang) return true;
+
+            return value === this.search.ruang;
+          }
         },
         { text: "Detail", value: "action", sortable: false, width: "80px" }
       ]
     };
   },
-  async beforeRouteEnter(to, from, next) {
+  async created() {
     try {
-      await store.dispatch("karyawan/fetchKaryawans");
-      next();
+      await Promise.all([
+        store.dispatch("departemen/fetchDepartemens"),
+        store.dispatch("ruang/fetchRuangs"),
+        store.dispatch("karyawan/fetchKaryawans")
+      ]);
     } catch (err) {
       console.log(err);
     }
@@ -111,22 +119,18 @@ export default {
   computed: {
     ...mapState(["departemen", "ruang", "karyawan"]),
     filteredKaryawans() {
-      return this.karyawan.karyawans.filter(
-        k =>
-          (!this.search.departemen ||
-            k.departemen.id == this.search.departemen) &&
-          (!this.search.ruang || k.ruang.id == this.search.ruang)
-      );
+      return this.karyawan.karyawans.map(k => ({
+        nik: k.nik,
+        nama: k.nama,
+        departemen: this.departemen.departemens.find(
+          d => d.id_departemen === k.departemen.id_departemen
+        ).departemen,
+        ruang: this.ruang.ruangs.find(d => d.id_ruang === k.ruang.id_ruang)
+          .ruang
+      }));
     }
   },
-  methods: {
-    ruangText(id) {
-      return this.ruang.ruangs.filter(r => r.id == id)[0].ruang;
-    },
-    departemenText(id) {
-      return this.departemen.departemens.filter(r => r.id == id)[0].departemen;
-    }
-  }
+  methods: {}
 };
 </script>
 

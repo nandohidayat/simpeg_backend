@@ -32,20 +32,20 @@
             <v-select
               :items="departemen.departemens"
               :item-text="obj => obj.departemen"
-              :item-value="obj => obj.id"
+              :item-value="obj => obj.id_departemen"
               label="Departemen"
               dense
-              v-model="newKaryawan.departemen_id"
+              v-model="newKaryawan.id_departemen"
             ></v-select>
           </v-col>
           <v-col cols="6">
             <v-select
               :items="ruang.ruangs"
               :item-text="obj => obj.ruang"
-              :item-value="obj => obj.id"
+              :item-value="obj => obj.id_ruang"
               label="Ruang"
               dense
-              v-model="newKaryawan.ruang_id"
+              v-model="newKaryawan.id_ruang"
             ></v-select>
           </v-col>
         </v-row>
@@ -93,8 +93,10 @@ export default {
       return {
         nik: this.karyawan ? this.karyawan.nik : "",
         nama: this.karyawan ? this.karyawan.nama : "",
-        departemen_id: this.karyawan ? this.karyawan.departemen.id : undefined,
-        ruang_id: this.karyawan ? this.karyawan.ruang.id : undefined
+        id_departemen: this.karyawan
+          ? this.karyawan.departemen.id_departemen
+          : undefined,
+        id_ruang: this.karyawan ? this.karyawan.ruang.id_ruang : undefined
       };
     },
     close() {
