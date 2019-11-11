@@ -110,10 +110,9 @@ export default {
         store.dispatch("ruang/fetchRuangs"),
         store.dispatch("karyawan/fetchKaryawans")
       ]);
+      this.loading = false;
     } catch (err) {
       console.log(err);
-    } finally {
-      this.loading = false;
     }
   },
   components: {

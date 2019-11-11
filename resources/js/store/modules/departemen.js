@@ -3,12 +3,14 @@ import DepartemenService from "../../services/DepartemenService.js";
 export const namespaced = true;
 
 export const state = {
-    departemens: []
+    departemens: [],
+    loaded: false
 };
 
 export const mutations = {
     ADD_DEPARTEMENS(state, departemens) {
         state.departemens = departemens;
+        state.load = true;
     }
 };
 

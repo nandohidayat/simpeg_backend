@@ -3,12 +3,14 @@ import RuangService from "../../services/RuangService.js";
 export const namespaced = true;
 
 export const state = {
-    ruangs: []
+    ruangs: [],
+    loaded: false
 };
 
 export const mutations = {
     ADD_RUANGS(state, ruangs) {
         state.ruangs = ruangs;
+        state.load = true;
     }
 };
 

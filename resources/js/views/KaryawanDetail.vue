@@ -89,7 +89,7 @@
 
 <script>
 import store from "../store";
-import { mapState } from "vuex";
+import { mapState, mapGetters } from "vuex";
 import FormKaryawan from "../components/FormKaryawan.vue";
 
 export default {
@@ -109,10 +109,16 @@ export default {
     ]
   }),
   async created() {
+    let fetch = [];
+    if (!this.departemen.loaded && !this.ruang.loaded) {
+      fetch = [
+        store.dispatch("departemen/fetchDepartemens"),
+        store.dispatch("ruang/fetchRuangs")
+      ];
+    }
     try {
       await Promise.all([
-        store.dispatch("departemen/fetchDepartemens"),
-        store.dispatch("ruang/fetchRuangs"),
+        ...fetch,
         store.dispatch("karyawan/fetchKaryawan", this.$route.params.id)
       ]);
       this.loaded = false;
