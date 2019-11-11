@@ -18,7 +18,7 @@ class DepartemenController extends BaseController
      */
     public function index()
     {
-        $data = Departemen::all();
+        $data = Departemen::orderBy('departemen', 'asc')->get();
 
         return $this->sendResponse($data, 'Product retrieved successfully.');
     }

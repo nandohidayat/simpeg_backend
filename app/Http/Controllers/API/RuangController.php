@@ -19,7 +19,7 @@ class RuangController extends BaseController
      */
     public function index()
     {
-        $data = Ruang::all();
+        $data = Ruang::orderBy('ruang', 'asc')->get();
 
         return $this->sendResponse($data, 'Product retrieved successfully.');
     }
