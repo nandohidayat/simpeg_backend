@@ -132,16 +132,16 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
     NProgress.start();
 
-    // const publicPages = ["/login"];
+    const publicPages = ["/login"];
     // const commonPages = ["/penilaian/answer", ...publicPages];
 
-    // const authRequired = !publicPages.includes(to.path);
+    const authRequired = !publicPages.includes(to.path);
     // const adminRequired = !commonPages.includes(to.path);
 
-    // const loggedIn = localStorage.getItem("user");
-    // if (authRequired && !loggedIn) {
-    //     return next("/login");
-    // }
+    const loggedIn = localStorage.getItem("user");
+    if (authRequired && !loggedIn) {
+        return next("/login");
+    }
     // if (adminRequired && JSON.parse(loggedIn).user.role < 10) {
     //     return next("/404");
     // }
