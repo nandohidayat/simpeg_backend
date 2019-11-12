@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
         $this->call(UserSeeder::class);
         $this->call(RuangSeeder::class);
         $this->call(DepartemenSeeder::class);
+        $this->call(BagianSeeder::class);
         $this->call(KaryawanSeeder::class);
         $this->call(ShiftSeeder::class);
     }
