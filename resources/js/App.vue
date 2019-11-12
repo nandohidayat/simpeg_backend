@@ -21,14 +21,7 @@
             </v-list-item-content>
           </template>
           <v-list-item
-            @click="
-              c.params
-                ? $router.push({
-                    name: c.link,
-                    params: c.params
-                  })
-                : $router.push({ name: c.link })
-            "
+            @click="$router.push({ name: c.link })"
             v-for="(c, i) in m.child"
             :key="i"
           >
@@ -77,8 +70,7 @@ export default {
             { header: "Daftar Karyawan", link: "karyawan-list" },
             {
               header: "Jadwal Karyawan",
-              link: "schedule-list",
-              params: { year: date.getFullYear(), month: date.getMonth() + 1 }
+              link: "schedule-list"
             }
           ]
         },

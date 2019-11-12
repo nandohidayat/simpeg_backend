@@ -20,6 +20,11 @@ import Login from "./views/Login.vue";
 
 import WhereToTry from "./views/_WhereToTry.vue";
 
+const originalPush = Router.prototype.push;
+Router.prototype.push = function push(location) {
+    return originalPush.call(this, location).catch(err => err);
+};
+
 Vue.use(Router);
 
 const router = new Router({
