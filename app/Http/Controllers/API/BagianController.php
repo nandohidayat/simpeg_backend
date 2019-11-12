@@ -16,7 +16,7 @@ class BagianController extends BaseController
      */
     public function index()
     {
-        $data = Bagian::orderBy('bagian', 'asc')->get();
+        $data = Bagian::with('departemens')->orderBy('bagian', 'asc')->get();
 
         return $this->sendResponse($data, 'Product retrieved successfully.');
     }
