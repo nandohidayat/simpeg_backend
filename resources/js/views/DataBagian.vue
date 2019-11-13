@@ -11,7 +11,7 @@
         <v-tab><v-icon>mdi-plus-thick</v-icon></v-tab>
         <v-tab-item v-for="b in bagian.bagians" :key="b.id_bagian">
           <v-card flat>
-            <v-list>
+            <v-list nav>
               <v-list-item-group>
                 <draggable :list="b.departemens">
                   <v-list-item
@@ -32,32 +32,20 @@
             <v-card-text>
               <v-row>
                 <v-col cols="6">
-                  <v-select dense block label="Bagian"></v-select>
-                  <div class="text-right">
-                    <v-btn color="teal" dark small
-                      ><v-icon>mdi-plus-thick</v-icon></v-btn
-                    >
-                    <v-btn color="warning" dark small
-                      ><v-icon>mdi-pencil</v-icon></v-btn
-                    >
-                    <v-btn color="error" dark small
-                      ><v-icon>mdi-delete</v-icon></v-btn
-                    >
-                  </div>
+                  <ListDataBagian
+                    label="Bagian"
+                    :items="bagian.bagians"
+                    :itemText="obj => obj.bagian"
+                    :itemValue="obj => obj.id_bagian"
+                  ></ListDataBagian>
                 </v-col>
                 <v-col cols="6">
-                  <v-select dense block label="Departemen"></v-select>
-                  <div class="text-right">
-                    <v-btn color="teal" dark small
-                      ><v-icon>mdi-plus-thick</v-icon></v-btn
-                    >
-                    <v-btn color="warning" dark small
-                      ><v-icon>mdi-pencil</v-icon></v-btn
-                    >
-                    <v-btn color="error" dark small
-                      ><v-icon>mdi-delete</v-icon></v-btn
-                    >
-                  </div>
+                  <ListDataBagian
+                    label="Departemen"
+                    :items="departemen.departemens"
+                    :itemText="obj => obj.departemen"
+                    :itemValue="obj => obj.id_departemen"
+                  ></ListDataBagian>
                 </v-col>
               </v-row>
             </v-card-text>
@@ -69,9 +57,11 @@
 </template>
 
 <script>
+import NProgress from "nprogress";
 import draggable from "vuedraggable";
 import { mapState } from "vuex";
 import store from "../store";
+import ListDataBagian from "../components/ListDataBagian.vue";
 
 export default {
   data() {
@@ -82,16 +72,21 @@ export default {
   },
   async created() {
     try {
-      await store.dispatch("bagian/fetchBagians");
+      await Promise.all([
+        store.dispatch("departemen/fetchDepartemens"),
+        store.dispatch("bagian/fetchBagians"),
+        store.dispatch("ruang/fetchRuangs")
+      ]);
     } catch (e) {
       console.log(e);
     }
   },
   components: {
-    draggable
+    draggable,
+    ListDataBagian
   },
   computed: {
-    ...mapState(["bagian"])
+    ...mapState(["departemen", "bagian"])
   }
 };
 </script>

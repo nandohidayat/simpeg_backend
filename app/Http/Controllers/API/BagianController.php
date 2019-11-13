@@ -29,7 +29,12 @@ class BagianController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { }
+    {
+        $input = $request->all();
+        $data = Bagian::create($input);
+
+        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
+    }
 
 
     /**
@@ -59,6 +64,9 @@ class BagianController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Penilaian $penilaian)
-    { }
+    public function destroy(Bagian $bagian)
+    {
+        $bagian->delete();
+        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+    }
 }

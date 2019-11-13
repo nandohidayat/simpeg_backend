@@ -12,6 +12,6 @@ class Bagian extends Model
 
     public function departemens()
     {
-        return $this->hasMany('App\Departemen', 'id_bagian', 'id_bagian');
+        return $this->hasMany('App\Departemen', 'id_bagian', 'id_bagian')->orderBy('tingkat', 'asc');
     }
 }

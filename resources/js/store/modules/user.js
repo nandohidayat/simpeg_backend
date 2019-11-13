@@ -37,9 +37,9 @@ export const actions = {
             console.log(err);
         }
     },
-    async logout({ commit }) {
+    logout({ commit }) {
         try {
-            await UserService.logout();
+            UserService.logout();
             commit("REMOVE_USER");
         } catch (err) {
             console.log(err);

@@ -8,7 +8,7 @@ class Departemen extends Model
 {
     protected $primaryKey = 'id_departemen';
     protected $fillable = ['departemen', 'tingkat', 'id_bagian'];
-    protected $hidden = ['created_at', 'updated_at'];
+    protected $hidden = ['tingkat', 'id_bagian', 'created_at', 'updated_at'];
 
     public function bagians()
     {
