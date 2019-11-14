@@ -29,8 +29,12 @@ class DepartemenController extends Controller
     public function store(Request $request)
     {
         $departemen = Departemen::where('id_bagian', '=', $request['id_bagian'])->orderBy('tingkat', 'desc')->first();
-        $tingkat = $departemen->tingkat;
 
+        if ($departemen != null) {
+            $tingkat = $departemen->tingkat;
+        } else {
+            $tingkat = 0;
+        }
         $request['tingkat'] = $tingkat + 1;
 
         $input = $request->all();

@@ -45,7 +45,7 @@ export const actions = {
     },
     async updateBagian({ commit }, bagian) {
         try {
-            await BagianService.putBagian(bagian.id_bagian, bagian);
+            await BagianService.putBagian(bagian);
             commit("EDT_BAGIAN", bagian);
         } catch (err) {
             console.log(err.response);

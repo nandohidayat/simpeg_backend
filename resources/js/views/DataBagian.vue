@@ -66,6 +66,37 @@
         </v-row>
       </v-card-text>
     </v-card>
+    <v-card class="mt-5">
+      <v-toolbar flat color="teal" dark>
+        <v-toolbar-title>Data Ruang</v-toolbar-title>
+      </v-toolbar>
+      <v-card-text>
+        <v-row>
+          <v-col>
+            <v-data-table :headers="headerRuang" :items="ruang.ruangs">
+              <template v-slot:top>
+                <v-toolbar flat color="white">
+                  <v-toolbar-title>Data Ruang</v-toolbar-title>
+                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-spacer></v-spacer>
+                  <FormBagian label="Ruang"></FormBagian>
+                </v-toolbar>
+              </template>
+              <template v-slot:item.action="{ item }">
+                <FormBagian
+                  label="Ruang"
+                  :editData="item"
+                  :edit="true"
+                ></FormBagian>
+                <v-icon small @click="deleteData('ruang', item.id_ruang)">
+                  mdi-delete
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
   </v-container>
 </template>
 
@@ -108,6 +139,15 @@ export default {
           width: "100px"
         }
       ],
+      headerRuang: [
+        { text: "Ruang", value: "ruang" },
+        {
+          text: "Action",
+          value: "action",
+          sortable: false,
+          width: "100px"
+        }
+      ],
       dialog: false,
       selectedBagian: []
     };
@@ -129,7 +169,7 @@ export default {
     FormBagian
   },
   computed: {
-    ...mapState(["departemen", "bagian"]),
+    ...mapState(["departemen", "bagian", "ruang"]),
     filteredDepartemens() {
       if (this.selectedBagian.length > 0)
         return this.departemen.departemens.filter(
@@ -145,6 +185,8 @@ export default {
       try {
         if (data === "bagian") {
           await store.dispatch("bagian/deleteBagian", id);
+        } else if (data === "ruang") {
+          await store.dispatch("ruang/deleteRuang", id);
         } else {
           await store.dispatch("departemen/deleteDepartemen", id);
         }

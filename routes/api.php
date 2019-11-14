@@ -22,9 +22,10 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 
 Route::apiResource('departemen', 'API\DepartemenController');
 Route::apiResource('bagian', 'API\BagianController');
+Route::apiResource('ruang', 'API\RuangController');
 
 Route::resource('karyawan', 'API\KaryawanController');
-Route::resource('ruang', 'API\RuangController');
+// Route::resource('ruang', 'API\RuangController');
 // Route::resource('departemen', 'API\DepartemenController');
 // Route::resource('bagian', 'API\BagianController');
 Route::resource('shift', 'API\ShiftController');

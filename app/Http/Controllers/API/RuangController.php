@@ -1,16 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\API\BaseController as BaseController;
-use App\Penilaian;
+use App\Http\Controllers\Controller;
 use App\Ruang;
+use Illuminate\Http\Request;
 
-
-class RuangController extends BaseController
+class RuangController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -21,9 +17,8 @@ class RuangController extends BaseController
     {
         $data = Ruang::orderBy('ruang', 'asc')->get();
 
-        return $this->sendResponse($data, 'Product retrieved successfully.');
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -32,8 +27,13 @@ class RuangController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { }
+    {
+        $input = $request->all();
+        $data = Ruang::create($input);
 
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
 
     /**
      * Display the specified resource.
@@ -42,8 +42,9 @@ class RuangController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    { }
-
+    {
+        //
+    }
 
     /**
      * Update the specified resource in storage.
@@ -52,9 +53,13 @@ class RuangController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Penilaian $penilaian)
-    { }
+    public function update(Request $request, $id)
+    {
+        $data = Ruang::updateOrCreate(['id_ruang' => $id], $request->all());
 
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+        return response()->json(["status" => "success"], 201);
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -62,6 +67,13 @@ class RuangController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Penilaian $penilaian)
-    { }
+    public function destroy($id)
+    {
+        $data = Ruang::find($id);
+
+        if ($data === null) return response()->json(["status" => "not found"], 404);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
+    }
 }

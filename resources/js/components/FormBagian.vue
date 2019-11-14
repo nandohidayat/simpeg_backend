@@ -75,6 +75,7 @@ export default {
   created() {
     if (this.edit === true) {
       if (this.label === "Bagian") this.newData = this.editData.bagian;
+      else if (this.label === "Ruang") this.newData = this.editData.ruang;
       else {
         this.newData = this.editData.departemen;
         this.newBagian = this.editData.id_bagian;
@@ -83,13 +84,15 @@ export default {
     }
   },
   computed: {
-    ...mapState(["bagian", "departemen"])
+    ...mapState(["bagian"])
   },
   methods: {
     close() {
       this.dialog = false;
       if (this.label === "Bagian")
         this.newData = this.edit === false ? undefined : this.editData.bagian;
+      if (this.label === "Ruang")
+        this.newData = this.edit === false ? undefined : this.editData.ruang;
       else {
         this.newBagian =
           this.edit === false ? undefined : this.editData.id_bagian;
@@ -104,6 +107,8 @@ export default {
       try {
         if (this.label === "Bagian") {
           await store.dispatch("bagian/createBagian", { bagian: this.newData });
+        } else if (this.label === "Ruang") {
+          await store.dispatch("ruang/createRuang", { ruang: this.newData });
         } else if (this.label === "Departemen") {
           await store.dispatch("departemen/createDepartemen", {
             departemen: this.newData,
@@ -123,6 +128,11 @@ export default {
           await store.dispatch("bagian/updateBagian", {
             ...this.editData,
             bagian: this.newData
+          });
+        } else if (this.label === "Ruang") {
+          await store.dispatch("ruang/updateRuang", {
+            ...this.editData,
+            ruang: this.newData
           });
         } else if (this.label === "Departemen") {
           await store.dispatch("departemen/updateDepartemen", {
