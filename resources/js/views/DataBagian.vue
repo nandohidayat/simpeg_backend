@@ -2,56 +2,69 @@
   <v-container>
     <v-card>
       <v-toolbar flat color="teal" dark>
-        <v-toolbar-title>Data Departemen</v-toolbar-title>
+        <v-toolbar-title>Data Bagian</v-toolbar-title>
       </v-toolbar>
-      <v-tabs vertical color="teal">
-        <v-tab v-for="b in bagian.bagians" :key="b.id_bagian">
-          {{ b.bagian }}
-        </v-tab>
-        <v-tab><v-icon>mdi-plus-thick</v-icon></v-tab>
-        <v-tab-item v-for="b in bagian.bagians" :key="b.id_bagian">
-          <v-card flat>
-            <v-list nav>
-              <v-list-item-group>
-                <draggable :list="b.departemens">
-                  <v-list-item
-                    v-for="d in b.departemens"
-                    :key="d.id_departemen"
-                  >
-                    <v-list-item-content>
-                      <v-list-item-title>{{ d.departemen }}</v-list-item-title>
-                    </v-list-item-content>
-                  </v-list-item>
-                </draggable>
-              </v-list-item-group>
-            </v-list>
-          </v-card>
-        </v-tab-item>
-        <v-tab-item>
-          <v-card flat>
-            <v-card-text>
-              <v-row>
-                <v-col cols="6">
-                  <ListDataBagian
-                    label="Bagian"
-                    :items="bagian.bagians"
-                    :itemText="obj => obj.bagian"
-                    :itemValue="obj => obj.id_bagian"
-                  ></ListDataBagian>
-                </v-col>
-                <v-col cols="6">
-                  <ListDataBagian
-                    label="Departemen"
-                    :items="departemen.departemens"
-                    :itemText="obj => obj.departemen"
-                    :itemValue="obj => obj.id_departemen"
-                  ></ListDataBagian>
-                </v-col>
-              </v-row>
-            </v-card-text>
-          </v-card>
-        </v-tab-item>
-      </v-tabs>
+      <v-card-text>
+        <v-row>
+          <v-col cols="6">
+            <v-data-table
+              v-model="selectedBagian"
+              :headers="headerBagian"
+              :items="bagian.bagians"
+              show-select
+              single-select
+              item-key="id_bagian"
+            >
+              <template v-slot:top>
+                <v-toolbar flat color="white">
+                  <v-toolbar-title>Data Bagian</v-toolbar-title>
+                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-spacer></v-spacer>
+                  <FormBagian label="Bagian"></FormBagian>
+                </v-toolbar>
+              </template>
+              <template v-slot:item.action="{ item }">
+                <FormBagian
+                  label="Bagian"
+                  :editData="item"
+                  :edit="true"
+                ></FormBagian>
+                <v-icon small @click="deleteData('bagian', item.id_bagian)">
+                  mdi-delete
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+          <v-col cols="6">
+            <v-data-table
+              :headers="headerDepartemen"
+              :items="filteredDepartemens"
+            >
+              <template v-slot:top>
+                <v-toolbar flat color="white">
+                  <v-toolbar-title>Data Departemen</v-toolbar-title>
+                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-spacer></v-spacer>
+                  <FormBagian label="Departemen"></FormBagian>
+                </v-toolbar>
+              </template>
+              <template v-slot:item.action="{ item }">
+                <FormBagian
+                  label="Departemen"
+                  :editData="item"
+                  :edit="true"
+                ></FormBagian>
+                <v-icon
+                  small
+                  @click="deleteData('departemen', item.id_departemen)"
+                >
+                  mdi-delete
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+        </v-row>
+      </v-card-text>
     </v-card>
   </v-container>
 </template>
@@ -62,12 +75,41 @@ import draggable from "vuedraggable";
 import { mapState } from "vuex";
 import store from "../store";
 import ListDataBagian from "../components/ListDataBagian.vue";
+import FormBagian from "../components/FormBagian.vue";
 
 export default {
   data() {
     return {
-      model: null,
-      drag: false
+      headerBagian: [
+        {
+          text: "Bagian",
+          value: "bagian"
+        },
+        {
+          text: "Action",
+          value: "action",
+          sortable: false,
+          width: "100px"
+        }
+      ],
+      headerDepartemen: [
+        {
+          text: "Departemen",
+          value: "departemen"
+        },
+        {
+          text: "Tingkat",
+          value: "tingkat"
+        },
+        {
+          text: "Action",
+          value: "action",
+          sortable: false,
+          width: "100px"
+        }
+      ],
+      dialog: false,
+      selectedBagian: []
     };
   },
   async created() {
@@ -83,10 +125,34 @@ export default {
   },
   components: {
     draggable,
-    ListDataBagian
+    ListDataBagian,
+    FormBagian
   },
   computed: {
-    ...mapState(["departemen", "bagian"])
+    ...mapState(["departemen", "bagian"]),
+    filteredDepartemens() {
+      if (this.selectedBagian.length > 0)
+        return this.departemen.departemens.filter(
+          d => d.id_bagian == this.selectedBagian[0].id_bagian
+        );
+      return this.departemen.departemens;
+    }
+  },
+  methods: {
+    async deleteData(data, id) {
+      if (!confirm("Apakah anda yakin akan menghapus data tersebut?")) return;
+      NProgress.start();
+      try {
+        if (data === "bagian") {
+          await store.dispatch("bagian/deleteBagian", id);
+        } else {
+          await store.dispatch("departemen/deleteDepartemen", id);
+        }
+      } catch (e) {
+        console.log(e);
+        NProgress.done();
+      }
+    }
   }
 };
 </script>

@@ -28,7 +28,7 @@ class DepartemenController extends Controller
      */
     public function store(Request $request)
     {
-        $departemen = Departemen::orderBy('tingkat', 'desc')->first();
+        $departemen = Departemen::where('id_bagian', '=', $request['id_bagian'])->orderBy('tingkat', 'desc')->first();
         $tingkat = $departemen->tingkat;
 
         $request['tingkat'] = $tingkat + 1;
@@ -59,7 +59,10 @@ class DepartemenController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $data = Departemen::updateOrCreate(['id_departemen' => $id], $request->all());
+
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+        return response()->json(["status" => "success"], 201);
     }
 
     /**
