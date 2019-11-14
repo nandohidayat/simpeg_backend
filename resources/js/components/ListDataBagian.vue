@@ -25,6 +25,14 @@
           <v-card-text>
             <v-row>
               <v-col>
+                <v-select
+                  v-if="label === 'Departemen'"
+                  label="Bagian"
+                  :items="bagian.bagians"
+                  :item-value="obj => obj.id_bagian"
+                  :item-text="obj => obj.bagian"
+                  v-model="newBagian"
+                ></v-select>
                 <v-text-field v-model="newData" dense :label="label">
                 </v-text-field>
               </v-col>
@@ -49,11 +57,13 @@
 <script>
 import store from "../store";
 import NProgress from "nprogress";
+import { mapState } from "vuex";
 
 export default {
   data() {
     return {
       newData: undefined,
+      newBagian: undefined,
       dialog: false
     };
   },
@@ -62,6 +72,9 @@ export default {
     items: Array,
     itemText: Function,
     itemValue: Function
+  },
+  computed: {
+    ...mapState(["bagian"])
   },
   watch: {
     dialog(val) {
@@ -78,6 +91,11 @@ export default {
       try {
         if (this.label === "Bagian") {
           await store.dispatch("bagian/createBagian", { bagian: this.newData });
+        } else if (this.label === "Departemen") {
+          await store.dispatch("departemen/createDepartemen", {
+            departemen: this.newData,
+            id_bagian: this.newBagian
+          });
         }
         this.close();
       } catch (e) {
@@ -90,6 +108,8 @@ export default {
       try {
         if (this.label === "Bagian") {
           await store.dispatch("bagian/deleteBagian", this.newData);
+        } else if (this.label === "Departemen") {
+          await store.dispatch("departemen/deleteDepartemen", this.newData);
         }
         this.newData = undefined;
       } catch (e) {

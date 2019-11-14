@@ -1,15 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
 use App\Departemen;
+use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Http\Controllers\API\BaseController as BaseController;
-use App\Penilaian;
 
-
-class DepartemenController extends BaseController
+class DepartemenController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -20,9 +17,8 @@ class DepartemenController extends BaseController
     {
         $data = Departemen::orderBy('departemen', 'asc')->get();
 
-        return $this->sendResponse($data, 'Product retrieved successfully.');
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -31,8 +27,17 @@ class DepartemenController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { }
+    {
+        $departemen = Departemen::orderBy('tingkat', 'desc')->first();
+        $tingkat = $departemen->tingkat;
 
+        $request['tingkat'] = $tingkat + 1;
+
+        $input = $request->all();
+        $data = Departemen::create($input);
+
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
 
     /**
      * Display the specified resource.
@@ -41,8 +46,9 @@ class DepartemenController extends BaseController
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    { }
-
+    {
+        //
+    }
 
     /**
      * Update the specified resource in storage.
@@ -51,9 +57,10 @@ class DepartemenController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Penilaian $penilaian)
-    { }
-
+    public function update(Request $request, $id)
+    {
+        //
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -61,6 +68,12 @@ class DepartemenController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Penilaian $penilaian)
-    { }
+    public function destroy($id)
+    {
+        $data = Departemen::find($id);
+        if ($data === null) return response()->json(["status" => "not found"], 404);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
+    }
 }

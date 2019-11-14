@@ -20,9 +20,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+Route::apiResource('departemen', 'API\DepartemenController');
+
 Route::resource('karyawan', 'API\KaryawanController');
 Route::resource('ruang', 'API\RuangController');
-Route::resource('departemen', 'API\DepartemenController');
+// Route::resource('departemen', 'API\DepartemenController');
 Route::resource('bagian', 'API\BagianController');
 Route::resource('shift', 'API\ShiftController');
 Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
