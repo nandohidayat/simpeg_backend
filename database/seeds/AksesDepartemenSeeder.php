@@ -16,6 +16,10 @@ class AksesDepartemenSeeder extends Seeder
             'id_departemen' => '1',
         ]);
         DB::table('akses_departemens')->insert([
+            'id_akses' => '4',
+            'id_departemen' => '1',
+        ]);
+        DB::table('akses_departemens')->insert([
             'id_akses' => '1',
             'id_departemen' => '3',
         ]);

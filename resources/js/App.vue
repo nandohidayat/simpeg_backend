@@ -77,7 +77,13 @@ export default {
         {
           icon: "mdi-database",
           header: "Database",
-          child: [{ header: "Data Bagian", link: "data-bagian" }]
+          child: [
+            { header: "Data Bagian", link: "data-bagian" },
+            {
+              header: "Hak Akses",
+              link: "akses-list"
+            }
+          ]
         }
       ]
     };

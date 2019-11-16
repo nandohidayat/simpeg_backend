@@ -14,6 +14,7 @@ import KaryawanDetail from "./views/KaryawanDetail.vue";
 import ScheduleList from "./views/ScheduleList.vue";
 
 import DataBagian from "./views/DataBagian.vue";
+import AksesList from "./views/AksesList.vue";
 
 import Page404 from "./views/Page404.vue";
 import Login from "./views/Login.vue";
@@ -64,6 +65,14 @@ const router = new Router({
             }
         },
         {
+            path: "/schedule",
+            name: "schedule-list",
+            component: ScheduleList,
+            meta: {
+                title: "Alpha System | Schedule List"
+            }
+        },
+        {
             path: "/data-bagian",
             name: "data-bagian",
             component: DataBagian,
@@ -72,11 +81,11 @@ const router = new Router({
             }
         },
         {
-            path: "/schedule",
-            name: "schedule-list",
-            component: ScheduleList,
+            path: "/akses",
+            name: "akses-list",
+            component: AksesList,
             meta: {
-                title: "Alpha System | Schedule List"
+                title: "Alpha System | Akses List"
             }
         },
         {
