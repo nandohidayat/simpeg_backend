@@ -14,7 +14,9 @@ class CreateAksesDepartemensTable extends Migration
     public function up()
     {
         Schema::create('akses_departemens', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->bigIncrements('id_akses_departemen');
+            $table->bigInteger('id_akses');
+            $table->bigInteger('id_departemen');
             $table->timestamps();
         });
     }

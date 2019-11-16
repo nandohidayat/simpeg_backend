@@ -11,6 +11,17 @@ class AksesSeeder extends Seeder
      */
     public function run()
     {
-        //
+        DB::table('akses')->insert([
+            'id_akses_kategori' => '1',
+            'akses' => 'karyawan-list',
+        ]);
+        DB::table('akses')->insert([
+            'id_akses_kategori' => '1',
+            'akses' => 'schedule-list',
+        ]);
+        DB::table('akses')->insert([
+            'id_akses_kategori' => '2',
+            'akses' => 'data-bagian',
+        ]);
     }
 }
