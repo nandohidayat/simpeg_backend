@@ -14,6 +14,7 @@
               show-select
               single-select
               item-key="id_bagian"
+              :loading="loading.bagian"
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -39,6 +40,7 @@
             <v-data-table
               :headers="headerDepartemen"
               :items="filteredDepartemens"
+              :loading="loading.departemen"
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -73,7 +75,11 @@
       <v-card-text>
         <v-row>
           <v-col>
-            <v-data-table :headers="headerRuang" :items="ruang.ruangs">
+            <v-data-table
+              :headers="headerRuang"
+              :items="ruang.ruangs"
+              :loading="loading.ruang"
+            >
               <template v-slot:top>
                 <v-toolbar flat color="white">
                   <v-toolbar-title>Data Ruang</v-toolbar-title>
@@ -149,7 +155,12 @@ export default {
         }
       ],
       dialog: false,
-      selectedBagian: []
+      selectedBagian: [],
+      loading: {
+        bagian: true,
+        departemen: true,
+        ruang: true
+      }
     };
   },
   async created() {
@@ -159,6 +170,9 @@ export default {
         store.dispatch("bagian/fetchBagians"),
         store.dispatch("ruang/fetchRuangs")
       ]);
+      this.loading.bagian = false;
+      this.loading.departemen = false;
+      this.loading.ruang = false;
     } catch (e) {
       console.log(e);
     }
