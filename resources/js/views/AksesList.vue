@@ -17,7 +17,7 @@
           <v-col cols="1" class="d-flex align-center">
             <v-divider vertical></v-divider>
             <v-spacer></v-spacer>
-            <v-btn color="teal" dark small
+            <v-btn color="teal" dark small @click="saveAkses"
               ><v-icon>mdi-content-save</v-icon></v-btn
             >
           </v-col>
@@ -71,6 +71,16 @@ export default {
         this.aksesDepartemen = this.akses.akses;
       }
       this.loading = false;
+    },
+    async saveAkses() {
+      if (this.selectedDepartemen !== undefined) {
+        this.loading = true;
+        await store.dispatch("akses/createAkses", {
+          departemen: this.selectedDepartemen,
+          akses: this.aksesDepartemen
+        });
+        this.loading = false;
+      }
     }
   }
 };

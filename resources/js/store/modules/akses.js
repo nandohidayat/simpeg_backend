@@ -45,10 +45,9 @@ export const actions = {
             console.log(err.response);
         }
     },
-    async createAkses({ commit }, akses) {
+    async createAkses({}, akses) {
         try {
-            const res = await AksesService.postAkses(akses);
-            commit("ADD_AKSES", res.data.data);
+            await AksesService.postAkses(akses);
         } catch (err) {
             console.log(err.response);
         }

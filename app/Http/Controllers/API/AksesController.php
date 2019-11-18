@@ -46,7 +46,20 @@ class AksesController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request)
-    { }
+    {
+        $input = $request->all();
+        $akses = Akses::all();
+
+        foreach ($akses as $a) {
+            $status = false;
+            if (in_array($a->id_akses, $input['akses'], true)) {
+                $status = true;
+            }
+            AksesDepartemen::updateOrCreate(['id_akses' => $a->id_akses, 'id_departemen' => $input['departemen']], ['status' => $status]);
+        }
+
+        return response()->json(["status" => "success"], 201);
+    }
 
     /**
      * Display the specified resource.
