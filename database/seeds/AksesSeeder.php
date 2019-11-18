@@ -13,19 +13,23 @@ class AksesSeeder extends Seeder
     {
         DB::table('akses')->insert([
             'id_akses_kategori' => '1',
-            'akses' => 'karyawan-list',
+            'akses' => 'Daftar Karyawan',
+            'url' => 'karyawan-list',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '1',
-            'akses' => 'schedule-list',
+            'akses' => 'Jadwal Karyawan',
+            'url' => 'schedule-list',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '2',
-            'akses' => 'data-bagian',
+            'akses' => 'Data Bagian',
+            'url' => 'data-bagian',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '2',
-            'akses' => 'akses-list',
+            'akses' => 'Hak Akses',
+            'url' => 'akses-list',
         ]);
     }
 }

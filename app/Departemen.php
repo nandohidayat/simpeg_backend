@@ -19,4 +19,9 @@ class Departemen extends Model
     {
         return $this->hasMany('App\Karyawan', 'id_departemen', 'id_departemen');
     }
+
+    public function aksesDepartemens()
+    {
+        return $this->belongsToMany('App\Akses', 'akses_departemens', 'id_departemen', 'id_akses')->where('status', true);
+    }
 }

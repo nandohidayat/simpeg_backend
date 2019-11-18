@@ -12,10 +12,10 @@ class AksesKategoriSeeder extends Seeder
     public function run()
     {
         DB::table('akses_kategoris')->insert([
-            'kategori' => 'karyawan',
+            'kategori' => 'Karyawan',
         ]);
         DB::table('akses_kategoris')->insert([
-            'kategori' => 'database',
+            'kategori' => 'Database',
         ]);
     }
 }

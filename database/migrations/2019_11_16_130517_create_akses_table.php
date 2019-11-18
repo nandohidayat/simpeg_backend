@@ -17,6 +17,7 @@ class CreateAksesTable extends Migration
             $table->bigIncrements('id_akses');
             $table->bigInteger('id_akses_kategori');
             $table->string('akses');
+            $table->string('url');
             $table->timestamps();
         });
     }
