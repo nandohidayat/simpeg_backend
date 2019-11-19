@@ -45,7 +45,7 @@ export default {
       aksesDepartemen: [],
       selectedDepartemen: undefined,
       open: [],
-      loading: false
+      loading: true
     };
   },
   async created() {
@@ -54,6 +54,7 @@ export default {
       store.dispatch("akses/fetchAksess")
     ]);
     this.open = this.opened();
+    this.loading = false;
   },
   computed: {
     ...mapState(["departemen", "akses"])
