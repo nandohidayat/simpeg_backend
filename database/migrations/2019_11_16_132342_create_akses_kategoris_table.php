@@ -16,6 +16,7 @@ class CreateAksesKategorisTable extends Migration
         Schema::create('akses_kategoris', function (Blueprint $table) {
             $table->bigIncrements('id_akses_kategori');
             $table->string('kategori');
+            $table->string('icon');
             $table->timestamps();
         });
     }

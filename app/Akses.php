@@ -17,6 +17,6 @@ class Akses extends Model
 
     public function aksesDepartemens()
     {
-        return $this->belongsToMany('App\Departemen', 'akses_departemens', 'id_akses', 'id_departemen')->withPivot('status');
+        return $this->belongsToMany('App\Departemen', 'akses_departemens', 'id_akses', 'id_departemen');
     }
 }

@@ -13,9 +13,11 @@ class AksesKategoriSeeder extends Seeder
     {
         DB::table('akses_kategoris')->insert([
             'kategori' => 'Karyawan',
+            'icon' => 'mdi-account-badge'
         ]);
         DB::table('akses_kategoris')->insert([
             'kategori' => 'Database',
+            'icon' => 'mdi-database'
         ]);
     }
 }

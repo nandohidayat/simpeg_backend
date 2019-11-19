@@ -22,7 +22,7 @@
           </template>
           <v-list-item
             @click="$router.push({ name: c.link })"
-            v-for="(c, i) in m.child"
+            v-for="(c, i) in m.children"
             :key="i"
           >
             <v-list-item-title>{{ c.header }}</v-list-item-title>
@@ -100,7 +100,7 @@ export default {
         {
           icon: "mdi-account-badge",
           header: "Karyawan",
-          child: [
+          children: [
             { header: "Daftar Karyawan", link: "karyawan-list" },
             {
               header: "Jadwal Karyawan",
@@ -111,7 +111,7 @@ export default {
         {
           icon: "mdi-database",
           header: "Database",
-          child: [
+          children: [
             { header: "Data Bagian", link: "data-bagian" },
             {
               header: "Hak Akses",
