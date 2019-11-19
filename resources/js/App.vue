@@ -29,16 +29,49 @@
           </v-list-item>
         </v-list-group>
       </v-list>
-      <template v-slot:append>
-        <div class="pa-2">
-          <v-btn block color="error" dark @click="logout">Logout</v-btn>
-        </div>
-      </template>
     </v-navigation-drawer>
 
     <v-app-bar app color="teal" dark>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
       <v-toolbar-title>Alpha System</v-toolbar-title>
+      <v-spacer></v-spacer>
+      <v-menu offset-y>
+        <template v-slot:activator="{ on }">
+          <v-btn outlined v-on="on">
+            <v-icon class="mr-2">mdi-account-circle</v-icon>
+            {{ user.user.username }}
+          </v-btn>
+        </template>
+        <v-card tile>
+          <v-list dense>
+            <v-subheader>Data</v-subheader>
+            <v-list-item
+              @click="
+                $router.push({
+                  name: 'karyawan-detail',
+                  params: { id: user.user.nik }
+                })
+              "
+            >
+              <v-list-item-icon
+                ><v-icon>mdi-account-box</v-icon></v-list-item-icon
+              >
+              <v-list-item-content>
+                <v-list-item-title>Profile</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+            <v-divider class="my-1"></v-divider>
+            <v-list-item @click="logout">
+              <v-list-item-icon
+                ><v-icon>mdi-exit-to-app</v-icon></v-list-item-icon
+              >
+              <v-list-item-content>
+                <v-list-item-title>Log Out</v-list-item-title>
+              </v-list-item-content>
+            </v-list-item>
+          </v-list>
+        </v-card>
+      </v-menu>
     </v-app-bar>
 
     <v-content>
@@ -51,6 +84,7 @@
 </template>
 
 <script>
+import { mapState } from "vuex";
 import NProgress from "nprogress";
 import Login from "./views/Login";
 import store from "./store";
@@ -90,6 +124,9 @@ export default {
   },
   components: {
     Login
+  },
+  computed: {
+    ...mapState(["user"])
   },
   methods: {
     async logout() {

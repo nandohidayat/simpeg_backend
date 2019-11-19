@@ -70,6 +70,12 @@
             </v-row>
           </v-card-text>
         </v-card>
+        <v-card outlined class="mt-5">
+          <v-card-title id="data-akses">
+            <v-icon large left>mdi-shield-account</v-icon
+            ><span class="title font-weight-light">Data Akses</span>
+          </v-card-title>
+        </v-card>
         <v-card outlined class="mt-5 colored-border">
           <v-card-title id="hapus-karyawan" class="mb-2">
             <v-icon large left color="error">mdi-alert</v-icon
@@ -100,6 +106,11 @@ export default {
         icon: "mdi-clipboard-account-outline",
         text: "Data Karyawan",
         id: "data-karyawan"
+      },
+      {
+        icon: "mdi-shield-account",
+        text: "Data Akses",
+        id: "data-akses"
       },
       {
         icon: "mdi-alert",

@@ -9,5 +9,8 @@ export default {
     },
     logout() {
         return client.get("/api/logout");
+    },
+    user() {
+        return client.get("/api/user");
     }
 };

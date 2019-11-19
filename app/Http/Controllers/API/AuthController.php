@@ -36,14 +36,12 @@ class AuthController extends BaseController
         $token->expires_at = Carbon::now()->addWeeks(1);
         $token->save();
 
-        $karyawan = Karyawan::where('nik', $user->nik)->first();
-
         return response()->json([
             'token' => $tokenResult->accessToken,
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
-            'user' => ['nik' => $karyawan->nik, 'nama' => $karyawan->nama]
+            'user' => ['nik' => $user->nik, 'username' => $user->username]
         ]);
     }
 

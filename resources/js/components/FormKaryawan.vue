@@ -9,7 +9,10 @@
       >
     </template>
     <v-card>
-      <v-card-title>
+      <v-card-title v-if="edited">
+        Data Karyawan
+      </v-card-title>
+      <v-card-title v-else>
         Pendaftaran Karyawan
       </v-card-title>
       <v-card-text>
