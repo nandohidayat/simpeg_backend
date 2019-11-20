@@ -46,32 +46,26 @@ class AuthController extends BaseController
             ->join('akses', 'akses_departemens.id_akses', '=', 'akses.id_akses')
             ->join('akses_kategoris', 'akses.id_akses_kategori', '=', 'akses_kategoris.id_akses_kategori')
             ->select('akses.akses', 'akses.url', 'akses_kategoris.kategori', 'akses_kategoris.icon')
-            ->groupBy('akses.akses', 'akses.url', 'akses.id_akses_kategori')
             ->get();
 
-        error_log($hakAkses);
-
-        $departemen = Departemen::with('aksesDepartemens')->where('id_departemen', $id)->first();
-        $hak = [];
-
-        foreach ($departemen->aksesDepartemens as $a) {
-            array_push($hak, $a->id_akses);
-        }
-
-        $list_akses = AksesKategori::with('akses')->get();
+        $menu = [];
         $akses = [];
-
-        foreach ($list_akses as $p) {
-            $parent = new stdClass();
-            $parent->icon = $p->icon;
-            $parent->header = $p->kategori;
-            $parent->children = [];
-            foreach ($p->akses as $c) {
-                $children = new stdClass();
-                $children->header = $c->akses;
-                $children->link = $c->url;
-                array_push($parent->children, $children);
+        $i = 0;
+        $before = "";
+        foreach ($hakAkses as $h) {
+            if ($before !== $h->kategori) {
+                $i++;
+                $before = $h->kategori;
+                $menu[$i] = new stdClass();
+                $menu[$i]->icon = $h->icon;
+                $menu[$i]->header = $h->kategori;
+                $menu[$i]->children = [];
             }
+            $obj = new stdClass();
+            $obj->header = $h->akses;
+            $obj->link = $h->url;
+            array_push($menu[$i]->children, $obj);
+            array_push($akses, $h->url);
         }
 
         return response()->json([
@@ -79,7 +73,9 @@ class AuthController extends BaseController
             'expires_at' => Carbon::parse(
                 $tokenResult->token->expires_at
             )->toDateTimeString(),
-            'user' => ['nik' => $user->nik, 'username' => $user->username]
+            'user' => ['nik' => $user->nik, 'username' => $user->username],
+            'menu' => $menu,
+            'akses' => $akses
         ]);
     }
 
