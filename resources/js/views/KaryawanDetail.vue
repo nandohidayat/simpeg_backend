@@ -70,13 +70,36 @@
             </v-row>
           </v-card-text>
         </v-card>
-        <v-card outlined class="mt-5">
+        <v-card outlined class="mt-5" v-if="grantedAccess()" :loading="loaded">
           <v-card-title id="data-akses">
             <v-icon large left>mdi-shield-account</v-icon
             ><span class="title font-weight-light">Data Akses</span>
           </v-card-title>
+          <v-card-text>
+            <template v-if="!loaded">
+              <v-row v-if="user.karyawan !== null">
+                <v-col cols="6">
+                  <span>Username :</span>
+                  <span class="subtitle-1 text--primary d-block ml-3">{{
+                    user.karyawan.username
+                  }}</span>
+                </v-col>
+                <v-col cols="6">
+                  <span>Password :</span>
+                  <span class="subtitle-1 text--primary d-block ml-3">
+                    *********
+                  </span>
+                </v-col>
+              </v-row>
+              <v-row v-else>
+                <v-col>
+                  Does not have an account. Create one if she/he need it.
+                </v-col>
+              </v-row>
+            </template>
+          </v-card-text>
         </v-card>
-        <v-card outlined class="mt-5 colored-border">
+        <v-card outlined class="mt-5 colored-border" v-if="grantedDelete()">
           <v-card-title id="hapus-karyawan" class="mb-2">
             <v-icon large left color="error">mdi-alert</v-icon
             ><span class="title font-weight-light error--text"
@@ -127,6 +150,9 @@ export default {
         store.dispatch("ruang/fetchRuangs")
       ];
     }
+    if (this.grantedAccess()) {
+      fetch.push(store.dispatch("user/fetchUser", this.$route.params.id));
+    }
     try {
       await Promise.all([
         ...fetch,
@@ -141,7 +167,7 @@ export default {
     FormKaryawan
   },
   computed: {
-    ...mapState(["departemen", "ruang", "karyawan"])
+    ...mapState(["departemen", "ruang", "karyawan", "user"])
   },
   methods: {
     async deleteKaryawan() {
@@ -153,6 +179,15 @@ export default {
         );
         this.$router.push({ name: "karyawan-list" });
       }
+    },
+    grantedAccess() {
+      return (
+        this.user.user.nik == this.$route.params.id ||
+        this.user.akses.includes("karyawan-list")
+      );
+    },
+    grantedDelete() {
+      return this.user.akses.includes("karyawan-list");
     }
   }
 };

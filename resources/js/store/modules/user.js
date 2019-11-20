@@ -6,7 +6,8 @@ export const namespaced = true;
 export const state = {
     user: undefined,
     menu: [],
-    akses: []
+    akses: [],
+    karyawan: {}
 };
 
 export const mutations = {
@@ -22,6 +23,9 @@ export const mutations = {
     REMOVE_USER() {
         localStorage.removeItem("user");
         location.reload();
+    },
+    SET_KARYAWAN(state, user) {
+        state.karyawan = user;
     }
 };
 
@@ -45,6 +49,14 @@ export const actions = {
         try {
             UserService.logout();
             commit("REMOVE_USER");
+        } catch (err) {
+            console.log(err);
+        }
+    },
+    async fetchUser({ commit }, nik) {
+        try {
+            const res = await UserService.user(nik);
+            commit("SET_KARYAWAN", res.data.data);
         } catch (err) {
             console.log(err);
         }

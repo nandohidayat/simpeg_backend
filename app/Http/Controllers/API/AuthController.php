@@ -116,8 +116,10 @@ class AuthController extends BaseController
      *
      * @return [json] user object
      */
-    public function user(Request $request)
+    public function user($id)
     {
-        return response()->json($request->user());
+        $data = User::where('nik', $id)->select('username')->first();
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 }
