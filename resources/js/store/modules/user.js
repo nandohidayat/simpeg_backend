@@ -4,7 +4,9 @@ import client from "../../services/client";
 export const namespaced = true;
 
 export const state = {
-    user: undefined
+    user: undefined,
+    menu: [],
+    akses: []
 };
 
 export const mutations = {
@@ -14,6 +16,8 @@ export const mutations = {
             "Authorization"
         ] = `Bearer ${user.token}`;
         state.user = user.user;
+        state.menu = user.menu;
+        state.akses = user.akses;
     },
     REMOVE_USER() {
         localStorage.removeItem("user");

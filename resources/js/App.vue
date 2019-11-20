@@ -11,7 +11,7 @@
             <v-list-item-title>Home</v-list-item-title>
           </v-list-item-content>
         </v-list-item>
-        <v-list-group no-action v-for="(m, i) in menu" :key="i">
+        <v-list-group no-action v-for="(m, i) in user.menu" :key="i">
           <template v-slot:activator>
             <v-list-item-action>
               <v-icon>{{ m.icon }}</v-icon>
@@ -92,34 +92,8 @@ import store from "./store";
 export default {
   name: "App",
   data() {
-    const date = new Date();
-
     return {
-      drawer: false,
-      menu: [
-        {
-          icon: "mdi-account-badge",
-          header: "Karyawan",
-          children: [
-            { header: "Daftar Karyawan", link: "karyawan-list" },
-            {
-              header: "Jadwal Karyawan",
-              link: "schedule-list"
-            }
-          ]
-        },
-        {
-          icon: "mdi-database",
-          header: "Database",
-          children: [
-            { header: "Data Bagian", link: "data-bagian" },
-            {
-              header: "Hak Akses",
-              link: "akses-list"
-            }
-          ]
-        }
-      ]
+      drawer: false
     };
   },
   components: {

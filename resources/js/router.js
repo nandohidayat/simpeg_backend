@@ -146,23 +146,29 @@ const router = new Router({
 router.beforeEach((to, from, next) => {
     NProgress.start();
 
-    const publicPages = ["/login"];
-    // const commonPages = ["/penilaian/answer", ...publicPages];
-
-    const authRequired = !publicPages.includes(to.path);
-    // const adminRequired = !commonPages.includes(to.path);
-
+    const publicPages = ["login"];
+    const adminPages = ["page-404", "dashboard", "karyawan-detail"];
+    const authRequired = !publicPages.includes(to.name);
     const loggedIn = localStorage.getItem("user");
-    if (authRequired && !loggedIn) {
-        return next("/login");
+
+    if (authRequired) {
+        if (!loggedIn) {
+            return next({ name: "login" });
+        }
+
+        if (adminPages.includes(to.name)) {
+            return next();
+        }
+
+        if (!store.state.user.akses.includes(to.name)) {
+            return next("/404");
+        }
     }
-    // if (adminRequired && JSON.parse(loggedIn).user.role < 10) {
-    //     return next("/404");
-    // }
+
     next();
 });
 
-router.afterEach((to, from, next) => {
+router.afterEach((to, from) => {
     document.title = to.meta.title;
     NProgress.done();
 });
