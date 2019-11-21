@@ -151,6 +151,11 @@ router.beforeEach((to, from, next) => {
     const authRequired = !publicPages.includes(to.name);
     const loggedIn = localStorage.getItem("user");
 
+    if (loggedIn && store.state.user.loaded === false) {
+        const userData = JSON.parse(loggedIn);
+        store.commit("user/SET_USER", userData);
+    }
+
     if (authRequired) {
         if (!loggedIn) {
             return next({ name: "login" });

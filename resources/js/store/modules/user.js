@@ -7,7 +7,8 @@ export const state = {
     user: undefined,
     menu: [],
     akses: [],
-    karyawan: {}
+    karyawan: {},
+    loaded: false
 };
 
 export const mutations = {
@@ -19,6 +20,7 @@ export const mutations = {
         state.user = user.user;
         state.menu = user.menu;
         state.akses = user.akses;
+        state.loaded = true;
     },
     REMOVE_USER() {
         localStorage.removeItem("user");
