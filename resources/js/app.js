@@ -3,8 +3,10 @@ import "./bootstrap";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import axios from "axios";
+import DisableAutocomplete from "vue-disable-autocomplete";
 
 Vue.use(Vuetify);
+Vue.use(DisableAutocomplete);
 
 import App from "./App.vue";
 import router from "./router";

@@ -13,6 +13,7 @@ use App\Karyawan;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use stdClass;
 use Validator;
 
@@ -86,12 +87,28 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-        $user = new User([
-            'username' => $request->username,
-            'password' => bcrypt($request->password)
-        ]);
+        $user = User::where('nik', Auth::user()->nik)->first();
 
-        $user->save();
+        if (Hash::check($request['userPassword'], $user->password)) {
+            if ($request['password'] === null) {
+                User::updateOrCreate(
+                    ['nik' => $request['nik']],
+                    [
+                        "username" => $request['username'],
+                    ]
+                );
+            } else {
+                User::updateOrCreate(
+                    ['nik' => $request['nik']],
+                    [
+                        "username" => $request['username'],
+                        "password" => bcrypt($request['password'])
+                    ]
+                );
+            }
+        } else {
+            return response()->json(['message' => 'Unauthorized'], 401);
+        }
 
         return response()->json([
             'message' => 'Successfully created user!'

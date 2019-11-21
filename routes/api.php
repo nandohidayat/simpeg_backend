@@ -14,12 +14,11 @@ use Illuminate\Http\Request;
 */
 
 Route::post("login", "API\AuthController@login");
-Route::post("register", "API\AuthController@register");
 Route::get("user/{id}", "API\AuthController@user");
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Route::middleware('auth:api')->get('/user', function (Request $request) {
+//     return $request->user();
+// });
 
 Route::apiResource('departemen', 'API\DepartemenController');
 Route::apiResource('bagian', 'API\BagianController');
@@ -27,14 +26,12 @@ Route::apiResource('ruang', 'API\RuangController');
 Route::apiResource('akses', 'API\AksesController');
 
 Route::resource('karyawan', 'API\KaryawanController');
-// Route::resource('ruang', 'API\RuangController');
-// Route::resource('departemen', 'API\DepartemenController');
-// Route::resource('bagian', 'API\BagianController');
 Route::resource('shift', 'API\ShiftController');
 Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
 Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');
 
 Route::middleware('auth:api')->group(function () {
+    Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
     Route::post("user", "API\AuthController@user");
 

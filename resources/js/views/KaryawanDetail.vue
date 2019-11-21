@@ -74,10 +74,50 @@
           <v-card-title id="data-akses">
             <v-icon large left>mdi-shield-account</v-icon
             ><span class="title font-weight-light">Data Akses</span>
+            <v-spacer></v-spacer>
+            <v-btn
+              v-if="editAccess"
+              text
+              icon
+              color="teal"
+              @click="createUser()"
+              ><v-icon>mdi-content-save</v-icon></v-btn
+            >
+            <v-btn v-else text icon color="teal" @click="editAccess = true"
+              ><v-icon>mdi-pencil</v-icon></v-btn
+            >
           </v-card-title>
           <v-card-text>
             <template v-if="!loaded">
-              <v-row v-if="user.karyawan !== null">
+              <v-row v-if="editAccess">
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="newUser.username"
+                    label="Username"
+                    dense
+                    solo
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="newUser.password"
+                    label="Password"
+                    dense
+                    solo
+                    type="password"
+                  ></v-text-field>
+                </v-col>
+                <v-col cols="4">
+                  <v-text-field
+                    v-model="newUser.userPassword"
+                    label="Your Password"
+                    dense
+                    solo
+                    type="password"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row v-else-if="user.karyawan !== null">
                 <v-col cols="6">
                   <span>Username :</span>
                   <span class="subtitle-1 text--primary d-block ml-3">{{
@@ -91,6 +131,7 @@
                   </span>
                 </v-col>
               </v-row>
+
               <v-row v-else>
                 <v-col>
                   Does not have an account. Create one if she/he need it.
@@ -124,23 +165,13 @@ import FormKaryawan from "../components/FormKaryawan.vue";
 export default {
   data: () => ({
     loaded: true,
-    menu: [
-      {
-        icon: "mdi-clipboard-account-outline",
-        text: "Data Karyawan",
-        id: "data-karyawan"
-      },
-      {
-        icon: "mdi-shield-account",
-        text: "Data Akses",
-        id: "data-akses"
-      },
-      {
-        icon: "mdi-alert",
-        text: "Hapus Karyawan",
-        id: "hapus-karyawan"
-      }
-    ]
+    editAccess: false,
+    newUser: {
+      nik: undefined,
+      username: undefined,
+      password: undefined,
+      userPassword: undefined
+    }
   }),
   async created() {
     let fetch = [];
@@ -159,6 +190,8 @@ export default {
         store.dispatch("karyawan/fetchKaryawan", this.$route.params.id)
       ]);
       this.loaded = false;
+      this.newUser.nik = this.karyawan.karyawan.nik;
+      this.newUser.username = this.user.karyawan.username;
     } catch (e) {
       console.log(e);
     }
@@ -167,7 +200,34 @@ export default {
     FormKaryawan
   },
   computed: {
-    ...mapState(["departemen", "ruang", "karyawan", "user"])
+    ...mapState(["departemen", "ruang", "karyawan", "user"]),
+    menu() {
+      const arr = [
+        {
+          icon: "mdi-clipboard-account-outline",
+          text: "Data Karyawan",
+          id: "data-karyawan"
+        }
+      ];
+
+      if (this.grantedAccess()) {
+        arr.push({
+          icon: "mdi-shield-account",
+          text: "Data Akses",
+          id: "data-akses"
+        });
+      }
+
+      if (this.grantedDelete()) {
+        arr.push({
+          icon: "mdi-alert",
+          text: "Hapus Karyawan",
+          id: "hapus-karyawan"
+        });
+      }
+
+      return arr;
+    }
   },
   methods: {
     async deleteKaryawan() {
@@ -179,6 +239,11 @@ export default {
         );
         this.$router.push({ name: "karyawan-list" });
       }
+    },
+    async createUser() {
+      await store.dispatch("user/register", this.newUser);
+      await store.dispatch("user/fetchUser", this.$route.params.id);
+      this.editAccess = false;
     },
     grantedAccess() {
       return (
