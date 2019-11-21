@@ -3,7 +3,10 @@
     <v-card class="px-4">
       <v-row style="height: 65px;">
         <v-col cols="9" class="pt-4">
-          <span class="headline text--primary">Jadwal Sulaiman 3</span>
+          <span
+            class="headline text--primary"
+            v-text="`Jadwal ${schedule.ruang || ''}`"
+          ></span>
         </v-col>
         <v-col cols="2">
           <v-menu
@@ -229,5 +232,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

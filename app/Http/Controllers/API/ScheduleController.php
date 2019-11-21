@@ -12,6 +12,7 @@ use App\Rekan;
 use App\Ruang;
 use App\Schedule;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use stdClass;
 use Validator;
@@ -30,9 +31,11 @@ class ScheduleController extends BaseController
         $firstday = Carbon::create($tahun, $bulan)->firstOfMonth();
         $lastday = Carbon::create($tahun, $bulan)->lastOfMonth();
 
+        $id_ruang = Karyawan::where('nik', Auth::user()->nik)->first()->id_ruang;
+
         $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
             $query->whereBetween('tgl', [$firstday, $lastday]);
-        }])->orderBy('nik', 'asc')->get();
+        }])->where('id_ruang', $id_ruang)->orderBy('nik', 'asc')->get();
 
         $data = array();
         $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
@@ -47,7 +50,9 @@ class ScheduleController extends BaseController
             array_push($data, $obj);
         }
 
-        return $this->sendResponse($data, "Sukses mang, yeyeyeyeye");
+        $ruang = Ruang::where('id_ruang', $id_ruang)->first()->ruang;
+
+        return response()->json(["status" => "success", "data" => ["schedule" => $data, "ruang" => $ruang]], 200);
     }
 
 

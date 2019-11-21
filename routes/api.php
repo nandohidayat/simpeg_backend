@@ -27,13 +27,13 @@ Route::apiResource('akses', 'API\AksesController');
 
 Route::resource('karyawan', 'API\KaryawanController');
 Route::resource('shift', 'API\ShiftController');
-Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
-Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
-    Route::post("user", "API\AuthController@user");
+
+    Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
+    Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');
 
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
 

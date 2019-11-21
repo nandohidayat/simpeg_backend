@@ -3,12 +3,14 @@ import ScheduleService from "../../services/ScheduleService.js";
 export const namespaced = true;
 
 export const state = {
-    schedules: []
+    schedules: [],
+    ruang: undefined
 };
 
 export const mutations = {
     ADD_SCHEDULES(state, schedules) {
-        state.schedules = schedules;
+        state.schedules = schedules.schedule;
+        state.ruang = schedules.ruang;
     }
 };
 
