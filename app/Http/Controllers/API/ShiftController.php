@@ -1,24 +1,12 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\API\BaseController as BaseController;
-use App\Karyawan;
-use App\Penilaian;
-use App\Rekan;
-use App\Ruang;
+use App\Http\Controllers\Controller;
 use App\Shift;
-use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use stdClass;
-use Validator;
+use Illuminate\Http\Request;
 
-use function GuzzleHttp\Promise\all;
-
-class ShiftController extends BaseController
+class ShiftController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -27,11 +15,10 @@ class ShiftController extends BaseController
      */
     public function index()
     {
-        $data = Shift::all();
+        $data = Shift::orderBy('mulai', 'asc')->get();
 
-        return $this->sendResponse($data, "Sukses mang, yeyeyeyeye");
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -42,11 +29,12 @@ class ShiftController extends BaseController
     public function store(Request $request)
     {
         $input = $request->all();
-        Karyawan::create($input);
+        $data = Shift::create($input);
 
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
-
 
     /**
      * Display the specified resource.
@@ -56,10 +44,8 @@ class ShiftController extends BaseController
      */
     public function show($id)
     {
-        $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
-        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
+        //
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -68,12 +54,13 @@ class ShiftController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
-        Karyawan::updateOrCreate(['nik' => $request->nik], $request->all());
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
-    }
+        $data = Shift::updateOrCreate(['id_shift' => $id], $request->all());
 
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+        return response()->json(["status" => "success"], 201);
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -81,12 +68,13 @@ class ShiftController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Karyawan $karyawan)
+    public function destroy($id)
     {
-        $karyawan->delete();
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
-    }
+        $data = Shift::find($id);
 
-    public function getSchedules($tahun, $bulan)
-    { }
+        if ($data === null) return response()->json(["status" => "not found"], 401);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
+    }
 }

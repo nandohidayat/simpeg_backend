@@ -73,7 +73,7 @@ const router = new Router({
             }
         },
         {
-            path: "/data-bagian",
+            path: "/data/bagian",
             name: "data-bagian",
             component: DataBagian,
             meta: {

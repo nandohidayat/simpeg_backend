@@ -23,10 +23,10 @@ Route::get("user/{id}", "API\AuthController@user");
 Route::apiResource('departemen', 'API\DepartemenController');
 Route::apiResource('bagian', 'API\BagianController');
 Route::apiResource('ruang', 'API\RuangController');
+Route::apiResource('shift', 'API\ShiftController');
 Route::apiResource('akses', 'API\AksesController');
 
 Route::resource('karyawan', 'API\KaryawanController');
-Route::resource('shift', 'API\ShiftController');
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");

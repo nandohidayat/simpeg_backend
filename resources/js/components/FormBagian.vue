@@ -20,7 +20,7 @@
       </v-card-title>
       <v-card-text>
         <v-row>
-          <v-col>
+          <v-col v-if="label !== 'Shift'">
             <v-select
               v-if="label === 'Departemen'"
               :items="bagian.bagians"
@@ -30,8 +30,63 @@
               label="Bagian"
             ></v-select>
             <v-text-field v-model="newData" :label="label"></v-text-field>
-            <v-text-field v-if="label === 'Departemen' && edit === true" v-model="newTingkat" label="Tingkat" type="number"></v-text-field>
-            </v-text-field>
+            <v-text-field
+              v-if="label === 'Departemen' && edit === true"
+              v-model="newTingkat"
+              label="Tingkat"
+              type="number"
+            ></v-text-field>
+          </v-col>
+          <v-col cols="4">
+            <v-menu
+              ref="menu1"
+              v-model="menu1"
+              :close-on-content-click="false"
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="newShift.mulai"
+                  label="Mulai"
+                  readonly
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-time-picker
+                v-if="menu1"
+                v-model="newShift.mulai"
+                format="24hr"
+                @click:minute="$refs.menu1.save(newShift.mulai)"
+              ></v-time-picker>
+            </v-menu>
+          </v-col>
+          <v-col cols="4">
+            <v-menu
+              ref="menu2"
+              v-model="menu2"
+              :close-on-content-click="false"
+              max-width="290px"
+              min-width="290px"
+            >
+              <template v-slot:activator="{ on }">
+                <v-text-field
+                  v-model="newShift.selesai"
+                  label="Selesai"
+                  readonly
+                  v-on="on"
+                ></v-text-field>
+              </template>
+              <v-time-picker
+                v-if="menu2"
+                v-model="newShift.selesai"
+                format="24hr"
+                @click:minute="$refs.menu2.save(newShift.selesai)"
+              ></v-time-picker>
+            </v-menu>
+          </v-col>
+          <v-col cols="4">
+            <v-text-field v-model="newShift.kode" label="Kode"></v-text-field>
           </v-col>
         </v-row>
       </v-card-text>
@@ -61,7 +116,14 @@ export default {
       dialog: false,
       newData: undefined,
       newBagian: undefined,
-      newTingkat: undefined
+      newTingkat: undefined,
+      newShift: {
+        mulai: undefined,
+        selesai: undefined,
+        kode: undefined
+      },
+      menu1: false,
+      menu2: false
     };
   },
   props: {
@@ -76,7 +138,11 @@ export default {
     if (this.edit === true) {
       if (this.label === "Bagian") this.newData = this.editData.bagian;
       else if (this.label === "Ruang") this.newData = this.editData.ruang;
-      else {
+      else if (this.label === "Shift") {
+        this.newShift.mulai = this.editData.mulai;
+        this.newShift.selesai = this.editData.selesai;
+        this.newShift.kode = this.editData.kode;
+      } else {
         this.newData = this.editData.departemen;
         this.newBagian = this.editData.id_bagian;
         this.newTingkat = this.editData.tingkat;
@@ -91,9 +157,14 @@ export default {
       this.dialog = false;
       if (this.label === "Bagian")
         this.newData = this.edit === false ? undefined : this.editData.bagian;
-      if (this.label === "Ruang")
+      else if (this.label === "Ruang")
         this.newData = this.edit === false ? undefined : this.editData.ruang;
-      else {
+      else if (this.label === "Shift") {
+        this.newShift =
+          this.edit === false
+            ? { mulai: undefined, selesai: undefined, kode: undefined }
+            : this.editData;
+      } else {
         this.newBagian =
           this.edit === false ? undefined : this.editData.id_bagian;
         this.newTingkat =
@@ -109,6 +180,8 @@ export default {
           await store.dispatch("bagian/createBagian", { bagian: this.newData });
         } else if (this.label === "Ruang") {
           await store.dispatch("ruang/createRuang", { ruang: this.newData });
+        } else if (this.label === "Shift") {
+          await store.dispatch("shift/createShift", this.newShift);
         } else if (this.label === "Departemen") {
           await store.dispatch("departemen/createDepartemen", {
             departemen: this.newData,
@@ -134,6 +207,11 @@ export default {
             ...this.editData,
             ruang: this.newData
           });
+        } else if (this.label === "Shift") {
+          await store.dispatch("shift/updateShift", {
+            ...this.editData,
+            ...this.newShift
+          });
         } else if (this.label === "Departemen") {
           await store.dispatch("departemen/updateDepartemen", {
             ...this.editData,
@@ -152,5 +230,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

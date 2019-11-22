@@ -71,7 +71,7 @@ class RuangController extends Controller
     {
         $data = Ruang::find($id);
 
-        if ($data === null) return response()->json(["status" => "not found"], 404);
+        if ($data === null) return response()->json(["status" => "not found"], 401);
 
         $data->delete();
         return response()->json(["status" => "success"], 201);

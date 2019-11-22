@@ -74,7 +74,7 @@
       </v-toolbar>
       <v-card-text>
         <v-row>
-          <v-col>
+          <v-col cols="6">
             <v-data-table
               :headers="headerRuang"
               :items="ruang.ruangs"
@@ -95,6 +95,32 @@
                   :edit="true"
                 ></FormBagian>
                 <v-icon small @click="deleteData('ruang', item.id_ruang)">
+                  mdi-delete
+                </v-icon>
+              </template>
+            </v-data-table>
+          </v-col>
+          <v-col cols="6">
+            <v-data-table
+              :headers="headerShift"
+              :items="shift.shifts"
+              :loading="loading.shift"
+            >
+              <template v-slot:top>
+                <v-toolbar flat color="white">
+                  <v-toolbar-title>Data Shift</v-toolbar-title>
+                  <v-divider class="mx-4" inset vertical></v-divider>
+                  <v-spacer></v-spacer>
+                  <FormBagian label="Shift"></FormBagian>
+                </v-toolbar>
+              </template>
+              <template v-slot:item.action="{ item }">
+                <FormBagian
+                  label="Shift"
+                  :editData="item"
+                  :edit="true"
+                ></FormBagian>
+                <v-icon small @click="deleteData('shift', item.id_shift)">
                   mdi-delete
                 </v-icon>
               </template>
@@ -154,12 +180,24 @@ export default {
           width: "100px"
         }
       ],
+      headerShift: [
+        { text: "Mulai", value: "mulai" },
+        { text: "Selesai", value: "selesai" },
+        { text: "Kode", value: "kode" },
+        {
+          text: "Action",
+          value: "action",
+          sortable: false,
+          width: "100px"
+        }
+      ],
       dialog: false,
       selectedBagian: [],
       loading: {
         bagian: true,
         departemen: true,
-        ruang: true
+        ruang: true,
+        shift: true
       }
     };
   },
@@ -168,11 +206,13 @@ export default {
       await Promise.all([
         store.dispatch("departemen/fetchDepartemens"),
         store.dispatch("bagian/fetchBagians"),
-        store.dispatch("ruang/fetchRuangs")
+        store.dispatch("ruang/fetchRuangs"),
+        store.dispatch("shift/fetchShifts")
       ]);
       this.loading.bagian = false;
       this.loading.departemen = false;
       this.loading.ruang = false;
+      this.loading.shift = false;
     } catch (e) {
       console.log(e);
     }
@@ -183,7 +223,7 @@ export default {
     FormBagian
   },
   computed: {
-    ...mapState(["departemen", "bagian", "ruang"]),
+    ...mapState(["departemen", "bagian", "ruang", "shift"]),
     filteredDepartemens() {
       if (this.selectedBagian.length > 0)
         return this.departemen.departemens.filter(
@@ -201,6 +241,8 @@ export default {
           await store.dispatch("bagian/deleteBagian", id);
         } else if (data === "ruang") {
           await store.dispatch("ruang/deleteRuang", id);
+        } else if (data === "shift") {
+          await store.dispatch("shift/deleteShift", id);
         } else {
           await store.dispatch("departemen/deleteDepartemen", id);
         }
