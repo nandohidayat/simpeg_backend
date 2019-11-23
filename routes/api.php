@@ -20,13 +20,19 @@ Route::get("user/{id}", "API\AuthController@user");
 //     return $request->user();
 // });
 
+Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
+Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
+
 Route::apiResource('departemen', 'API\DepartemenController');
 Route::apiResource('bagian', 'API\BagianController');
 Route::apiResource('ruang', 'API\RuangController');
 Route::apiResource('shift', 'API\ShiftController');
 Route::apiResource('akses', 'API\AksesController');
 
+
+// OLD CODE
 Route::resource('karyawan', 'API\KaryawanController');
+
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
@@ -35,6 +41,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
     Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');
 
+
+    // OLD CODE
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
 
     Route::group(['middleware' => 'cors'], function () {

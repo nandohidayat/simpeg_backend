@@ -24,4 +24,9 @@ class Departemen extends Model
     {
         return $this->belongsToMany('App\Akses', 'akses_departemens', 'id_departemen', 'id_akses')->where('status', true);
     }
+
+    public function shiftDepartemens()
+    {
+        return $this->belongsToMany('App\Shift', 'shift_departemens', 'id_departemen', 'id_shift')->where('status', true);
+    }
 }

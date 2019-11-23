@@ -12,5 +12,11 @@ export default {
     },
     deleteShift(id) {
         return client.delete(`/api/shift/${id}`);
+    },
+    getDepartemen(id) {
+        return client.get(`/api/shift/departemen/${id}`);
+    },
+    postDepartemen(shift) {
+        return client.post("api/shift/departemen", shift);
     }
 };

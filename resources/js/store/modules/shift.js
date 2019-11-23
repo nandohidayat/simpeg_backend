@@ -3,11 +3,12 @@ import ShiftService from "../../services/ShiftService.js";
 export const namespaced = true;
 
 export const state = {
-    shifts: []
+    shifts: [],
+    departemen: []
 };
 
 export const mutations = {
-    ADD_SHIFTS(state, shifts) {
+    SET_SHIFTS(state, shifts) {
         state.shifts = shifts;
     },
     ADD_SHIFT(state, shift) {
@@ -21,6 +22,9 @@ export const mutations = {
     },
     DEL_SHIFT(state, id) {
         state.shifts = state.shifts.filter(b => b.id_shift != id);
+    },
+    SET_DEPARTEMEN(state, shift) {
+        state.departemen = shift;
     }
 };
 
@@ -28,7 +32,7 @@ export const actions = {
     async fetchShifts({ commit }) {
         try {
             const res = await ShiftService.getShifts();
-            commit("ADD_SHIFTS", res.data.data);
+            commit("SET_SHIFTS", res.data.data);
         } catch (err) {
             console.log(err.response);
         }
@@ -53,6 +57,21 @@ export const actions = {
         try {
             await ShiftService.deleteShift(id);
             commit("DEL_SHIFT", id);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async fetchDepartemen({ commit }, id) {
+        try {
+            const res = await ShiftService.getDepartemen(id);
+            commit("SET_DEPARTEMEN", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async updateDepartemen({}, shift) {
+        try {
+            await ShiftService.postDepartemen(shift);
         } catch (err) {
             console.log(err.response);
         }

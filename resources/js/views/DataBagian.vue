@@ -1,6 +1,6 @@
 <template>
   <v-container>
-    <v-card>
+    <v-card :loading="loading">
       <v-toolbar flat color="teal" dark>
         <v-toolbar-title>Data Bagian &amp; Data Departemen</v-toolbar-title>
       </v-toolbar>
@@ -14,7 +14,6 @@
               show-select
               single-select
               item-key="id_bagian"
-              :loading="loading.bagian"
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -40,7 +39,6 @@
             <v-data-table
               :headers="headerDepartemen"
               :items="filteredDepartemens"
-              :loading="loading.departemen"
             >
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -68,18 +66,14 @@
         </v-row>
       </v-card-text>
     </v-card>
-    <v-card class="mt-5">
+    <v-card class="mt-5" :loading="loading">
       <v-toolbar flat color="teal" dark>
-        <v-toolbar-title>Data Ruang &amp; Data Shift</v-toolbar-title>
+        <v-toolbar-title>Data Ruang</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-row>
           <v-col cols="6">
-            <v-data-table
-              :headers="headerRuang"
-              :items="ruang.ruangs"
-              :loading="loading.ruang"
-            >
+            <v-data-table :headers="headerRuang" :items="ruang.ruangs">
               <template v-slot:top>
                 <v-toolbar flat color="white">
                   <v-toolbar-title>Data Ruang</v-toolbar-title>
@@ -104,18 +98,14 @@
         </v-row>
       </v-card-text>
     </v-card>
-    <v-card class="mt-5">
+    <v-card class="mt-5" :loading="loading">
       <v-toolbar flat color="teal" dark>
         <v-toolbar-title>Shift Manager</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-row>
           <v-col cols="6">
-            <v-data-table
-              :headers="headerShift"
-              :items="shift.shifts"
-              :loading="loading.shift"
-            >
+            <v-data-table :headers="headerShift" :items="shift.shifts">
               <template v-slot:top>
                 <v-toolbar flat color="white">
                   <v-toolbar-title>Data Shift</v-toolbar-title>
@@ -143,13 +133,27 @@
             </v-toolbar>
             <v-row>
               <v-col>
-                <v-select
-                  label="Departemen"
-                  v-model="selectedDepartemen"
-                  :items="departemen.departemens"
-                  :item-value="obj => obj.id_departemen"
-                  :item-text="obj => obj.departemen"
-                ></v-select>
+                <v-row>
+                  <v-col cols="10">
+                    <v-select
+                      label="Departemen"
+                      v-model="selectedDepartemen"
+                      :items="departemen.departemens"
+                      :item-value="obj => obj.id_departemen"
+                      :item-text="obj => obj.departemen"
+                      dense
+                      clearable
+                      @change="getSelected"
+                    ></v-select>
+                  </v-col>
+                  <v-col cols="2" class="d-flex align-center">
+                    <v-divider vertical></v-divider>
+                    <v-spacer></v-spacer>
+                    <v-btn small color="teal" dark @click="saveShift"
+                      ><v-icon>mdi-content-save</v-icon></v-btn
+                    >
+                  </v-col>
+                </v-row>
                 <header>Shift</header>
                 <v-row>
                   <v-col v-for="s in shift.shifts" :key="s.id_shift" cols="3">
@@ -175,7 +179,6 @@ import NProgress from "nprogress";
 import draggable from "vuedraggable";
 import { mapState } from "vuex";
 import store from "../store";
-import ListDataBagian from "../components/ListDataBagian.vue";
 import FormBagian from "../components/FormBagian.vue";
 
 export default {
@@ -233,12 +236,7 @@ export default {
       selectedBagian: [],
       selectedDepartemen: undefined,
       selectedShift: [],
-      loading: {
-        bagian: true,
-        departemen: true,
-        ruang: true,
-        shift: true
-      }
+      loading: true
     };
   },
   async created() {
@@ -249,17 +247,13 @@ export default {
         store.dispatch("ruang/fetchRuangs"),
         store.dispatch("shift/fetchShifts")
       ]);
-      this.loading.bagian = false;
-      this.loading.departemen = false;
-      this.loading.ruang = false;
-      this.loading.shift = false;
+      this.loading = false;
     } catch (e) {
       console.log(e);
     }
   },
   components: {
     draggable,
-    ListDataBagian,
     FormBagian
   },
   computed: {
@@ -289,6 +283,26 @@ export default {
       } catch (e) {
         console.log(e);
         NProgress.done();
+      }
+    },
+    async getSelected() {
+      this.loading = true;
+      if (this.selectedDepartemen === undefined) {
+        this.selectedShift = [];
+      } else {
+        await store.dispatch("shift/fetchDepartemen", this.selectedDepartemen);
+        this.selectedShift = this.shift.departemen;
+      }
+      this.loading = false;
+    },
+    async saveShift() {
+      if (this.selectedDepartemen !== undefined) {
+        this.loading = true;
+        await store.dispatch("shift/updateDepartemen", {
+          departemen: this.selectedDepartemen,
+          shift: this.selectedShift
+        });
+        this.loading = false;
       }
     }
   }

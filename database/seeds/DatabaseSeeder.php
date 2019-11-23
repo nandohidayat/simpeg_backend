@@ -25,5 +25,6 @@ class DatabaseSeeder extends Seeder
         $this->call(AksesKategoriSeeder::class);
         $this->call(AksesSeeder::class);
         $this->call(AksesDepartemenSeeder::class);
+        $this->call(ShiftDepartemenSeeder::class);
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Departemen;
 use App\Http\Controllers\Controller;
 use App\Shift;
+use App\ShiftDepartemen;
 use Illuminate\Http\Request;
 
 class ShiftController extends Controller
@@ -75,6 +77,34 @@ class ShiftController extends Controller
         if ($data === null) return response()->json(["status" => "not found"], 401);
 
         $data->delete();
+        return response()->json(["status" => "success"], 201);
+    }
+
+    public function getDepartemens($id)
+    {
+        $departemen = Departemen::with('shiftDepartemens')->where('id_departemen', $id)->first();
+        $data = [];
+
+        foreach ($departemen->shiftDepartemens as $d) {
+            array_push($data, $d->id_shift);
+        }
+
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
+
+    public function createDepartemens(Request $request)
+    {
+        $input = $request->all();
+        $shift = Shift::all();
+
+        foreach ($shift as $a) {
+            $status = false;
+            if (in_array($a->id_shift, $input['shift'], true)) {
+                $status = true;
+            }
+            ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_departemen' => $input['departemen']], ['status' => $status]);
+        }
+
         return response()->json(["status" => "success"], 201);
     }
 }
