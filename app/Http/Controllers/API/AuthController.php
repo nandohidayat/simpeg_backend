@@ -46,6 +46,7 @@ class AuthController extends BaseController
         $hakAkses = AksesDepartemen::where([['id_departemen', '=', $id], ['status', '=', 'true']])
             ->join('akses', 'akses_departemens.id_akses', '=', 'akses.id_akses')
             ->join('akses_kategoris', 'akses.id_akses_kategori', '=', 'akses_kategoris.id_akses_kategori')
+            ->orderBy('akses.id_akses', 'asc')
             ->select('akses.akses', 'akses.url', 'akses_kategoris.kategori', 'akses_kategoris.icon')
             ->get();
 

@@ -3,7 +3,7 @@
 
 namespace App\Http\Controllers\API;
 
-
+use App\Departemen;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Karyawan;
@@ -35,17 +35,27 @@ class ScheduleController extends BaseController
 
         $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
             $query->whereBetween('tgl', [$firstday, $lastday]);
-        }])->where('id_ruang', $id_ruang)->orderBy('nik', 'asc')->get();
+        }])
+            ->where('id_ruang', $id_ruang)
+            ->orderBy('nik', 'asc')->get();
 
-        $data = array();
+        $data = [];
         $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
 
         foreach ($schedules as $s) {
+            $departemen = Departemen::with('shiftDepartemens')->where('id_departemen', $s->id_departemen)->first();
+
             $obj = new stdClass();
             $obj->nik = $s->nik;
             $obj->nama = $s->nama;
+
             for ($i = 0; $i < $last; $i++) {
                 $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
+            }
+
+            $obj->shift = [];
+            foreach ($departemen->shiftDepartemens as $s) {
+                array_push($obj->shift, $s->id_shift);
             }
             array_push($data, $obj);
         }

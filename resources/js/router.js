@@ -73,11 +73,11 @@ const router = new Router({
             }
         },
         {
-            path: "/data/bagian",
-            name: "data-bagian",
+            path: "/data/karyawan",
+            name: "data-karyawan",
             component: DataBagian,
             meta: {
-                title: "Alpha System | Data Bagian"
+                title: "Alpha System | Data Karyawan"
             }
         },
         {

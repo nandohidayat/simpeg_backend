@@ -71,7 +71,7 @@
             </v-date-picker>
             <v-select
               v-model="ranged.shift"
-              :items="shift.shifts"
+              :items="filteredShift(item.shift)"
               :item-text="obj => obj.kode"
               :item-value="obj => obj.id_shift"
               label="Shift"
@@ -93,7 +93,7 @@
           <template v-slot:input>
             <v-select
               v-model="item[`day${l}`]"
-              :items="shift.shifts"
+              :items="filteredShift(item.shift)"
               :item-text="obj => obj.kode"
               :item-value="obj => obj.id_shift"
               label="Shift"
@@ -167,6 +167,9 @@ export default {
     }
   },
   methods: {
+    filteredShift(arr) {
+      return this.shift.shifts.filter(s => arr.includes(s.id_shift));
+    },
     updateShift() {
       if (this.ranged.dates.length == 0) return;
 
