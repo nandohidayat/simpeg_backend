@@ -2,7 +2,7 @@
   <v-container>
     <v-card>
       <v-toolbar flat color="teal" dark>
-        <v-toolbar-title>Data Bagian</v-toolbar-title>
+        <v-toolbar-title>Data Bagian &amp; Data Departemen</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-row>
@@ -70,7 +70,7 @@
     </v-card>
     <v-card class="mt-5">
       <v-toolbar flat color="teal" dark>
-        <v-toolbar-title>Data Ruang</v-toolbar-title>
+        <v-toolbar-title>Data Ruang &amp; Data Shift</v-toolbar-title>
       </v-toolbar>
       <v-card-text>
         <v-row>
@@ -100,6 +100,16 @@
               </template>
             </v-data-table>
           </v-col>
+          <v-col cols="6"> </v-col>
+        </v-row>
+      </v-card-text>
+    </v-card>
+    <v-card class="mt-5">
+      <v-toolbar flat color="teal" dark>
+        <v-toolbar-title>Shift Manager</v-toolbar-title>
+      </v-toolbar>
+      <v-card-text>
+        <v-row>
           <v-col cols="6">
             <v-data-table
               :headers="headerShift"
@@ -125,6 +135,34 @@
                 </v-icon>
               </template>
             </v-data-table>
+          </v-col>
+          <v-col cols="6">
+            <v-toolbar flat color="white">
+              <v-toolbar-title>Shift Departemen</v-toolbar-title>
+              <v-divider class="mx-4" inset vertical></v-divider>
+            </v-toolbar>
+            <v-row>
+              <v-col>
+                <v-select
+                  label="Departemen"
+                  v-model="selectedDepartemen"
+                  :items="departemen.departemens"
+                  :item-value="obj => obj.id_departemen"
+                  :item-text="obj => obj.departemen"
+                ></v-select>
+                <header>Shift</header>
+                <v-row>
+                  <v-col v-for="s in shift.shifts" :key="s.id_shift" cols="3">
+                    <v-checkbox
+                      v-model="selectedShift"
+                      :label="s.kode"
+                      :value="s.id_shift"
+                      color="teal"
+                    ></v-checkbox>
+                  </v-col>
+                </v-row>
+              </v-col>
+            </v-row>
           </v-col>
         </v-row>
       </v-card-text>
@@ -193,6 +231,8 @@ export default {
       ],
       dialog: false,
       selectedBagian: [],
+      selectedDepartemen: undefined,
+      selectedShift: [],
       loading: {
         bagian: true,
         departemen: true,
