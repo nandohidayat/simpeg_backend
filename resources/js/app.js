@@ -2,7 +2,7 @@ import "./bootstrap";
 
 import Vue from "vue";
 import Vuetify from "vuetify";
-import axios from "axios";
+import client from "./services/client";
 import DisableAutocomplete from "vue-disable-autocomplete";
 
 Vue.use(Vuetify);
@@ -57,7 +57,7 @@ new Vue({
             console.log(userData);
             this.$store.commit("user/SET_USER", userData, { root: true });
         }
-        axios.interceptors.response.use(
+        client.interceptors.response.use(
             response => response,
             error => {
                 console.log(error.response);
