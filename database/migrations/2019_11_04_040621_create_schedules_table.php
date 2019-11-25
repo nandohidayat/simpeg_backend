@@ -18,6 +18,8 @@ class CreateSchedulesTable extends Migration
             $table->bigInteger('nik');
             $table->date('tgl');
             $table->bigInteger('id_shift')->nullable();
+            $table->bigInteger('masuk')->nullable();
+            $table->bigInteger('keluar')->nullable();
             $table->timestamps();
         });
     }

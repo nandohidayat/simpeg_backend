@@ -28,6 +28,7 @@ Route::apiResource('bagian', 'API\BagianController');
 Route::apiResource('ruang', 'API\RuangController');
 Route::apiResource('shift', 'API\ShiftController');
 Route::apiResource('akses', 'API\AksesController');
+Route::apiResource('absen', 'API\AbsenController');
 
 
 // OLD CODE
