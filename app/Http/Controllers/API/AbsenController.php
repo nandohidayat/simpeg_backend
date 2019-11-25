@@ -6,6 +6,7 @@ use App\Absen;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 
 class AbsenController extends Controller
 {
@@ -16,9 +17,12 @@ class AbsenController extends Controller
      */
     public function index()
     {
-        $data = Absen::all();
+        $start = Carbon::now('+07:00')->startOfDay();
+        $end = Carbon::now('+07:00')->endOfDay();
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        $log = DB::connection('mysql2')->table('log_presensi')->whereBetween('DateTime', [$start, $end])->get();
+
+        return response()->json(["status" => "success", "data" => $log], 200);
     }
 
     /**

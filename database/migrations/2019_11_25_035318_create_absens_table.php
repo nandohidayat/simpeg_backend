@@ -16,9 +16,8 @@ class CreateAbsensTable extends Migration
         Schema::create('absens', function (Blueprint $table) {
             $table->bigIncrements('id_absen');
             $table->bigInteger('nik');
-            $table->boolean('type');
-            $table->date('tgl');
-            $table->time('waktu');
+            $table->integer('type');
+            $table->dateTime('tgl');
             $table->timestamps();
         });
     }
