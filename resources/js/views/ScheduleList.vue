@@ -103,6 +103,7 @@
         </v-edit-dialog>
       </template>
     </v-data-table>
+    <AbsenCard class="mt-5"></AbsenCard>
   </v-container>
 </template>
 
@@ -112,6 +113,8 @@ import moment from "moment";
 import "moment/locale/id";
 import NProgress from "nprogress";
 import store from "../store";
+
+import AbsenCard from "../components/AbsenCard";
 
 export default {
   data() {
@@ -125,6 +128,9 @@ export default {
         nik: undefined
       }
     };
+  },
+  components: {
+    AbsenCard
   },
   async created() {
     await Promise.all([

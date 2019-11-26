@@ -1,8 +1,11 @@
 import client from "./client";
 
 export default {
-    getKaryawans() {
-        return client.get("/api/karyawan");
+    getKaryawans(select) {
+        let params = "?";
+        if (select !== undefined) params += `select=${select}`;
+
+        return client.get(`/api/karyawan${params}`);
     },
     getKaryawan(nik) {
         return client.get(`/api/karyawan/${nik}`);

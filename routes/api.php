@@ -30,14 +30,11 @@ Route::apiResource('shift', 'API\ShiftController');
 Route::apiResource('akses', 'API\AksesController');
 Route::apiResource('absen', 'API\AbsenController');
 
-
-// OLD CODE
-Route::resource('karyawan', 'API\KaryawanController');
-
-
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
+
+    Route::apiResource('karyawan', 'API\KaryawanController');
 
     Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
     Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');

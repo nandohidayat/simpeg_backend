@@ -1,23 +1,14 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
-
-use Illuminate\Http\Request;
-use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Controllers\Controller;
 use App\Karyawan;
-use App\Penilaian;
-use App\Rekan;
-use App\Ruang;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use stdClass;
-use Validator;
 
-use function GuzzleHttp\Promise\all;
-
-class KaryawanController extends BaseController
+class KaryawanController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -26,10 +17,25 @@ class KaryawanController extends BaseController
      */
     public function index()
     {
-        $data = Karyawan::with('departemen', 'ruang')->orderBy('nik', 'asc')->get();
-        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
-    }
+        $query = DB::table('karyawans');
 
+        error_log("START THE APPOCALIPSE");
+
+        if (request()->select == 1) {
+            $ruang = Karyawan::where('nik', Auth::user()->nik)->first()->id_ruang;
+            $query->where('id_ruang', $ruang);
+            $query->select('nik', 'nama');
+            $query->orderBy('nama', 'asc');
+        } else {
+            $query->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang');
+            $query->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen');
+            $query->select('karyawans.nik', 'karyawans.nama', 'ruangs.ruang', 'departemens.departemen');
+            $query->orderBy('nik', 'desc');
+        }
+        $data = $query->get();
+
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -42,9 +48,8 @@ class KaryawanController extends BaseController
         $input = $request->all();
         Karyawan::create($input);
 
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        return response()->json(["status" => "success"], 201);
     }
-
 
     /**
      * Display the specified resource.
@@ -54,10 +59,14 @@ class KaryawanController extends BaseController
      */
     public function show($id)
     {
-        $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
-        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
-    }
+        $data = Karyawan::where('nik', $id)
+            ->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen')
+            ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
+            ->select('karyawans.nik', 'karyawans.nama', 'departemens.departemen', 'ruangs.ruang')
+            ->first();
 
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
 
     /**
      * Update the specified resource in storage.
@@ -66,12 +75,12 @@ class KaryawanController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
-        Karyawan::updateOrCreate(['nik' => $request->nik], $request->all());
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
-    }
+        Karyawan::updateOrCreate(['nik' => $id], $request->all());
 
+        return response()->json(["status" => "success"], 200);
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -79,9 +88,14 @@ class KaryawanController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Karyawan $karyawan)
+    public function destroy($id)
     {
-        $karyawan->delete();
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        $data = Karyawan::find($id);
+
+        if ($data === null) return response()->json(["status" => "not found"], 404);
+
+        $data->delete();
+
+        return response()->json(["status" => "success"], 201);
     }
 }

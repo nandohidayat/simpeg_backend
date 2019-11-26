@@ -20,9 +20,9 @@ export const mutations = {
 };
 
 export const actions = {
-    async fetchKaryawans({ commit }) {
+    async fetchKaryawans({ commit }, { select }) {
         try {
-            const res = await KaryawanService.getKaryawans();
+            const res = await KaryawanService.getKaryawans(select);
             commit("SET_KARYAWANS", res.data.data);
         } catch (err) {
             console.log(err.response);
