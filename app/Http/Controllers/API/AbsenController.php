@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Absen;
 use App\Http\Controllers\Controller;
 use App\Schedule;
 use Illuminate\Http\Request;
@@ -18,23 +17,17 @@ class AbsenController extends Controller
      */
     public function index()
     {
-        // if (request()->year != null && request()->month != null && request()->day != null) {
-        //     $start = Carbon::create(request()->year, request()->month, request()->day)->startOfDay();
-        //     $start = Carbon::create(request()->year, request()->month, request()->day)->endOfDay();
-        // } else {
         $start = Carbon::now('+07:00')->startOfDay();
         $end = Carbon::now('+07:00')->endOfDay();
-        // }
 
         $log = DB::connection('mysql2')->table('log_presensi')->whereBetween('DateTime', [$start, $end])->get();
 
         foreach ($log as $l) {
             if ($l->Status === 0) {
-                $schedule = Schedule::where('schedules.tgl', $start)
-                    ->where('schedules.nik', $l->PIN)
+                $schedule = Schedule::where('schedules.nik', $l->PIN)
+                    ->where('schedules.tgl', $start)
                     ->orderBy('schedules.tgl', 'desc')
-                    ->join('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
-                    ->select('shifts.mulai', 'schedules.masuk', 'schedules.status')
+                    ->select('schedules.masuk')
                     ->first();
 
                 if ($schedule === null) continue;
@@ -42,19 +35,15 @@ class AbsenController extends Controller
                 $masuk = Carbon::create($l->DateTime)->toTimeString();
                 $mulai = Carbon::create($schedule->mulai)->toTimeString();
 
-                error_log($schedule);
-
                 if ($schedule->masuk === null) {
                     $schedule->masuk = $masuk;
-                    $schedule->status = $masuk < $mulai ? 0 : 1;
                     $schedule->save();
                 }
             } else if ($l->Status === 1) {
                 $schedule = Schedule::where('schedules.nik', $l->PIN)
                     ->whereNotNull('schedules.masuk')
                     ->orderBy('schedules.tgl', 'desc')
-                    ->join('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
-                    ->select('shifts.selesai', 'schedules.keluar')
+                    ->select('schedules.keluar')
                     ->first();
 
                 if ($schedule === null) continue;

@@ -1,46 +1,41 @@
 <?php
 
-
 namespace App\Http\Controllers\API;
 
 use App\Departemen;
-use Illuminate\Http\Request;
-use App\Http\Controllers\API\BaseController as BaseController;
+use App\Http\Controllers\Controller;
 use App\Karyawan;
-use App\Penilaian;
-use App\Rekan;
-use App\Ruang;
-use App\Schedule;
-use Carbon\Carbon;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use stdClass;
-use Validator;
 
-use function GuzzleHttp\Promise\all;
-
-class ScheduleController extends BaseController
+class ScheduleController extends Controller
 {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index($tahun, $bulan)
+    public function index()
     {
-        $firstday = Carbon::create($tahun, $bulan)->firstOfMonth();
-        $lastday = Carbon::create($tahun, $bulan)->lastOfMonth();
+        $thisMonth = Carbon::create(request()->year, request()->month);
+        $firstday = $thisMonth->firstOfMonth();
+        $lastday = $thisMonth->lastOfMonth();
 
-        $id_ruang = Karyawan::where('nik', Auth::user()->nik)->first()->id_ruang;
+        $karyawan = Karyawan::where('nik', Auth::user()->nik)
+            ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
+            ->select('ruangs.id_ruang', 'ruangs.ruang')
+            ->first();
 
         $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
             $query->whereBetween('tgl', [$firstday, $lastday]);
         }])
-            ->where('id_ruang', $id_ruang)
+            ->where('id_ruang', $karyawan->id_ruang)
             ->orderBy('nik', 'asc')->get();
 
         $data = [];
-        $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
+        $last = $lastday->day;
 
         foreach ($schedules as $s) {
             $departemen = Departemen::with('shiftDepartemens')->where('id_departemen', $s->id_departemen)->first();
@@ -60,11 +55,10 @@ class ScheduleController extends BaseController
             array_push($data, $obj);
         }
 
-        $ruang = Ruang::where('id_ruang', $id_ruang)->first()->ruang;
+        $ruang = $karyawan->ruang;
 
         return response()->json(["status" => "success", "data" => ["schedule" => $data, "ruang" => $ruang]], 200);
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -72,24 +66,10 @@ class ScheduleController extends BaseController
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, $tahun, $bulan)
+    public function store(Request $request)
     {
-        $input = $request->all();
-        $last = Carbon::create($tahun, $bulan)->lastOfMonth()->day;
-
-        foreach ($input as $inp) {
-            for ($i = 0; $i < $last; $i++) {
-                $obj = array();
-                $obj['nik'] = $inp['nik'];
-                $obj['tgl'] = Carbon::create($tahun, $bulan, $i + 1);
-                $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
-                Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
-            }
-        }
-
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        //
     }
-
 
     /**
      * Display the specified resource.
@@ -99,10 +79,8 @@ class ScheduleController extends BaseController
      */
     public function show($id)
     {
-        $data = Karyawan::where('nik', $id)->with('departemen', 'ruang')->first();
-        return $this->sendResponse($data, 'Sukses mang, yeyeyeyeye');
+        //
     }
-
 
     /**
      * Update the specified resource in storage.
@@ -111,12 +89,10 @@ class ScheduleController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Karyawan $karyawan)
+    public function update(Request $request, $id)
     {
-        Karyawan::updateOrCreate(['nik' => $request->nik], $request->all());
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        //
     }
-
 
     /**
      * Remove the specified resource from storage.
@@ -124,12 +100,8 @@ class ScheduleController extends BaseController
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Karyawan $karyawan)
+    public function destroy($id)
     {
-        $karyawan->delete();
-        return $this->sendResponse([], 'Sukses mang, yeyeyeyeye');
+        //
     }
-
-    public function getSchedules($tahun, $bulan)
-    { }
 }

@@ -35,10 +35,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get("logout", "API\AuthController@logout");
 
     Route::apiResource('karyawan', 'API\KaryawanController');
-
-    Route::get('schedule/{tahun}/{bulan}', 'API\ScheduleController@index');
-    Route::post('schedule/{tahun}/{bulan}', 'API\ScheduleController@store');
-
+    Route::apiResource('schedule', 'API\ScheduleController');
 
     // OLD CODE
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
