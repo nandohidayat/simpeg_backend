@@ -19,8 +19,6 @@ class KaryawanController extends Controller
     {
         $query = DB::table('karyawans');
 
-        error_log("START THE APPOCALIPSE");
-
         if (request()->select == 1) {
             $ruang = Karyawan::where('nik', Auth::user()->nik)->first()->id_ruang;
             $query->where('id_ruang', $ruang);
@@ -32,6 +30,7 @@ class KaryawanController extends Controller
             $query->select('karyawans.nik', 'karyawans.nama', 'ruangs.ruang', 'departemens.departemen');
             $query->orderBy('nik', 'desc');
         }
+
         $data = $query->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);

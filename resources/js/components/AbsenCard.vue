@@ -1,11 +1,11 @@
 <template>
   <v-card>
-    <v-card-title>
-      Absen
-    </v-card-title>
+    <v-toolbar flat color="teal" dark>
+      <v-toolbar-title>Absen</v-toolbar-title>
+    </v-toolbar>
     <v-card-text>
       <v-row>
-        <v-col cols="11">
+        <v-col>
           <v-select
             dense
             v-model="selectedKaryawan"
@@ -13,15 +13,15 @@
             :item-text="obj => obj.nama"
             :item-value="obj => obj.nik"
             clearable
+            @change="getAbsen()"
           ></v-select>
         </v-col>
-        <v-col cols="1" class="d-flex align-center">
-          <v-divider vertical></v-divider>
-          <v-spacer></v-spacer>
-          <v-btn color="teal" small dark><v-icon>mdi-plus-thick</v-icon></v-btn>
-        </v-col>
       </v-row>
-      <v-data-table :header="header"></v-data-table>
+      <v-data-table
+        :headers="header"
+        :items="absen.absen"
+        multi-sort
+      ></v-data-table>
     </v-card-text>
   </v-card>
 </template>
@@ -38,8 +38,7 @@ export default {
       header: [
         { text: "Tanggal", value: "tanggal" },
         { text: "Waktu", value: "waktu" },
-        { text: "Keterangan", value: "keterangan" },
-        { text: "Manual", value: "manual" }
+        { text: "Keterangan", value: "keterangan" }
       ]
     };
   },
@@ -47,7 +46,14 @@ export default {
     await store.dispatch("karyawan/fetchKaryawans", { select: 1 });
   },
   computed: {
-    ...mapState(["karyawan"])
+    ...mapState(["karyawan", "absen"])
+  },
+  methods: {
+    async getAbsen() {
+      if (this.selectedKaryawan !== undefined)
+        await store.dispatch("absen/fetchAbsen", this.selectedKaryawan);
+      else this.absen.absen = [];
+    }
   }
 };
 </script>

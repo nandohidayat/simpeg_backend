@@ -93,9 +93,15 @@ class AbsenController extends Controller
         $firstday = Carbon::create(request()->tahun, request()->bulan)->firstOfMonth();
         $lastday = Carbon::create(request()->tahun, request()->bulan)->lastOfMonth();
 
-        $data = Absen::where('nik', $id)
-            ->whereBetween('tgl', [$firstday, $lastday])
-            ->select('id_absen', 'nik', 'type', 'tgl', 'waktu')
+        $data = DB::connection('mysql2')
+            ->table('log_presensi')
+            ->whereBetween('DateTime', [$firstday, $lastday])
+            ->where('PIN', $id)
+            ->select(
+                DB::raw('CAST(DateTime AS DATE) AS tanggal'),
+                DB::raw('CAST(DateTime AS TIME) AS waktu'),
+                DB::raw('IF(Status = 0, "Masuk", "Keluar") AS keterangan')
+            )
             ->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);

@@ -10,6 +10,7 @@ import * as user from "../store/modules/user.js";
 import * as schedule from "../store/modules/schedule.js";
 import * as shift from "../store/modules/shift.js";
 import * as akses from "../store/modules/akses.js";
+import * as absen from "../store/modules/absen.js";
 
 Vue.use(Vuex);
 
@@ -24,7 +25,8 @@ export default new Vuex.Store({
         user,
         schedule,
         shift,
-        akses
+        akses,
+        absen
     },
     state: {},
     mutations: {},

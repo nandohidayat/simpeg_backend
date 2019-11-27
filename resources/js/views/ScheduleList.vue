@@ -103,7 +103,11 @@
         </v-edit-dialog>
       </template>
     </v-data-table>
-    <AbsenCard class="mt-5"></AbsenCard>
+    <v-row>
+      <v-col cols="6">
+        <AbsenCard class="mt-5"></AbsenCard>
+      </v-col>
+    </v-row>
   </v-container>
 </template>
 
