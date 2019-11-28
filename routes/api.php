@@ -23,18 +23,18 @@ Route::get("user/{id}", "API\AuthController@user");
 Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
 Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
 
-Route::apiResource('departemen', 'API\DepartemenController');
-Route::apiResource('bagian', 'API\BagianController');
-Route::apiResource('ruang', 'API\RuangController');
-Route::apiResource('shift', 'API\ShiftController');
-Route::apiResource('akses', 'API\AksesController');
-Route::apiResource('absen', 'API\AbsenController');
-
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
 
     Route::apiResource('karyawan', 'API\KaryawanController');
+    Route::apiResource('departemen', 'API\DepartemenController');
+    Route::apiResource('bagian', 'API\BagianController');
+    Route::apiResource('ruang', 'API\RuangController');
+    Route::apiResource('shift', 'API\ShiftController');
+    Route::apiResource('akses', 'API\AksesController');
+    Route::apiResource('absen', 'API\AbsenController');
+    Route::apiResource('schedule/change', 'API\ScheduleChangeController');
     Route::apiResource('schedule', 'API\ScheduleController');
 
     // OLD CODE

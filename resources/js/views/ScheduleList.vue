@@ -107,9 +107,12 @@
         </v-edit-dialog>
       </template>
     </v-data-table>
-    <v-row>
+    <v-row class="mt-5">
       <v-col cols="6">
-        <AbsenCard class="mt-5"></AbsenCard>
+        <AbsenCard></AbsenCard>
+      </v-col>
+      <v-col cols="6">
+        <ScheduleChangeCard></ScheduleChangeCard>
       </v-col>
     </v-row>
   </v-container>
@@ -123,6 +126,7 @@ import NProgress from "nprogress";
 import store from "../store";
 
 import AbsenCard from "../components/AbsenCard";
+import ScheduleChangeCard from "../components/ScheduleChangeCard";
 
 export default {
   data() {
@@ -139,7 +143,8 @@ export default {
     };
   },
   components: {
-    AbsenCard
+    AbsenCard,
+    ScheduleChangeCard
   },
   async created() {
     await Promise.all([
