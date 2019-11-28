@@ -68,7 +68,20 @@ class ScheduleController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $input = $request->all();
+        $last = Carbon::create(request()->year, request()->month)->lastOfMonth()->day;
+
+        foreach ($input as $inp) {
+            for ($i = 0; $i < $last; $i++) {
+                $obj = array();
+                $obj['nik'] = $inp['nik'];
+                $obj['tgl'] = Carbon::create(request()->year, request()->month, $i + 1);
+                $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
+                Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
+            }
+        }
+
+        return response()->json(["status" => "success"], 201);
     }
 
     /**

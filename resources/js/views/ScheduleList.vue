@@ -37,7 +37,11 @@
           </v-menu>
         </v-col>
         <v-col cols="1" style="margin-top: 2px;">
-          <v-btn color="teal" dark @click="saveSchedules"
+          <v-btn
+            color="teal"
+            dark
+            @click="saveSchedules"
+            :disabled="current <= today"
             ><v-icon>mdi-content-save</v-icon></v-btn
           >
         </v-col>
@@ -125,6 +129,7 @@ export default {
     return {
       loaded: true,
       current: new Date().toISOString().substr(0, 7),
+      today: new Date().toISOString().substr(0, 7),
       menu: false,
       ranged: {
         dates: [],
@@ -180,15 +185,20 @@ export default {
     filteredShift(arr) {
       return this.shift.shifts.filter(s => arr.includes(s.id_shift));
     },
-    updateShift() {
-      if (this.ranged.dates.length == 0) return;
+    updateVerify() {
+      if (this.ranged.dates.length == 0) return true;
 
-      if (parseInt(this.ranged.dates[0].substring(5, 7)) != this.month) return;
+      if (parseInt(this.ranged.dates[0].substring(5, 7)) != this.month)
+        return true;
       if (
         parseInt(this.ranged.dates[1]) &&
         parseInt(this.ranged.dates[1].substring(5, 7)) != this.month
       )
-        return;
+        return true;
+      return false;
+    },
+    updateShift() {
+      if (this.updateVerify()) return;
 
       let first = this.ranged.dates[0];
       let last = this.ranged.dates[1] || this.ranged.dates[0];
