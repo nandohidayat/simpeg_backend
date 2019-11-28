@@ -34,8 +34,8 @@
               </div>
             </td>
             <td class="pl-10">
-              <v-btn color="teal" dark small><v-icon>mdi-check</v-icon></v-btn>
-              <v-btn color="error" dark small><v-icon>mdi-close</v-icon></v-btn>
+              <v-btn color="teal" dark icon><v-icon>mdi-check</v-icon></v-btn>
+              <v-btn color="error" dark icon><v-icon>mdi-close</v-icon></v-btn>
             </td>
           </tr>
         </tbody>

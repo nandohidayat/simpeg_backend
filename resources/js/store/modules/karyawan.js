@@ -39,30 +39,42 @@ export const actions = {
     async createKaryawan({ commit }, karyawan) {
         try {
             await KaryawanService.postKaryawan(karyawan);
+
             const k = {
                 ...karyawan,
-                departemen: { id_departemen: karyawan.id_departemen },
-                ruang: { id_ruang: karyawan.id_ruang }
+                departemen: rootState.departemen.departemens.find(
+                    d => d.id_departemen == karyawan.id_departemen
+                ).departemen,
+                ruang: rootState.ruang.ruangs.find(
+                    d => d.id_ruang == karyawan.id_ruang
+                ).ruang
             };
+
             commit("ADD_KARYAWAN", k);
         } catch (err) {
             console.log(err.response);
         }
     },
-    async updateKaryawan({ commit }, karyawan) {
+    async updateKaryawan({ commit, rootState }, karyawan) {
         try {
             await KaryawanService.putKaryawan(karyawan, karyawan.nik);
+
             const k = {
                 ...karyawan,
-                departemen: { id_departemen: karyawan.id_departemen },
-                ruang: { id_ruang: karyawan.id_ruang }
+                departemen: rootState.departemen.departemens.find(
+                    d => d.id_departemen == karyawan.id_departemen
+                ).departemen,
+                ruang: rootState.ruang.ruangs.find(
+                    d => d.id_ruang == karyawan.id_ruang
+                ).ruang
             };
+
             commit("SET_KARYAWAN", k);
         } catch (err) {
             console.log(err.response);
         }
     },
-    async deleteKaryawan({ commit }, nik) {
+    async deleteKaryawan({}, nik) {
         try {
             await KaryawanService.deleteKaryawan(nik);
         } catch (err) {

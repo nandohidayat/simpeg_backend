@@ -11,7 +11,7 @@ export const state = {
 export const mutations = {
     SET_DEPARTEMENS(state, departemens) {
         state.departemens = departemens;
-        state.load = true;
+        state.loaded = true;
     },
     ADD_DEPARTEMEN(state, departemen) {
         state.departemens.push(departemen);

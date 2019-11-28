@@ -61,7 +61,7 @@ class KaryawanController extends Controller
         $data = Karyawan::where('nik', $id)
             ->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen')
             ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
-            ->select('karyawans.nik', 'karyawans.nama', 'departemens.departemen', 'ruangs.ruang')
+            ->select('karyawans.nik', 'karyawans.nama', 'karyawans.id_departemen', 'karyawans.id_ruang', 'departemens.departemen', 'ruangs.ruang')
             ->first();
 
         return response()->json(["status" => "success", "data" => $data], 200);

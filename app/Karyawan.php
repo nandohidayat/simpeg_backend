@@ -10,7 +10,7 @@ class Karyawan extends Model
     protected $primaryKey = 'nik';
     public $incrementing = false;
     protected $fillable = ['nik', 'nama', 'id_departemen', 'id_ruang'];
-    protected $hidden = ['created_at', 'updated_at', 'id_ruang'];
+    protected $hidden = ['created_at', 'updated_at'];
 
     public function users()
     {

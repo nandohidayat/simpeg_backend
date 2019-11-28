@@ -1,7 +1,7 @@
 import client from "./client";
 
 export default {
-    getKaryawans(select) {
+    getKaryawans(select = undefined) {
         let params = "?";
         if (select !== undefined) params += `select=${select}`;
 

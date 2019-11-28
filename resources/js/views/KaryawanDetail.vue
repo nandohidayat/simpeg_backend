@@ -54,17 +54,11 @@
               <v-col cols="6">
                 <span>Departemen :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  departemen.departemens.find(
-                    d =>
-                      d.id_departemen ==
-                      karyawan.karyawan.departemen.id_departemen
-                  ).departemen
+                  karyawan.karyawan.departemen
                 }}</span>
                 <span>Ruang :</span>
                 <span class="subtitle-1 text--primary d-block ml-3">{{
-                  ruang.ruangs.find(
-                    r => r.id_ruang == karyawan.karyawan.ruang.id_ruang
-                  ).ruang
+                  karyawan.karyawan.ruang
                 }}</span>
               </v-col>
             </v-row>
@@ -241,8 +235,10 @@ export default {
       }
     },
     async createUser() {
+      if (this.newUser.userPassword === undefined) return;
       await store.dispatch("user/register", this.newUser);
       await store.dispatch("user/fetchUser", this.$route.params.id);
+      this.newUser.userPassword = undefined;
       this.editAccess = false;
     },
     grantedAccess() {

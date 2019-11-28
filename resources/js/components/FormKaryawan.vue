@@ -94,10 +94,8 @@ export default {
       return {
         nik: this.karyawan ? this.karyawan.nik : undefined,
         nama: this.karyawan ? this.karyawan.nama : undefined,
-        id_departemen: this.karyawan
-          ? this.karyawan.departemen.id_departemen
-          : undefined,
-        id_ruang: this.karyawan ? this.karyawan.ruang.id_ruang : undefined
+        id_departemen: this.karyawan ? this.karyawan.id_departemen : undefined,
+        id_ruang: this.karyawan ? this.karyawan.id_ruang : undefined
       };
     },
     close() {

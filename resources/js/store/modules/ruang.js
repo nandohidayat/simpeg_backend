@@ -10,7 +10,7 @@ export const state = {
 export const mutations = {
     SET_RUANGS(state, ruangs) {
         state.ruangs = ruangs;
-        state.load = true;
+        state.loaded = true;
     },
     ADD_RUANG(state, ruang) {
         state.ruangs.push(ruang);
