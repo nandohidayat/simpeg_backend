@@ -64,6 +64,27 @@
             </v-row>
           </v-card-text>
         </v-card>
+        <v-card outlined class="mt-5" :loading="loaded">
+          <v-card-title id="data-jadwal">
+            <v-icon large left>mdi-calendar</v-icon
+            ><span class="title font-weight-light">Data Jadwal</span>
+            <v-spacer></v-spacer>
+            <v-btn
+              v-if="editAccess"
+              text
+              icon
+              color="teal"
+              @click="createUser()"
+              ><v-icon>mdi-content-save</v-icon></v-btn
+            >
+            <v-btn v-else text icon color="teal" @click="editAccess = true"
+              ><v-icon>mdi-calendar-plus</v-icon></v-btn
+            >
+          </v-card-title>
+          <v-card-text>
+            <template v-if="!loaded"> </template>
+          </v-card-text>
+        </v-card>
         <v-card outlined class="mt-5" v-if="grantedAccess()" :loading="loaded">
           <v-card-title id="data-akses">
             <v-icon large left>mdi-shield-account</v-icon
@@ -134,7 +155,8 @@
             </template>
           </v-card-text>
         </v-card>
-        <v-card outlined class="mt-5 colored-border" v-if="grantedDelete()">
+
+        <v-card outlined class="mt-5" v-if="grantedDelete()">
           <v-card-title id="hapus-karyawan" class="mb-2">
             <v-icon large left color="error">mdi-alert</v-icon
             ><span class="title font-weight-light error--text"
@@ -201,6 +223,11 @@ export default {
           icon: "mdi-clipboard-account-outline",
           text: "Data Karyawan",
           id: "data-karyawan"
+        },
+        {
+          icon: "mdi-calendar",
+          text: "Data Jadwal",
+          id: "data-jadwal"
         }
       ];
 

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Departemen;
 use App\Http\Controllers\Controller;
 use App\Karyawan;
+use App\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -20,8 +21,8 @@ class ScheduleController extends Controller
     public function index()
     {
         $thisMonth = Carbon::create(request()->year, request()->month);
-        $firstday = $thisMonth->firstOfMonth();
-        $lastday = $thisMonth->lastOfMonth();
+        $firstday = $thisMonth->copy()->firstOfMonth();
+        $lastday = $thisMonth->copy()->lastOfMonth();
 
         $karyawan = Karyawan::where('nik', Auth::user()->nik)
             ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
@@ -72,12 +73,14 @@ class ScheduleController extends Controller
         $last = Carbon::create(request()->year, request()->month)->lastOfMonth()->day;
 
         foreach ($input as $inp) {
+            if (!is_array($inp)) break;
+
             for ($i = 0; $i < $last; $i++) {
                 $obj = array();
                 $obj['nik'] = $inp['nik'];
                 $obj['tgl'] = Carbon::create(request()->year, request()->month, $i + 1);
                 $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
-                Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
+                $aaa = Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
             }
         }
 
@@ -92,7 +95,27 @@ class ScheduleController extends Controller
      */
     public function show($id)
     {
-        //
+        $thisMonth = Carbon::create(request()->year, request()->month);
+        $firstday = $thisMonth->firstOfMonth();
+        $lastday = $thisMonth->lastOfMonth();
+
+        $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
+            $query->whereBetween('tgl', [$firstday, $lastday]);
+        }])
+            ->where('nik', $id)
+            ->first();
+
+        $last = $lastday->day;
+
+        $data = new stdClass();
+        $data->nik = $schedules->nik;
+        $data->nama = $schedules->nama;
+
+        for ($i = 0; $i < $last; $i++) {
+            $data->{'day' . ($i + 1)} = empty($schedules->schedules[$i]) ? null : $schedules->schedules[$i]->id_shift;
+        }
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**

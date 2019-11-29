@@ -44,7 +44,7 @@
     </v-card>
     <v-data-table
       :headers="headers"
-      :items="filteredKaryawans"
+      :items="karyawan.karyawans"
       :items-per-page="20"
       :search="search.nama"
       class="elevation-2 mt-3"
@@ -108,7 +108,7 @@ export default {
       await Promise.all([
         store.dispatch("departemen/fetchDepartemens"),
         store.dispatch("ruang/fetchRuangs"),
-        store.dispatch("karyawan/fetchKaryawans")
+        store.dispatch("karyawan/fetchKaryawans", { select: 0 })
       ]);
       this.loading = false;
     } catch (err) {
@@ -119,19 +119,8 @@ export default {
     FormKaryawan
   },
   computed: {
-    ...mapState(["departemen", "ruang", "karyawan"]),
-    filteredKaryawans() {
-      return this.karyawan.karyawans.map(k => ({
-        ...k,
-        departemen: this.departemen.departemens.find(
-          d => d.id_departemen === k.departemen.id_departemen
-        ).departemen,
-        ruang: this.ruang.ruangs.find(d => d.id_ruang === k.ruang.id_ruang)
-          .ruang
-      }));
-    }
-  },
-  methods: {}
+    ...mapState(["departemen", "ruang", "karyawan"])
+  }
 };
 </script>
 
