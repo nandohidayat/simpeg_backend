@@ -32,6 +32,9 @@ import { mapState } from "vuex";
 import store from "../store";
 
 export default {
+  props: {
+    current: String
+  },
   data() {
     return {
       selectedKaryawan: undefined,
@@ -46,12 +49,27 @@ export default {
     await store.dispatch("karyawan/fetchKaryawans", { select: 1 });
   },
   computed: {
-    ...mapState(["karyawan", "absen"])
+    ...mapState(["karyawan", "absen"]),
+    year() {
+      return parseInt(this.current.substr(0, 4));
+    },
+    month() {
+      return parseInt(this.current.slice(-2));
+    }
+  },
+  watch: {
+    current(val) {
+      this.getAbsen();
+    }
   },
   methods: {
     async getAbsen() {
       if (this.selectedKaryawan !== undefined)
-        await store.dispatch("absen/fetchAbsen", this.selectedKaryawan);
+        await store.dispatch("absen/fetchAbsen", {
+          id: this.selectedKaryawan,
+          year: this.year,
+          month: this.month
+        });
       else this.absen.absen = [];
     }
   }

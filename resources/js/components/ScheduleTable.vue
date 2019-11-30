@@ -1,14 +1,19 @@
 <template>
-  <div>
+  <div :class="single ? 'mt-5' : ''">
     <v-card class="px-4">
       <v-row style="height: 65px;">
-        <v-col cols="9" class="pt-4">
+        <v-col :cols="single ? 8 : 9" class="pt-4">
           <span
+            v-if="!single"
             class="headline text--primary"
             v-text="`Jadwal ${schedule.ruang || ''}`"
           ></span>
+          <span v-else>
+            <v-icon large left>mdi-calendar</v-icon
+            ><span class="title font-weight-light">Data Jadwal</span>
+          </span>
         </v-col>
-        <v-col cols="2">
+        <v-col :cols="single ? 3 : 2">
           <v-menu
             ref="menu"
             v-model="menu"
@@ -37,7 +42,7 @@
           </v-menu>
         </v-col>
         <v-col cols="1" style="margin-top: 2px;">
-          <v-btn color="teal" dark @click="saveSchedules"
+          <v-btn v-if="!single" color="teal" dark @click="saveSchedules"
             ><v-icon>mdi-content-save</v-icon></v-btn
           >
         </v-col>
@@ -45,12 +50,13 @@
     </v-card>
     <v-data-table
       :headers="header"
-      :items="schedule.schedules"
+      :items="single ? schedule.schedule : schedule.schedules"
       class="elevation-2 mt-3"
       :loading="loaded"
     >
       <template v-slot:item.nama="{ item }">
         <v-edit-dialog
+          v-if="!single"
           large
           persistent
           offset-y
@@ -82,9 +88,10 @@
             ></v-select>
           </template>
         </v-edit-dialog>
+        <span v-else>{{ item.nama }}</span>
       </template>
       <template :slot="`item.day${l}`" slot-scope="{ item }" v-for="l in last">
-        <v-edit-dialog>
+        <v-edit-dialog v-if="!single">
           {{
             shift.shifts.find(s => s.id_shift == item[`day${l}`])
               ? shift.shifts.find(s => s.id_shift == item[`day${l}`]).kode
@@ -101,6 +108,13 @@
             ></v-select>
           </template>
         </v-edit-dialog>
+        <span v-else>
+          {{
+            shift.shifts.find(s => s.id_shift == item[`day${l}`])
+              ? shift.shifts.find(s => s.id_shift == item[`day${l}`]).kode
+              : undefined
+          }}
+        </span>
       </template>
     </v-data-table>
   </div>
@@ -119,7 +133,6 @@ export default {
   data() {
     return {
       loaded: true,
-      today: new Date().toISOString().substr(0, 7),
       menu: false,
       ranged: {
         dates: [],
@@ -129,20 +142,36 @@ export default {
     };
   },
   props: {
-    value: String
+    value: String,
+    single: {
+      type: Boolean,
+      default: false
+    }
   },
   async created() {
-    await Promise.all([
-      store.dispatch("schedule/fetchSchedules", {
-        year: this.year,
-        month: this.month
-      }),
-      store.dispatch("shift/fetchShifts")
-    ]);
+    const arr = [];
+
+    if (this.single) {
+      arr.push(
+        store.dispatch("schedule/fetchSchedule", {
+          year: this.year,
+          month: this.month,
+          id: this.karyawan.karyawan.nik
+        })
+      );
+    } else {
+      arr.push(
+        store.dispatch("schedule/fetchSchedules", {
+          year: this.year,
+          month: this.month
+        })
+      );
+    }
+    await Promise.all([...arr, store.dispatch("shift/fetchShifts")]);
     this.loaded = false;
   },
   computed: {
-    ...mapState(["schedule", "shift"]),
+    ...mapState(["schedule", "shift", "karyawan"]),
     year() {
       return parseInt(this.value.substr(0, 4));
     },

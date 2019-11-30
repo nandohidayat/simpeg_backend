@@ -37,9 +37,9 @@ export const actions = {
             console.log(err.response);
         }
     },
-    async fetchAbsen({ commit }, id) {
+    async fetchAbsen({ commit }, { id, year, month }) {
         try {
-            const res = await AbsenService.getAbsen(id);
+            const res = await AbsenService.getAbsen(id, year, month);
             commit("SET_ABSEN", res.data.data);
         } catch (err) {
             console.log(err.response);

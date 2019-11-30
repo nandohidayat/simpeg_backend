@@ -4,9 +4,8 @@ export default {
     getAbsens() {
         return client.get("/api/absen");
     },
-    getAbsen(id) {
-        console.log(id);
-        return client.get(`/api/absen/${id}`);
+    getAbsen(id, year, month) {
+        return client.get(`/api/absen/${id}?year=${year}&month=${month}`);
     },
     postAbsen(absen) {
         return client.post("/api/absen", absen);

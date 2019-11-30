@@ -3,7 +3,7 @@
     <ScheduleTable v-model="current"></ScheduleTable>
     <v-row class="mt-5">
       <v-col cols="6">
-        <AbsenCard></AbsenCard>
+        <AbsenCard :current="current"></AbsenCard>
       </v-col>
       <v-col cols="6">
         <ScheduleChangeCard></ScheduleChangeCard>

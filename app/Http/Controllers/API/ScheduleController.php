@@ -96,8 +96,8 @@ class ScheduleController extends Controller
     public function show($id)
     {
         $thisMonth = Carbon::create(request()->year, request()->month);
-        $firstday = $thisMonth->firstOfMonth();
-        $lastday = $thisMonth->lastOfMonth();
+        $firstday = $thisMonth->copy()->firstOfMonth();
+        $lastday = $thisMonth->copy()->lastOfMonth();
 
         $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
             $query->whereBetween('tgl', [$firstday, $lastday]);
@@ -115,7 +115,7 @@ class ScheduleController extends Controller
             $data->{'day' . ($i + 1)} = empty($schedules->schedules[$i]) ? null : $schedules->schedules[$i]->id_shift;
         }
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(["status" => "success", "data" => array($data)], 200);
     }
 
     /**

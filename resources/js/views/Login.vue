@@ -6,9 +6,7 @@
           <v-col cols="12" sm="8" md="4">
             <v-card class="elevation-12">
               <v-toolbar color="teal" dark flat dense>
-                <v-toolbar-title class="mx-auto"
-                  >Sistem Penilaian 360</v-toolbar-title
-                >
+                <v-toolbar-title class="mx-auto">AAA</v-toolbar-title>
               </v-toolbar>
               <v-card-text>
                 <v-form>
@@ -70,5 +68,4 @@ export default {
 };
 </script>
 
-<style scoped>
-</style>
+<style scoped></style>

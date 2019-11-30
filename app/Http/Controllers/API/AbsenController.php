@@ -79,8 +79,8 @@ class AbsenController extends Controller
      */
     public function show($id)
     {
-        $firstday = Carbon::create(request()->tahun, request()->bulan)->firstOfMonth();
-        $lastday = Carbon::create(request()->tahun, request()->bulan)->lastOfMonth();
+        $firstday = Carbon::create(request()->year, request()->month)->firstOfMonth();
+        $lastday = Carbon::create(request()->year, request()->month)->lastOfMonth();
 
         $data = DB::connection('mysql2')
             ->table('log_presensi')

@@ -1,5 +1,6 @@
 import "./bootstrap";
 
+import "babel-polyfill";
 import Vue from "vue";
 import Vuetify from "vuetify";
 import client from "./services/client";

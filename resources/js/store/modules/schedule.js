@@ -4,13 +4,17 @@ export const namespaced = true;
 
 export const state = {
     schedules: [],
+    schedule: [],
     ruang: undefined
 };
 
 export const mutations = {
-    ADD_SCHEDULES(state, schedules) {
+    SET_SCHEDULES(state, schedules) {
         state.schedules = schedules.schedule;
         state.ruang = schedules.ruang;
+    },
+    SET_SCHEDULE(state, schedule) {
+        state.schedule = schedule;
     }
 };
 
@@ -18,7 +22,15 @@ export const actions = {
     async fetchSchedules({ commit }, { year, month }) {
         try {
             const res = await ScheduleService.getSchedules(year, month);
-            commit("ADD_SCHEDULES", res.data.data);
+            commit("SET_SCHEDULES", res.data.data);
+        } catch (err) {
+            console.log(err.response);
+        }
+    },
+    async fetchSchedule({ commit }, { year, month, id }) {
+        try {
+            const res = await ScheduleService.getSchedule(year, month, id);
+            commit("SET_SCHEDULE", res.data.data);
         } catch (err) {
             console.log(err.response);
         }

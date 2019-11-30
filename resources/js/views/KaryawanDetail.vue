@@ -64,27 +64,14 @@
             </v-row>
           </v-card-text>
         </v-card>
-        <v-card outlined class="mt-5" :loading="loaded">
-          <v-card-title id="data-jadwal">
-            <v-icon large left>mdi-calendar</v-icon
-            ><span class="title font-weight-light">Data Jadwal</span>
-            <v-spacer></v-spacer>
-            <v-btn
-              v-if="editAccess"
-              text
-              icon
-              color="teal"
-              @click="createUser()"
-              ><v-icon>mdi-content-save</v-icon></v-btn
-            >
-            <v-btn v-else text icon color="teal" @click="editAccess = true"
-              ><v-icon>mdi-calendar-plus</v-icon></v-btn
-            >
-          </v-card-title>
-          <v-card-text>
-            <template v-if="!loaded"> </template>
-          </v-card-text>
-        </v-card>
+
+        <ScheduleTable
+          v-if="!loaded"
+          :single="true"
+          v-model="value"
+          id="data-jadwal"
+        ></ScheduleTable>
+
         <v-card outlined class="mt-5" v-if="grantedAccess()" :loading="loaded">
           <v-card-title id="data-akses">
             <v-icon large left>mdi-shield-account</v-icon
@@ -174,12 +161,19 @@
 </template>
 
 <script>
-import store from "../store";
 import { mapState, mapGetters } from "vuex";
+import moment from "moment";
+import "moment/locale/id";
+
+import store from "../store";
+
 import FormKaryawan from "../components/FormKaryawan.vue";
+import ScheduleTable from "../components/ScheduleTable.vue";
 
 export default {
   data: () => ({
+    calendar: false,
+    value: new Date().toISOString().substr(0, 7),
     loaded: true,
     editAccess: false,
     newUser: {
@@ -213,7 +207,8 @@ export default {
     }
   },
   components: {
-    FormKaryawan
+    FormKaryawan,
+    ScheduleTable
   },
   computed: {
     ...mapState(["departemen", "ruang", "karyawan", "user"]),
@@ -248,6 +243,13 @@ export default {
       }
 
       return arr;
+    },
+    dateMoment() {
+      return this.value
+        ? moment(this.value)
+            .locale("id")
+            .format("MMMM YYYY")
+        : "";
     }
   },
   methods: {
@@ -276,6 +278,9 @@ export default {
     },
     grantedDelete() {
       return this.user.akses.includes("karyawan-list");
+    },
+    updateMonth() {
+      this.calendar = false;
     }
   }
 };
