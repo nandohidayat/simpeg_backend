@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /*
 |--------------------------------------------------------------------------
@@ -40,8 +41,7 @@ Route::middleware('auth:api')->group(function () {
     // OLD CODE
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
 
-    Route::group(['middleware' => 'cors'], function () {
-        Route::resource('pegawai', 'API\PegawaiController');
-        Route::resource('penilaian', 'API\PenilaianController');
-    });
+    Route::resource('pegawai', 'API\PegawaiController');
+    Route::resource('penilaian', 'API\PenilaianController');
 });
+Route::group(['middleware' => 'cors'], function () { });
