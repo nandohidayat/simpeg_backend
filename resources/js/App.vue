@@ -21,7 +21,7 @@
             </v-list-item-content>
           </template>
           <v-list-item
-            @click="$router.push({ name: c.link })"
+            @click="$router.push({ path: c.link })"
             v-for="(c, i) in m.children"
             :key="i"
           >

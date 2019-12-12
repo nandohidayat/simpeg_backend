@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class AksesSeeder extends Seeder
 {
@@ -14,22 +15,22 @@ class AksesSeeder extends Seeder
         DB::table('akses')->insert([
             'id_akses_kategori' => '1',
             'akses' => 'Daftar Karyawan',
-            'url' => 'karyawan-list',
+            'url' => '/karyawan',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '1',
             'akses' => 'Jadwal Karyawan',
-            'url' => 'schedule-list',
+            'url' => '/schedule',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '2',
             'akses' => 'Data Karyawan',
-            'url' => 'data-karyawan',
+            'url' => '/data/karyawan',
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '2',
             'akses' => 'Hak Akses',
-            'url' => 'akses-list',
+            'url' => '/data/akses',
         ]);
     }
 }

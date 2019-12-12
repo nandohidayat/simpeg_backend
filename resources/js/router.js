@@ -81,7 +81,7 @@ const router = new Router({
             }
         },
         {
-            path: "/akses",
+            path: "/data/akses",
             name: "akses-list",
             component: AksesList,
             meta: {
@@ -165,7 +165,7 @@ router.beforeEach((to, from, next) => {
             return next();
         }
 
-        if (!store.state.user.akses.includes(to.name)) {
+        if (!store.state.user.akses.includes(to.path)) {
             return next("/404");
         }
     }
