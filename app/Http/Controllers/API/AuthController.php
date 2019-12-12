@@ -15,7 +15,6 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use stdClass;
-use Validator;
 
 
 class AuthController extends BaseController
@@ -38,7 +37,7 @@ class AuthController extends BaseController
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
 
-        $token->expires_at = Carbon::now()->addWeeks(1);
+        $token->expires_at = Carbon::now()->addDay();
         $token->save();
 
         $id = Karyawan::where('nik', $user->nik)->first()->id_departemen;
