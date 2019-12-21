@@ -3,6 +3,7 @@ import ScheduleService from "../../services/ScheduleService.js";
 export const namespaced = true;
 
 export const state = {
+    header: [],
     schedules: [],
     schedule: [],
     ruang: undefined
@@ -10,6 +11,7 @@ export const state = {
 
 export const mutations = {
     SET_SCHEDULES(state, schedules) {
+        state.header = schedules.header;
         state.schedules = schedules.schedule;
         state.ruang = schedules.ruang;
     },

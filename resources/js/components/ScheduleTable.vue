@@ -49,7 +49,7 @@
       </v-row>
     </v-card>
     <v-data-table
-      :headers="header"
+      :headers="schedule.header"
       :items="single ? schedule.schedule : schedule.schedules"
       class="elevation-2 mt-3"
       :loading="loaded"

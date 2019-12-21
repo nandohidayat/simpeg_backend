@@ -10,6 +10,7 @@ use App\Departemen;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Karyawan;
+use App\ShiftDepartemen;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
@@ -89,7 +90,7 @@ class AuthController extends BaseController
     {
         $user = User::where('nik', Auth::user()->nik)->first();
 
-        if (Hash::check($request['userPassword'], $user->password)) {
+        if (Hash::check($request['current'], $user->password)) {
             if ($request['password'] === null) {
                 User::updateOrCreate(
                     ['nik' => $request['nik']],
@@ -107,7 +108,7 @@ class AuthController extends BaseController
                 );
             }
         } else {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'Unauthorized'], 403);
         }
 
         return response()->json([
