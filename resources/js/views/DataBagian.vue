@@ -66,13 +66,13 @@
         </v-row>
       </v-card-text>
     </v-card>
-    <v-card class="mt-5" :loading="loading">
-      <v-toolbar flat color="teal" dark>
-        <v-toolbar-title>Data Ruang</v-toolbar-title>
-      </v-toolbar>
-      <v-card-text>
-        <v-row>
-          <v-col cols="6">
+    <v-row>
+      <v-col cols="6">
+        <v-card class="mt-5" :loading="loading">
+          <v-toolbar flat color="teal" dark>
+            <v-toolbar-title>Data Ruang</v-toolbar-title>
+          </v-toolbar>
+          <v-card-text>
             <v-data-table :headers="headerRuang" :items="ruang.ruangs">
               <template v-slot:top>
                 <v-toolbar flat color="white">
@@ -93,11 +93,10 @@
                 </v-icon>
               </template>
             </v-data-table>
-          </v-col>
-          <v-col cols="6"> </v-col>
-        </v-row>
-      </v-card-text>
-    </v-card>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
     <v-card class="mt-5" :loading="loading">
       <v-toolbar flat color="teal" dark>
         <v-toolbar-title>Shift Manager</v-toolbar-title>

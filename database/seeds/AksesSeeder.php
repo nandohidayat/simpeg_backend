@@ -29,7 +29,7 @@ class AksesSeeder extends Seeder
         ]);
         DB::table('akses')->insert([
             'id_akses_kategori' => '2',
-            'akses' => 'Hak Akses',
+            'akses' => 'Data Akses',
             'url' => '/data/akses',
         ]);
     }
