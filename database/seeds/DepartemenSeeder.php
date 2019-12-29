@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DepartemenSeeder extends Seeder
 {
@@ -14,23 +15,23 @@ class DepartemenSeeder extends Seeder
         //
         DB::table('departemens')->insert([
             'departemen' => 'Kepala SIM',
-            'tingkat' => '1',
-            'id_bagian' => '1'
+            // 'tingkat' => '1',
+            // 'id_bagian' => '1'
         ]);
         DB::table('departemens')->insert([
             'departemen' => 'SIM',
-            'tingkat' => '2',
-            'id_bagian' => '1'
+            // 'tingkat' => '2',
+            // 'id_bagian' => '1'
         ]);
         DB::table('departemens')->insert([
             'departemen' => 'Kepala Perawat',
-            'tingkat' => '1',
-            'id_bagian' => '2'
+            // 'tingkat' => '1',
+            // 'id_bagian' => '2'
         ]);
         DB::table('departemens')->insert([
             'departemen' => 'Perawat',
-            'tingkat' => '2',
-            'id_bagian' => '2'
+            // 'tingkat' => '2',
+            // 'id_bagian' => '2'
         ]);
     }
 }

@@ -25,7 +25,7 @@ class ScheduleController extends Controller
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
 
-        $nik = request()->nik ? request()->nik : Auth::user()->nik;
+        $nik = Auth::user()->nik;
 
         $karyawan = Karyawan::where('nik', $nik)
             ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
@@ -46,7 +46,7 @@ class ScheduleController extends Controller
 
             $obj->nik = $s->nik;
             $obj->nama = $s->nama;
-            $obj->shift = ShiftDepartemen::where('id_departemen', $s->id_departemen)->pluck('id_shift');
+            $obj->shift = ShiftDepartemen::where(['id_departemen' => $s->id_departemen, 'status' => true])->pluck('id_shift');
 
             for ($i = 0; $i < $last; $i++) {
                 $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;

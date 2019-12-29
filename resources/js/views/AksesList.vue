@@ -45,7 +45,6 @@ export default {
       aksesDepartemen: [],
       selectedDepartemen: undefined,
       open: [],
-      loading: true
     };
   },
   async created() {
