@@ -14,6 +14,7 @@ class CreatePresensisTable extends Migration
     public function up()
     {
         Schema::create('presensis', function (Blueprint $table) {
+            $table->bigIncrements('id_presensi');
             $table->tinyInteger('pin');
             $table->dateTime('datetime');
             $table->tinyInteger('verified');

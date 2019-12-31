@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Presensi;
 use App\Schedule;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -65,10 +66,6 @@ class AbsenController extends Controller
      */
     public function store(Request $request, $id)
     {
-        $data = Bagian::updateOrCreate(['id_bagian' => $id], $request->all());
-
-        if ($data === null) return response()->json(["status" => "failed"], 501);
-        return response()->json(["status" => "success"], 201);
     }
 
     /**
@@ -82,14 +79,34 @@ class AbsenController extends Controller
         $firstday = Carbon::create(request()->year, request()->month)->firstOfMonth();
         $lastday = Carbon::create(request()->year, request()->month)->lastOfMonth();
 
-        $data = DB::connection('mysql2')
-            ->table('log_presensi')
-            ->whereBetween('DateTime', [$firstday, $lastday])
-            ->where('PIN', $id)
+        $data = Schedule::where('nik', $id)
+            ->whereBetween('tgl', [$firstday, $lastday])
+            ->leftJoin('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
+            ->leftJoin('presensis as a', function ($leftJoin) {
+                $leftJoin
+                    ->on([
+                        ['a.pin', '=', DB::raw('cast(schedules.nik as int)')],
+                        [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
+                        // ['a.created_at', '=', DB::raw('(select min(fa.created_at) as created from presensis as fa where fa.created_at = a.created_at)')]
+                    ])
+                    ->where([['a.status', '=', '0']])
+                    ->groupBy('a.status')->limit(1);
+            })
+            // ->join('presensis as b', function ($join) {
+            //     $join
+            //         ->on([
+            //             ['b.pin', '=', 'a.pin'],
+            //             ['b.datetime', '>', 'a.datetime']
+            //         ])
+            //         ->where('b.status', '=', '1')
+            //         ->limit(1);
+            // })
+            ->orderBy('schedules.tgl')
             ->select(
-                DB::raw('CAST(DateTime AS DATE) AS tanggal'),
-                DB::raw('CAST(DateTime AS TIME) AS waktu'),
-                DB::raw('IF(Status = 0, "Masuk", "Keluar") AS keterangan')
+                'schedules.id_schedule',
+                'shifts.kode',
+                'a.datetime as masuk',
+                // 'b.datetime as keluar'
             )
             ->get();
 

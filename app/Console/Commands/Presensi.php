@@ -86,7 +86,8 @@ class Presensi extends Command
                     $Status = $this->Parse_Data($data, "<Status>", "</Status>");
 
                     if ($PIN != 0) {
-                        $data = AppPresensi::create(['pin' => $PIN, 'datetime' => $DateTime, 'verified' => $Verified, 'status' => $Status]);
+                        $arr = ['pin' => $PIN, 'datetime' => $DateTime, 'verified' => $Verified, 'status' => $Status];
+                        $data = AppPresensi::updateOrCreate($arr, $arr);
                     }
                 }
             }
