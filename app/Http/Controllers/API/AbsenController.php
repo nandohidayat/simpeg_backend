@@ -87,28 +87,33 @@ class AbsenController extends Controller
                     ->on([
                         ['a.pin', '=', DB::raw('cast(schedules.nik as int)')],
                         [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
-                        // ['a.created_at', '=', DB::raw('(select min(fa.created_at) as created from presensis as fa where fa.created_at = a.created_at)')]
+                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")]
                     ])
-                    ->where([['a.status', '=', '0']])
-                    ->groupBy('a.status')->limit(1);
+                    ->where([
+                        ['a.status', '=', '0'],
+                    ]);
             })
-            // ->join('presensis as b', function ($join) {
-            //     $join
-            //         ->on([
-            //             ['b.pin', '=', 'a.pin'],
-            //             ['b.datetime', '>', 'a.datetime']
-            //         ])
-            //         ->where('b.status', '=', '1')
-            //         ->limit(1);
-            // })
+            ->leftJoin('presensis as b', function ($leftJoin) {
+                $leftJoin
+                    ->on([
+                        ['b.pin', '=', 'a.pin'],
+                        ['b.datetime', '>', 'a.datetime']
+                    ])
+                    ->where('b.status', '=', '1');
+            })
             ->orderBy('schedules.tgl')
             ->select(
                 'schedules.id_schedule',
                 'shifts.kode',
-                'a.datetime as masuk',
-                // 'b.datetime as keluar'
+                DB::raw('min(a.datetime) as masuk'),
+                DB::raw('min(b.datetime) as keluar'),
+                DB::raw("(case when cast(a.datetime as time) > (cast(shifts.mulai as time) + interval '5 minutes') then 'terlambat' when shifts.kode is not null then 'tidak terlambat' else null end) as keterangan"),
+                DB::raw("(case when keterangan = 'tidak terlambat' then 16000 else 0 end) as pendapatan")
             )
+            ->groupBy('schedules.id_schedule', 'shifts.kode', 'keterangan')
             ->get();
+
+        // $data = $data->where('keterangan', '=', 'tidak terlambat')->count();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
