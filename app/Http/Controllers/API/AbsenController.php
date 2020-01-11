@@ -77,13 +77,17 @@ class AbsenController extends Controller
     public function show($id)
     {
         $firstday = Carbon::create(request()->year, request()->month)->firstOfMonth();
-        $lastday = Carbon::create(request()->year, request()->month)->lastOfMonth();
+        $last = Carbon::create(request()->year, request()->month);
+        $current = Carbon::now();
+        
+        $lastday = $last->diffInMonths($current) === 0 ? $current : $last->lastOfMonth();
 
         $data = Schedule::where('nik', $id)
             ->whereBetween('tgl', [$firstday, $lastday])
+            ->whereNotNull('schedules.id_shift')
             ->leftJoin('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
-            ->leftJoin('presensis as a', function ($leftJoin) {
-                $leftJoin
+            ->leftJoin('presensis as a', function ($join) {
+                $join
                     ->on([
                         ['a.pin', '=', DB::raw('cast(schedules.nik as int)')],
                         [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
@@ -93,8 +97,8 @@ class AbsenController extends Controller
                         ['a.status', '=', '0'],
                     ]);
             })
-            ->leftJoin('presensis as b', function ($leftJoin) {
-                $leftJoin
+            ->leftJoin('presensis as b', function ($join) {
+                $join
                     ->on([
                         ['b.pin', '=', 'a.pin'],
                         ['b.datetime', '>', 'a.datetime']
@@ -104,18 +108,22 @@ class AbsenController extends Controller
             ->orderBy('schedules.tgl')
             ->select(
                 'schedules.id_schedule',
-                'shifts.kode',
-                DB::raw('min(a.datetime) as masuk'),
-                DB::raw('min(b.datetime) as keluar'),
-                DB::raw("(case when cast(a.datetime as time) > (cast(shifts.mulai as time) + interval '5 minutes') then 'terlambat' when shifts.kode is not null then 'tidak terlambat' else null end) as keterangan"),
-                DB::raw("(case when keterangan = 'tidak terlambat' then 16000 else 0 end) as pendapatan")
+                'schedules.tgl as tanggal',
+                'shifts.kode as shift',
+                DB::raw('cast(min(a.datetime) as time) as masuk'),
+                DB::raw('cast(min(b.datetime) as time) as keluar'),
+                DB::raw("(case when cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes') then 16000 else 0 end) as pendapatan"),
             )
-            ->groupBy('schedules.id_schedule', 'shifts.kode', 'keterangan')
-            ->get();
+            ->groupBy('schedules.id_schedule', 'shifts.kode', 'keterangan', 'pendapatan')
+            ->get()->toArray();
 
-        // $data = $data->where('keterangan', '=', 'tidak terlambat')->count();
+        $sum = 0;
+        foreach ($data as $d) {
+            $sum += $d['pendapatan'];
+        }
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(["status" => "success", "data" => ["absen" => $data, "pendapatan" => $sum]], 200);
     }
 
     /**

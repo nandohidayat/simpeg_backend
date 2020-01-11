@@ -4,6 +4,7 @@ namespace App;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Karyawan extends Model
 {
@@ -29,6 +30,9 @@ class Karyawan extends Model
 
     public function schedules()
     {
-        return $this->hasMany("App\Schedule", 'nik', 'nik')->orderBy('tgl', 'asc');
+        return $this->hasMany("App\Schedule", 'nik', 'nik')
+            ->leftJoin('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
+            ->select('schedules.*', 'shifts.mulai', 'shifts.selesai')
+            ->orderBy('schedules.tgl', 'asc');
     }
 }

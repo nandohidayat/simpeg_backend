@@ -15,29 +15,30 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post("login", "API\AuthController@login");
+Route::get("user/{id}", "API\AuthController@user");
 
-// Route::get("user/{id}", "API\AuthController@user");
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();
 // });
 
-Route::apiResource('absen', 'API\AbsenController');
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
+
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
 
-    Route::apiResource('karyawan', 'API\KaryawanController');
-    Route::apiResource('departemen', 'API\DepartemenController');
-    Route::apiResource('ruang', 'API\RuangController');
-    Route::apiResource('bagian', 'API\BagianController');
-    Route::apiResource('shift', 'API\ShiftController');
+    Route::apiResource('absen', 'API\AbsenController');
     Route::apiResource('akses', 'API\AksesController');
+    Route::apiResource('bagian', 'API\BagianController');
+    Route::apiResource('departemen', 'API\DepartemenController');
+    Route::apiResource('karyawan', 'API\KaryawanController');
+    Route::apiResource('ruang', 'API\RuangController');
     Route::apiResource('schedule/change', 'API\ScheduleChangeController');
     Route::apiResource('schedule', 'API\ScheduleController');
+    Route::apiResource('shift', 'API\ShiftController');
 
     // OLD CODE
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');

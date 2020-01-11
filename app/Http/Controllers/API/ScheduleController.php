@@ -48,8 +48,18 @@ class ScheduleController extends Controller
             $obj->nama = $s->nama;
             $obj->shift = ShiftDepartemen::where(['id_departemen' => $s->id_departemen, 'status' => true])->pluck('id_shift');
 
+            $obj->jam = 0;
+
             for ($i = 0; $i < $last; $i++) {
                 $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
+                if(!empty($s->schedules[$i])) {
+                    $time1 = strtotime($s->schedules[$i]->mulai);
+                    $time2 = strtotime($s->schedules[$i]->selesai);
+                    if($time2 < $time1) {
+                        $time2 += 24 * 60 * 60;
+                    }
+                    $obj->jam += abs($time2 - $time1) / 3600;
+                }
             }
 
             array_push($data, $obj);
@@ -72,6 +82,12 @@ class ScheduleController extends Controller
             $obj->sortable = false;
             array_push($header, $obj);
         }
+
+        $obj = new stdClass();
+        $obj->text = "Total Jam";
+        $obj->value = "jam";
+        $obj->width = "110px";
+        array_push($header, $obj);
 
         return response()->json(["status" => "success", "data" => ["schedule" => $data, "header" => $header, "ruang" => $ruang]], 200);
     }
