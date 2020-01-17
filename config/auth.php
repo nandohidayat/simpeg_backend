@@ -38,12 +38,13 @@ return [
     'guards' => [
         'web' => [
             'driver' => 'session',
-            'provider' => 'users',
+            'provider' => 'login_pegawai',
         ],
 
         'api' => [
-            'driver' => 'passport',
-            'provider' => 'users',
+            'driver' => 'token',
+            'provider' => 'login_pegawai',
+            'storage_key' => 'token_sp'
         ],
     ],
 
@@ -68,6 +69,10 @@ return [
         'users' => [
             'driver' => 'eloquent',
             'model' => App\User::class,
+        ],
+        'login_pegawai' => [
+            'driver' => 'eloquent',
+            'model' => App\SIMLoginPegawai::class,
         ],
 
         // 'users' => [
@@ -97,6 +102,7 @@ return [
             'table' => 'password_resets',
             'expire' => 60,
         ],
+
     ],
 
 ];

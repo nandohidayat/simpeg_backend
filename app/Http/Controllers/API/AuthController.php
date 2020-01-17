@@ -11,11 +11,12 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Karyawan;
 use App\ShiftDepartemen;
+use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use stdClass;
+use Illuminate\Support\Str;
 
 
 class AuthController extends BaseController
@@ -28,56 +29,83 @@ class AuthController extends BaseController
 
     public function login(Request $request)
     {
-        $credentials = request(['username', 'password']);
-        if (!Auth::attempt($credentials))
+        // $credentials = request(['username', 'password']);
+
+        // $credentials = [
+        //     'user_pegawai' => $request->username,
+        //     'password' => md5($request->password)
+        // ];
+
+        // error_log(json_encode($credentials));
+
+        // if (!Auth::attempt($credentials))
+        //     return response()->json([
+        //         'message' => 'Unauthorized'
+        //     ], 401);
+
+        $user = SIMLoginPegawai::where([
+            'user_pegawai' => $request->username,
+            'pass_pegawai' => md5($request->password)
+        ])->first();
+
+        if ($user == null)
             return response()->json([
                 'message' => 'Unauthorized'
             ], 401);
 
-        $user = Auth::user();
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-
-        $token->expires_at = Carbon::now()->addDay();
-        $token->save();
-
-        $id = Karyawan::where('nik', $user->nik)->first()->id_departemen;
-
-        $hakAkses = AksesDepartemen::where([['id_departemen', '=', $id], ['status', '=', 'true']])
-            ->join('akses', 'akses_departemens.id_akses', '=', 'akses.id_akses')
-            ->join('akses_kategoris', 'akses.id_akses_kategori', '=', 'akses_kategoris.id_akses_kategori')
-            ->orderBy('akses.id_akses', 'asc')
-            ->select('akses.akses', 'akses.url', 'akses_kategoris.kategori', 'akses_kategoris.icon')
-            ->get();
-
-        $menu = [];
-        $akses = [];
-        $i = 0;
-        $before = "";
-        foreach ($hakAkses as $h) {
-            if ($before !== $h->kategori) {
-                $i++;
-                $before = $h->kategori;
-                $menu[$i] = new stdClass();
-                $menu[$i]->icon = $h->icon;
-                $menu[$i]->header = $h->kategori;
-                $menu[$i]->children = [];
-            }
-            $obj = new stdClass();
-            $obj->header = $h->akses;
-            $obj->link = $h->url;
-            array_push($menu[$i]->children, $obj);
-            array_push($akses, $h->url);
+        if ($user->token_sp == null) {
+            $user->token_sp = Str::random(80);
+            $user->save();
         }
 
+        Auth::login($user);
+
+        // $user = Auth::user();
+        // $tokenResult = $user->createToken('Personal Access Token');
+        // $token = $tokenResult->token;
+
+        // $token->expires_at = Carbon::now()->addDay();
+        // $token->save();
+
+        // $id = Karyawan::where('nik', $user->nik)->first()->id_departemen;
+
+        // $hakAkses = AksesDepartemen::where([['id_departemen', '=', $id], ['status', '=', 'true']])
+        //     ->join('akses', 'akses_departemens.id_akses', '=', 'akses.id_akses')
+        //     ->join('akses_kategoris', 'akses.id_akses_kategori', '=', 'akses_kategoris.id_akses_kategori')
+        //     ->orderBy('akses.id_akses', 'asc')
+        //     ->select('akses.akses', 'akses.url', 'akses_kategoris.kategori', 'akses_kategoris.icon')
+        //     ->get();
+
+        // $menu = [];
+        // $akses = [];
+        // $i = 0;
+        // $before = "";
+        // foreach ($hakAkses as $h) {
+        //     if ($before !== $h->kategori) {
+        //         $i++;
+        //         $before = $h->kategori;
+        //         $menu[$i] = new stdClass();
+        //         $menu[$i]->icon = $h->icon;
+        //         $menu[$i]->header = $h->kategori;
+        //         $menu[$i]->children = [];
+        //     }
+        //     $obj = new stdClass();
+        //     $obj->header = $h->akses;
+        //     $obj->link = $h->url;
+        //     array_push($menu[$i]->children, $obj);
+        //     array_push($akses, $h->url);
+        // }
+
         return response()->json([
-            'token' => $tokenResult->accessToken,
-            'expires_at' => Carbon::parse(
-                $tokenResult->token->expires_at
-            )->toDateTimeString(),
-            'user' => ['nik' => $user->nik, 'username' => $user->username],
-            'menu' => $menu,
-            'akses' => $akses
+            // 'token' => $tokenResult->accessToken,
+            'token' => $user->token_sp,
+            // 'expires_at' => Carbon::parse(
+            //     $tokenResult->token->expires_at
+            // )->toDateTimeString(),
+            'user' => json_encode($user)
+            // 'user' => ['nik' => $user->nik, 'username' => $user->username],
+            // 'menu' => $menu,
+            // 'akses' => $akses
         ]);
     }
 
