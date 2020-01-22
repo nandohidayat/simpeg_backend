@@ -6,8 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
-class SIMLoginPegawai extends Authenticatable
+class SIMLoginPegawai extends Authenticatable implements JWTSubject
 {
     use HasApiTokens, Notifiable;
 
@@ -16,27 +17,26 @@ class SIMLoginPegawai extends Authenticatable
     protected $connection = 'pgsql2';
     protected $table = 'login_pegawai';
     protected $primaryKey = 'id_pegawai';
-    // protected $hidden = [
-    //     'pass_pegawai',
-    // ];
+    protected $keyType = 'text';
+    protected $hidden = ['pass_pegawai'];
 
-    public function findForPassport($username)
+    /**
+     * Get the identifier that will be stored in the subject claim of the JWT.
+     *
+     * @return mixed
+     */
+    public function getJWTIdentifier()
     {
-        return $this->where('user_pegawai', $username)->first();
+        return $this->getKey();
     }
 
-    public function validateForPassportPasswordGrant($password)
+    /**
+     * Return a key value array, containing any custom claims to be added to the JWT.
+     *
+     * @return array
+     */
+    public function getJWTCustomClaims()
     {
-        return $this->pass_pegawai == md5($password);
+        return [];
     }
-
-    public function getAuthPassword()
-    {
-        return $this->pass_pegawai;
-    }
-
-    // public function setPasswordAttribute($value)
-    // {
-    //     $this->attributes['password'] = md5($value);
-    // }
 }

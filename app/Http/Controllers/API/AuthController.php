@@ -15,9 +15,11 @@ use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-
+use stdClass;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends BaseController
 {
@@ -29,20 +31,6 @@ class AuthController extends BaseController
 
     public function login(Request $request)
     {
-        // $credentials = request(['username', 'password']);
-
-        // $credentials = [
-        //     'user_pegawai' => $request->username,
-        //     'password' => md5($request->password)
-        // ];
-
-        // error_log(json_encode($credentials));
-
-        // if (!Auth::attempt($credentials))
-        //     return response()->json([
-        //         'message' => 'Unauthorized'
-        //     ], 401);
-
         $user = SIMLoginPegawai::where([
             'user_pegawai' => $request->username,
             'pass_pegawai' => md5($request->password)
@@ -53,59 +41,50 @@ class AuthController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
 
-        if ($user->token_sp == null) {
-            $user->token_sp = Str::random(80);
-            $user->save();
+        $token = auth()->login($user);
+
+        $dataAkses = DB::connection('pgsql')
+            ->table('f_login_pegawai as flp')
+            ->where('flp.id_pegawai', auth()->user()->id_pegawai)
+            ->join('akses_departemens as ad', function ($join) {
+                $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
+                $join->where('ad.status', 'true');
+            })
+            ->join('akses as a', 'a.id_akses', '=', 'ad.id_akses')
+            ->join('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
+            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon')
+            ->get();
+
+        $menu = [];
+        $akses = [];
+        $i = -1;
+        $before = "";
+        foreach ($dataAkses as $da) {
+            if ($before !== $da->kategori) {
+                $i++;
+                $before = $da->kategori;
+                $obj = new stdClass();
+                $obj->icon = $da->icon;
+                $obj->header = $da->kategori;
+                $obj->children = [];
+                array_push($menu, $obj);
+            }
+            $obj = new stdClass();
+            $obj->header = $da->akses;
+            $obj->link = $da->url;
+            array_push($menu[$i]->children, $obj);
+            array_push($akses, $da->url);
         }
 
-        Auth::login($user);
-
-        // $user = Auth::user();
-        // $tokenResult = $user->createToken('Personal Access Token');
-        // $token = $tokenResult->token;
-
-        // $token->expires_at = Carbon::now()->addDay();
-        // $token->save();
-
-        // $id = Karyawan::where('nik', $user->nik)->first()->id_departemen;
-
-        // $hakAkses = AksesDepartemen::where([['id_departemen', '=', $id], ['status', '=', 'true']])
-        //     ->join('akses', 'akses_departemens.id_akses', '=', 'akses.id_akses')
-        //     ->join('akses_kategoris', 'akses.id_akses_kategori', '=', 'akses_kategoris.id_akses_kategori')
-        //     ->orderBy('akses.id_akses', 'asc')
-        //     ->select('akses.akses', 'akses.url', 'akses_kategoris.kategori', 'akses_kategoris.icon')
-        //     ->get();
-
-        // $menu = [];
-        // $akses = [];
-        // $i = 0;
-        // $before = "";
-        // foreach ($hakAkses as $h) {
-        //     if ($before !== $h->kategori) {
-        //         $i++;
-        //         $before = $h->kategori;
-        //         $menu[$i] = new stdClass();
-        //         $menu[$i]->icon = $h->icon;
-        //         $menu[$i]->header = $h->kategori;
-        //         $menu[$i]->children = [];
-        //     }
-        //     $obj = new stdClass();
-        //     $obj->header = $h->akses;
-        //     $obj->link = $h->url;
-        //     array_push($menu[$i]->children, $obj);
-        //     array_push($akses, $h->url);
-        // }
-
         return response()->json([
-            // 'token' => $tokenResult->accessToken,
-            'token' => $user->token_sp,
-            // 'expires_at' => Carbon::parse(
-            //     $tokenResult->token->expires_at
-            // )->toDateTimeString(),
-            'user' => json_encode($user)
-            // 'user' => ['nik' => $user->nik, 'username' => $user->username],
-            // 'menu' => $menu,
-            // 'akses' => $akses
+            'token' => $token,
+            'expires_at' => auth()->factory()->getTTL(),
+            'user' => [
+                'id' => auth()->user()->id_pegawai,
+                'username' => auth()->user()->user_pegawai
+            ],
+            'menu' => $menu,
+            'akses' => $akses
         ]);
     }
 

@@ -26,7 +26,6 @@ Route::get("user/{id}", "API\AuthController@user");
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
-
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
 
