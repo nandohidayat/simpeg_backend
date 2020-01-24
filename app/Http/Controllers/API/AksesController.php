@@ -8,6 +8,7 @@ use App\AksesKategori;
 use App\Departemen;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use stdClass;
 
 class AksesController extends Controller
@@ -52,10 +53,15 @@ class AksesController extends Controller
 
         foreach ($akses as $a) {
             $status = false;
-            if (in_array($a->id_akses, $input['akses'], true)) {
+            $only = false;
+            if (in_array($a->id_akses, $input['semua'], true)) {
                 $status = true;
             }
-            AksesDepartemen::updateOrCreate(['id_akses' => $a->id_akses, 'id_departemen' => $input['departemen']], ['status' => $status]);
+            if (in_array($a->id_akses, $input['kepala'], true)) {
+                $only = true;
+            }
+
+            AksesDepartemen::updateOrCreate(['id_akses' => $a->id_akses, 'id_dept' => $input['dept']], ['status' => $status, 'only' => $only]);
         }
 
         return response()->json(["status" => "success"], 201);
@@ -69,14 +75,12 @@ class AksesController extends Controller
      */
     public function show($id)
     {
-        $departemen = Departemen::with('aksesDepartemens')->where('id_departemen', $id)->first();
-        $data = [];
+        $semua = AksesDepartemen::where(['id_dept' => $id, 'status' => 'true'])
+            ->pluck('id_akses');
+        $kepala = AksesDepartemen::where(['id_dept' => $id, 'status' => 'true', 'only' => 'true'])
+            ->pluck('id_akses');
 
-        foreach ($departemen->aksesDepartemens as $a) {
-            array_push($data, $a->id_akses);
-        }
-
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(["status" => "success", "data" => ['semua' => $semua, 'kepala' => $kepala]], 200);
     }
 
     /**

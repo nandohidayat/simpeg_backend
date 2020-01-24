@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Departemen;
+use App\Department;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -16,13 +17,16 @@ class DepartemenController extends Controller
      */
     public function index()
     {
-        // $data = Departemen::orderBy('departemen', 'asc')->get();
-        if (request()->select = 1) {
+        if (request()->select == true) {
             $data = DB::connection('pgsql2')
                 ->table('department')
                 ->select('nm_dept')
                 ->orderBy('nm_dept', 'asc')
                 ->pluck('nm_dept');
+        } else {
+            $data = Department::select('id_dept', 'nm_dept')
+                ->orderBy('nm_dept')
+                ->get();
         }
 
         return response()->json(["status" => "success", "data" => $data], 200);
