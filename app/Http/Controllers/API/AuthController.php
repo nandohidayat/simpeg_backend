@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Karyawan;
 use App\ShiftDepartemen;
+use App\SIMDataPegawai;
 use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
@@ -34,7 +35,10 @@ class AuthController extends BaseController
         $user = SIMLoginPegawai::where([
             'user_pegawai' => $request->username,
             'pass_pegawai' => md5($request->password)
-        ])->first();
+        ])
+            ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai')
+            ->select('f_login_pegawai.*', 'f_data_pegawai.nik_pegawai as nik')
+            ->first();
 
         if ($user == null)
             return response()->json([
@@ -43,8 +47,7 @@ class AuthController extends BaseController
 
         $token = auth()->login($user);
 
-        $dataAkses = DB::connection('pgsql')
-            ->table('f_login_pegawai as flp')
+        $dataAkses = DB::table('f_login_pegawai as flp')
             ->where('flp.id_pegawai', auth()->user()->id_pegawai)
             ->join('akses_departemens as ad', function ($join) {
                 $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
@@ -58,7 +61,7 @@ class AuthController extends BaseController
         $menu = [];
         $akses = [];
         $i = -1;
-        $before = "";
+        $before = null;
         foreach ($dataAkses as $da) {
             if ($before !== $da->kategori) {
                 $i++;
@@ -81,6 +84,7 @@ class AuthController extends BaseController
             'expires_at' => auth()->factory()->getTTL(),
             'user' => [
                 'id' => auth()->user()->id_pegawai,
+                'nik' => auth()->user()->nik,
                 'username' => auth()->user()->user_pegawai
             ],
             'menu' => $menu,
@@ -95,24 +99,30 @@ class AuthController extends BaseController
      */
     public function register(Request $request)
     {
-        $user = User::where('nik', Auth::user()->nik)->first();
+        $user = SIMLoginPegawai::where(['id_pegawai' => auth()->user()->id, 'pass_pegawai' => md5($request['current'])])
+            ->first();
+        // $user = User::where('nik', Auth::user()->nik)->first();
 
-        if (Hash::check($request['current'], $user->password)) {
+        if ($user !== null) {
             if ($request['password'] === null) {
-                User::updateOrCreate(
-                    ['nik' => $request['nik']],
-                    [
-                        "username" => $request['username'],
-                    ]
-                );
+                DB::connection('pgsql2')
+                    ->table('login_pegawai')
+                    ->updateOrCreate(
+                        ['id_pegawai' => $request['nik']],
+                        [
+                            "user_pegawai" => $request['username'],
+                        ]
+                    );
             } else {
-                User::updateOrCreate(
-                    ['nik' => $request['nik']],
-                    [
-                        "username" => $request['username'],
-                        "password" => bcrypt($request['password'])
-                    ]
-                );
+                DB::connection('pgsql2')
+                    ->table('login_pegawai')
+                    ->updateOrCreate(
+                        ['id_pegawai' => $request['nik']],
+                        [
+                            "user_pegawai" => $request['username'],
+                            "pass_pegawai" => md5($request['password'])
+                        ]
+                    );
             }
         } else {
             return response()->json(['message' => 'Unauthorized'], 403);
@@ -143,7 +153,12 @@ class AuthController extends BaseController
      */
     public function user($id)
     {
-        $data = User::where('nik', $id)->select('username')->first();
+        $data = DB::table('f_data_pegawai as dp')
+            ->where('nik_pegawai', $id)
+            ->join('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
+            ->select('lp.user_pegawai as username')
+            ->first();
+        // $data = User::where('nik', $id)->select('username')->first();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }

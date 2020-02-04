@@ -8,7 +8,7 @@ class Schedule extends Model
 {
     protected $primaryKey = 'id_schedule';
     protected $fillable = [
-        'nik', 'tgl', 'id_shift', 'masuk', 'keluar'
+        'id_pegawai', 'tgl', 'id_shift', 'masuk', 'keluar'
     ];
 
     public function karyawans()

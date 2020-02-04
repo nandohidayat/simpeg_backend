@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\API;
 
 use App\Departemen;
-use App\Department;
 use App\Http\Controllers\Controller;
+use App\SIMDepartment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -24,7 +24,7 @@ class DepartemenController extends Controller
                 ->orderBy('nm_dept', 'asc')
                 ->pluck('nm_dept');
         } else {
-            $data = Department::select('id_dept', 'nm_dept')
+            $data = SIMDepartment::select('id_dept', 'nm_dept')
                 ->orderBy('nm_dept')
                 ->get();
         }

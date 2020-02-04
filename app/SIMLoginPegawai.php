@@ -14,8 +14,7 @@ class SIMLoginPegawai extends Authenticatable implements JWTSubject
 
     public $timestamps = false;
 
-    protected $connection = 'pgsql2';
-    protected $table = 'login_pegawai';
+    protected $table = 'f_login_pegawai';
     protected $primaryKey = 'id_pegawai';
     protected $keyType = 'text';
     protected $hidden = ['pass_pegawai'];

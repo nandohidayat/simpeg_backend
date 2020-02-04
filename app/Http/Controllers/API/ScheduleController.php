@@ -7,9 +7,12 @@ use App\Http\Controllers\Controller;
 use App\Karyawan;
 use App\Schedule;
 use App\ShiftDepartemen;
+use App\SIMDepartment;
+use App\SIMLoginPegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use stdClass;
 
 class ScheduleController extends Controller
@@ -25,48 +28,25 @@ class ScheduleController extends Controller
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
 
-        $nik = Auth::user()->nik;
+        $dept = null;
 
-        $karyawan = Karyawan::where('nik', $nik)
-            ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
-            ->select('ruangs.id_ruang', 'ruangs.ruang')
-            ->first();
+        if (request()->dept !== null) {
+            $dept = request()->dept;
+        } else {
+            $listdept = SIMLoginPegawai::where('id_pegawai', auth()->user()->id_pegawai)
+                ->join('f_department', 'f_department.id_dept', '=', DB::raw('ANY(f_login_pegawai.id_dept)'))
+                ->select('f_department.id_dept', 'f_department.nm_dept')
+                ->get();
 
-        $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
-            $query->whereBetween('tgl', [$firstday, $lastday]);
-        }])
-            ->where('id_ruang', $karyawan->id_ruang)
-            ->orderBy('nik', 'asc')->get();
-
-        $data = [];
-        $last = $lastday->day;
-
-        foreach ($schedules as $s) {
-            $obj = new stdClass();
-
-            $obj->nik = $s->nik;
-            $obj->nama = $s->nama;
-            $obj->shift = ShiftDepartemen::where(['id_departemen' => $s->id_departemen, 'status' => true])->pluck('id_shift');
-
-            $obj->jam = 0;
-
-            for ($i = 0; $i < $last; $i++) {
-                $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
-                if(!empty($s->schedules[$i])) {
-                    $time1 = strtotime($s->schedules[$i]->mulai);
-                    $time2 = strtotime($s->schedules[$i]->selesai);
-                    if($time2 < $time1) {
-                        $time2 += 24 * 60 * 60;
-                    }
-                    $obj->jam += abs($time2 - $time1) / 3600;
-                }
-            }
-
-            array_push($data, $obj);
+            $dept = $listdept[0]->id_dept;
         }
 
-        $ruang = $karyawan->ruang;
+        $query = DB::table('f_login_pegawai as lp')
+            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
+            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
+            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama');
 
+        $jam = '';
         $header = [];
 
         $obj = new stdClass();
@@ -75,13 +55,37 @@ class ScheduleController extends Controller
         $obj->width = "250px";
         array_push($header, $obj);
 
-        for ($i = 0; $i < $last; $i++) {
+        $date = $firstday->copy();
+
+        while (!$date->greaterThan($lastday)) {
+            $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date) {
+                $q->on('sch' . $date->day . '.id_pegawai', '=', 'lp.id_pegawai');
+                $q->where('sch' . $date->day . '.tgl', $date->toDateString());
+            });
+            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.id_shift', '=', 'shf' . $date->day . '.id_shift');
+            $query->addSelect('sch' . $date->day . '.id_shift as day' . $date->day . '');
+
+            $jam .= 'COALESCE(
+                CASE
+                WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai > time \'00:00\' THEN
+                    shf' . $date->day . '.selesai - shf' . $date->day . '.mulai
+                ELSE
+                    shf' . $date->day . '.selesai - shf' . $date->day . '.mulai + interval \'24 hours\'
+                END
+                , interval \'0 hours\')';
+
+            if (!$date->equalTo($lastday)) $jam .= ' + ';
+
             $obj = new stdClass();
-            $obj->text = "" . ($i + 1) . "";
-            $obj->value = "day" . ($i + 1);
+            $obj->text = $date->day;
+            $obj->value = "day" . ($date->day);
             $obj->sortable = false;
             array_push($header, $obj);
+
+            $date->addDay();
         }
+
+        $query->addSelect(DB::raw($jam .= 'as jam'));
 
         $obj = new stdClass();
         $obj->text = "Total Jam";
@@ -89,7 +93,58 @@ class ScheduleController extends Controller
         $obj->width = "110px";
         array_push($header, $obj);
 
-        return response()->json(["status" => "success", "data" => ["schedule" => $data, "header" => $header, "ruang" => $ruang]], 200);
+        $schedules = $query->get();
+
+        $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
+
+        // $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
+        //     $query->whereBetween('tgl', [$firstday, $lastday]);
+        // }])
+        //     ->where('id_ruang', $karyawan->id_ruang)
+        //     ->orderBy('nik', 'asc')->get();
+
+        // $data = [];
+        // $last = $lastday->day;
+
+        // foreach ($schedules as $s) {
+        //     $obj = new stdClass();
+
+        //     $obj->nik = $s->nik;
+        //     $obj->nama = $s->nama;
+        //     $obj->shift = ShiftDepartemen::where(['id_departemen' => $s->id_departemen, 'status' => true])->pluck('id_shift');
+
+        //     $obj->jam = 0;
+
+        //     for ($i = 0; $i < $last; $i++) {
+        //         $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
+        //         if (!empty($s->schedules[$i])) {
+        //             $time1 = strtotime($s->schedules[$i]->mulai);
+        //             $time2 = strtotime($s->schedules[$i]->selesai);
+        //             if ($time2 < $time1) {
+        //                 $time2 += 24 * 60 * 60;
+        //             }
+        //             $obj->jam += abs($time2 - $time1) / 3600;
+        //         }
+        //     }
+
+        //     array_push($data, $obj);
+        // }
+
+        // $ruang = $karyawan->ruang;
+
+
+
+
+
+        // for ($i = 0; $i < $last; $i++) {
+        //
+        // }
+
+
+        if (request()->dept === null) {
+            return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, "dept" => $listdept, 'shift' => $shift]], 200);
+        }
+        return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, 'shift' => $shift]], 200);
     }
 
     /**
@@ -108,10 +163,13 @@ class ScheduleController extends Controller
 
             for ($i = 0; $i < $last; $i++) {
                 $obj = array();
-                $obj['nik'] = $inp['nik'];
+                $obj['id_pegawai'] = $inp['id_pegawai'];
                 $obj['tgl'] = Carbon::create(request()->year, request()->month, $i + 1);
                 $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
-                $aaa = Schedule::updateOrCreate(['nik' => $obj['nik'], 'tgl' => $obj['tgl']], $obj);
+                Schedule::updateOrCreate(
+                    ['id_pegawai' => $obj['id_pegawai'], 'tgl' => $obj['tgl']],
+                    ['id_shift' => $obj['id_shift']]
+                );
             }
         }
 

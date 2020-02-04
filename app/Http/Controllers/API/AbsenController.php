@@ -76,22 +76,24 @@ class AbsenController extends Controller
      */
     public function show($id)
     {
-        $firstday = Carbon::create(request()->year, request()->month)->firstOfMonth();
-        $last = Carbon::create(request()->year, request()->month);
+        $date = Carbon::create(request()->year, request()->month);
+        $firstday = $date->copy()->firstOfMonth();
         $current = Carbon::now();
-        
-        $lastday = $last->diffInMonths($current) === 0 ? $current : $last->lastOfMonth();
 
-        $data = Schedule::where('nik', $id)
+        $lastday = $date->diffInMonths($current) === 0 ? $current : $date->copy()->lastOfMonth();
+
+        $data = Schedule::where('schedules.id_pegawai', $id)
             ->whereBetween('tgl', [$firstday, $lastday])
             ->whereNotNull('schedules.id_shift')
+            ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.id_pegawai')
             ->leftJoin('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
             ->leftJoin('presensis as a', function ($join) {
                 $join
                     ->on([
-                        ['a.pin', '=', DB::raw('cast(schedules.nik as int)')],
+                        ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
                         [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
-                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")]
+                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
+                        [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
                     ])
                     ->where([
                         ['a.status', '=', '0'],
@@ -116,11 +118,11 @@ class AbsenController extends Controller
                 DB::raw("(case when cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes') then 16000 else 0 end) as pendapatan"),
             )
             ->groupBy('schedules.id_schedule', 'shifts.kode', 'keterangan', 'pendapatan')
-            ->get()->toArray();
+            ->get();
 
         $sum = 0;
         foreach ($data as $d) {
-            $sum += $d['pendapatan'];
+            $sum += $d->pendapatan;
         }
 
         return response()->json(["status" => "success", "data" => ["absen" => $data, "pendapatan" => $sum]], 200);

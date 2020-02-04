@@ -4,9 +4,12 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Karyawan;
+use App\SIMDataPegawai;
+use App\SIMLoginPegawai;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class KaryawanController extends Controller
@@ -41,24 +44,31 @@ class KaryawanController extends Controller
 
         // $data = $query->get();
 
-        $data = DB::connection('pgsql2')
-            ->table('login_pegawai')
-            ->leftJoin('data_pegawai', 'login_pegawai.id_pegawai', '=', 'data_pegawai.id_pegawai')
-            ->leftJoin('department', function ($join) {
-                $join->whereRaw('department.id_dept = ANY(login_pegawai.id_dept)');
-            })
-            ->select('data_pegawai.nik_pegawai as nik', 'data_pegawai.nm_pegawai as nama', 'data_pegawai.jenis_kelamin as sex', DB::raw('array_agg(department.nm_dept) AS dept'))
-            ->groupBy('nik', 'nama', 'sex')
-            ->get();
-
-        foreach ($data as $d) {
-            $d->dept = explode('"', $d->dept);
-            $temp = [];
-            foreach ($d->dept as $key => $value) {
-                if ($key % 2 != 0) array_push($temp, $value);
-            }
-            $d->dept = $temp;
+        if (request()->select === '1') {
+            $data = SIMLoginPegawai::whereRaw('\'' . request()->dept . '\' = ANY(f_login_pegawai.id_dept)')
+                ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai')
+                ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nm_pegawai')
+                ->get();
         }
+
+        // $data = DB::connection('pgsql2')
+        //     ->table('login_pegawai')
+        //     ->leftJoin('data_pegawai', 'login_pegawai.id_pegawai', '=', 'data_pegawai.id_pegawai')
+        //     ->leftJoin('department', function ($join) {
+        //         $join->whereRaw('department.id_dept = ANY(login_pegawai.id_dept)');
+        //     })
+        //     ->select('data_pegawai.nik_pegawai as nik', 'data_pegawai.nm_pegawai as nama', 'data_pegawai.jenis_kelamin as sex', DB::raw('array_agg(department.nm_dept) AS dept'))
+        //     ->groupBy('nik', 'nama', 'sex')
+        //     ->get();
+
+        // foreach ($data as $d) {
+        //     $d->dept = explode('"', $d->dept);
+        //     $temp = [];
+        //     foreach ($d->dept as $key => $value) {
+        //         if ($key % 2 != 0) array_push($temp, $value);
+        //     }
+        //     $d->dept = $temp;
+        // }
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
@@ -85,13 +95,35 @@ class KaryawanController extends Controller
      */
     public function show($id)
     {
-        $data = Karyawan::where('nik', $id)
-            ->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen')
-            ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
-            ->select('karyawans.nik', 'karyawans.nama', 'karyawans.id_departemen', 'karyawans.id_ruang', 'departemens.departemen', 'ruangs.ruang')
-            ->first();
+        $data = DB::table('f_data_pegawai as dp')
+            ->where('dp.nik_pegawai', $id)
+            ->join('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
+            ->leftjoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(lp.id_dept)'))
+            ->leftjoin('f_sub_department as sd', 'sd.id_subdept', '=', DB::raw('ANY(lp.id_subdept)'))
+            ->select('lp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'd.nm_dept as dept', 'sd.nm_subdept as subdept')
+            ->get();
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        $obj = new stdClass();
+        $obj->id = $data[0]->id;
+        $obj->nik = $data[0]->nik;
+        $obj->nama = $data[0]->nama;
+        $obj->dept = [];
+        $obj->subdept = [];
+
+        foreach ($data as $d) {
+            if (!in_array($d->dept, $obj->dept, true))
+                array_push($obj->dept, $d->dept);
+            if (!in_array($d->subdept, $obj->subdept, true))
+                array_push($obj->subdept, $d->subdept);
+        }
+
+        // $data = Karyawan::where('nik', $id)
+        //     ->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen')
+        //     ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
+        //     ->select('karyawans.nik', 'karyawans.nama', 'karyawans.id_departemen', 'karyawans.id_ruang', 'departemens.departemen', 'ruangs.ruang')
+        //     ->first();
+
+        return response()->json(["status" => "success", "data" => $obj], 200);
     }
 
     /**

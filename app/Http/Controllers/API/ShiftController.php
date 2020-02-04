@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Shift;
 use App\ShiftDepartemen;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ShiftController extends Controller
 {
@@ -82,14 +83,9 @@ class ShiftController extends Controller
 
     public function getDepartemens($id)
     {
-        $departemen = Departemen::with('shiftDepartemens')->where('id_departemen', $id)->first();
-        $data = [];
+        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->pluck('id_shift');
 
-        foreach ($departemen->shiftDepartemens as $d) {
-            array_push($data, $d->id_shift);
-        }
-
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(["status" => "success", "data" => $shift], 200);
     }
 
     public function createDepartemens(Request $request)
@@ -97,13 +93,15 @@ class ShiftController extends Controller
         $input = $request->all();
         $shift = Shift::all();
 
-        foreach ($shift as $a) {
-            $status = false;
-            if (in_array($a->id_shift, $input['shift'], true)) {
-                $status = true;
+        DB::transaction(function () use ($shift, $input) {
+            foreach ($shift as $a) {
+                $status = false;
+                if (in_array($a->id_shift, $input['shift'], true)) {
+                    $status = true;
+                }
+                ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_dept' => $input['departemen']], ['status' => $status]);
             }
-            ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_departemen' => $input['departemen']], ['status' => $status]);
-        }
+        });
 
         return response()->json(["status" => "success"], 201);
     }
