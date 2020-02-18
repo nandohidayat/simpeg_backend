@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::post("login", "API\AuthController@login");
 Route::get("user/{id}", "API\AuthController@user");
+Route::get('schedule/export/{id}', 'API\ScheduleController@export');
 
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
@@ -38,6 +39,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('schedule/change', 'API\ScheduleChangeController');
     Route::apiResource('schedule', 'API\ScheduleController');
     Route::apiResource('shift', 'API\ShiftController');
+    Route::apiResource('pendapatanharian', 'API\PendapatanHarianController');
+
 
     // OLD CODE
     Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');

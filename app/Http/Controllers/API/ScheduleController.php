@@ -3,16 +3,19 @@
 namespace App\Http\Controllers\API;
 
 use App\Departemen;
+use App\Exports\SchedulesExport;
 use App\Http\Controllers\Controller;
 use App\Karyawan;
 use App\Schedule;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
 use App\SIMLoginPegawai;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
 use stdClass;
 
 class ScheduleController extends Controller
@@ -34,9 +37,21 @@ class ScheduleController extends Controller
             $dept = request()->dept;
         } else {
             $listdept = SIMLoginPegawai::where('id_pegawai', auth()->user()->id_pegawai)
-                ->join('f_department', 'f_department.id_dept', '=', DB::raw('ANY(f_login_pegawai.id_dept)'))
-                ->select('f_department.id_dept', 'f_department.nm_dept')
+                ->join('f_department as d1', 'd1.id_dept', '=', DB::raw('ANY(f_login_pegawai.id_dept)'))
+                ->select('d1.id_dept', 'd1.nm_dept')
                 ->get();
+
+            foreach ($listdept as $l) {
+                $child = SIMDepartment::where('parent_code', $l->id_dept)
+                    ->select('id_dept', 'nm_dept')
+                    ->get();
+
+                if ($child == null) continue;
+
+                foreach ($child as $c) {
+                    if (!$listdept->contains('id_dept', $c->id_dept)) $listdept->push($c);
+                }
+            }
 
             $dept = $listdept[0]->id_dept;
         }
@@ -48,6 +63,7 @@ class ScheduleController extends Controller
 
         $jam = '';
         $header = [];
+        $weekend = [];
 
         $obj = new stdClass();
         $obj->text = "Nama";
@@ -82,6 +98,8 @@ class ScheduleController extends Controller
             $obj->sortable = false;
             array_push($header, $obj);
 
+            if ($date->dayOfWeek === 0) array_push($weekend, $date->day);
+
             $date->addDay();
         }
 
@@ -97,54 +115,10 @@ class ScheduleController extends Controller
 
         $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
 
-        // $schedules = Karyawan::with(['schedules' => function ($query) use ($firstday, $lastday) {
-        //     $query->whereBetween('tgl', [$firstday, $lastday]);
-        // }])
-        //     ->where('id_ruang', $karyawan->id_ruang)
-        //     ->orderBy('nik', 'asc')->get();
-
-        // $data = [];
-        // $last = $lastday->day;
-
-        // foreach ($schedules as $s) {
-        //     $obj = new stdClass();
-
-        //     $obj->nik = $s->nik;
-        //     $obj->nama = $s->nama;
-        //     $obj->shift = ShiftDepartemen::where(['id_departemen' => $s->id_departemen, 'status' => true])->pluck('id_shift');
-
-        //     $obj->jam = 0;
-
-        //     for ($i = 0; $i < $last; $i++) {
-        //         $obj->{'day' . ($i + 1)} = empty($s->schedules[$i]) ? null : $s->schedules[$i]->id_shift;
-        //         if (!empty($s->schedules[$i])) {
-        //             $time1 = strtotime($s->schedules[$i]->mulai);
-        //             $time2 = strtotime($s->schedules[$i]->selesai);
-        //             if ($time2 < $time1) {
-        //                 $time2 += 24 * 60 * 60;
-        //             }
-        //             $obj->jam += abs($time2 - $time1) / 3600;
-        //         }
-        //     }
-
-        //     array_push($data, $obj);
-        // }
-
-        // $ruang = $karyawan->ruang;
-
-
-
-
-
-        // for ($i = 0; $i < $last; $i++) {
-        //
-        // }
-
-
         if (request()->dept === null) {
-            return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, "dept" => $listdept, 'shift' => $shift]], 200);
+            return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, "dept" => $listdept, 'shift' => $shift, 'weekend' => $weekend]], 200);
         }
-        return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, 'shift' => $shift]], 200);
+        return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend]], 200);
     }
 
     /**
@@ -228,5 +202,10 @@ class ScheduleController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function export($id)
+    {
+        return Excel::download(new SchedulesExport($id, request()->year, request()->month), 'schedules.xlsx');
     }
 }

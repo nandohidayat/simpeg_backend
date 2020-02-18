@@ -37,7 +37,8 @@ class AuthController extends BaseController
             'pass_pegawai' => md5($request->password)
         ])
             ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai')
-            ->select('f_login_pegawai.*', 'f_data_pegawai.nik_pegawai as nik')
+            ->leftJoin('f_department as d', 'd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
+            ->select('f_login_pegawai.*', 'f_data_pegawai.nik_pegawai as nik', DB::raw('(CASE WHEN d.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
             ->first();
 
         if ($user == null)
@@ -52,10 +53,14 @@ class AuthController extends BaseController
             ->join('akses_departemens as ad', function ($join) {
                 $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
                 $join->where('ad.status', 'true');
+                if(!auth()->user()->kepala) {
+                    $join->where('ad.only', 'false');
+                }
             })
             ->join('akses as a', 'a.id_akses', '=', 'ad.id_akses')
             ->join('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
             ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon')
+            ->orderBy('a.id_akses')
             ->get();
 
         $menu = [];
@@ -85,7 +90,7 @@ class AuthController extends BaseController
             'user' => [
                 'id' => auth()->user()->id_pegawai,
                 'nik' => auth()->user()->nik,
-                'username' => auth()->user()->user_pegawai
+                'username' => auth()->user()->user_pegawai,
             ],
             'menu' => $menu,
             'akses' => $akses
