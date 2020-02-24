@@ -114,11 +114,18 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
+        $karyawan = DB::table('f_login_pegawai as lp')
+            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
+            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
+            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama')
+            ->get();
+
+        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'karyawan' => $karyawan];
 
         if (request()->dept === null) {
-            return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, "dept" => $listdept, 'shift' => $shift, 'weekend' => $weekend]], 200);
+            $response["dept"] = $listdept;
         }
-        return response()->json(["status" => "success", "data" => ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend]], 200);
+        return response()->json(["status" => "success", "data" => $response], 200);
     }
 
     /**
