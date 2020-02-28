@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Schedule;
 use App\ScheduleChange;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -18,13 +19,11 @@ class ScheduleChangeController extends Controller
      */
     public function index()
     {
-        $query = DB::table('schedule_changes');
-        if (request()->ruang !== null) {
-            $query->where('id_ruang', request()->ruang);
-        } else {
-            $query->where('pemohon', Auth::user()->nik)
-                ->orWhere('dengan', Auth::user()->nik);
-        }
+        $date = Carbon::create(request()->year, request()->month);
+        $firstday = $date->copy()->firstOfMonth();
+        $lastday = $date->copy()->lastOfMonth();
+
+        $query = ScheduleChange::where([['dept', '=', request()->dept], ['created_at', '>=', $firstday], ['created_at', '<=', $lastday]])->orderBy('created_at', 'desc');
 
         $data = $query->get();
 
@@ -40,6 +39,7 @@ class ScheduleChangeController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
+
         $data = ScheduleChange::create($input);
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
@@ -53,7 +53,8 @@ class ScheduleChangeController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function show($id)
-    { }
+    {
+    }
 
     /**
      * Update the specified resource in storage.
@@ -67,28 +68,38 @@ class ScheduleChangeController extends Controller
         $data = ScheduleChange::find($id);
 
         $data->status = $request->status;
+        $data->kepala = auth()->user()->id_pegawai;
         $data->save();
 
-        if ($data->status === 1) {
-            $first = Schedule::where('tgl', $data->tgl)
-                ->where('nik', $data->pemohon)
-                ->first();
+        if ((int) $request->status === 3)
+            return response()->json(["status" => "success"], 201);
 
-            if ($data->type === 0) {
-                $second = Schedule::where('tgl', $data->tgl)
-                    ->where('nik', $data->dengan)
-                    ->first();
+        $first = Carbon::create($data->mulai);
+        $last = Carbon::create($data->selesai);
 
-                $temp = $first->id_shift;
-                $first->id_shift = $second->id_shift;
-                $second->id_shift = $temp;
+        while ($first->lessThanOrEqualTo($last)) {
+            if ((int) $data->type === 1) {
+                $pemohon = Schedule::where([
+                    ['id_pegawai', '=', $data->pemohon],
+                    ['tgl', '=', $first]
+                ])->first();
+                $dengan = Schedule::where([
+                    ['id_pegawai', '=', $data->dengan],
+                    ['tgl', '=', $first]
+                ])->first();
 
-                $second->save();
-            } else if ($data->type === 1) {
-                $first->id_shift = $data->id_shift;
+                Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => $dengan['id_shift']]);
+                Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
+            } else if ((int) $data->type === 2) {
+                $pemohon = Schedule::where([
+                    ['id_pegawai', '=', $data->pemohon],
+                    ['tgl', '=', $first]
+                ])->first();
+
+                Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => 4]);
             }
 
-            $first->save();
+            $first->addDay();
         }
 
         return response()->json(["status" => "success"], 201);
@@ -102,6 +113,11 @@ class ScheduleChangeController extends Controller
      */
     public function destroy($id)
     {
-        //
+        $data = ScheduleChange::find($id);
+
+        if ($data === null) return response()->json(["status" => "not found"], 404);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
     }
 }

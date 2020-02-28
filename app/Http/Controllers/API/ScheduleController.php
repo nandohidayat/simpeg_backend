@@ -117,7 +117,7 @@ class ScheduleController extends Controller
         $karyawan = DB::table('f_login_pegawai as lp')
             ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
             ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
-            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama')
+            ->select('lp.id_pegawai', 'dp.nm_pegawai')
             ->get();
 
         $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'karyawan' => $karyawan];
