@@ -21,9 +21,9 @@ class ScheduleChangeController extends Controller
     {
         $date = Carbon::create(request()->year, request()->month);
         $firstday = $date->copy()->firstOfMonth();
-        $lastday = $date->copy()->lastOfMonth();
+        $lastday = $date->copy()->lastOfMonth()->addDay();
 
-        $query = ScheduleChange::where([['dept', '=', request()->dept], ['created_at', '>=', $firstday], ['created_at', '<=', $lastday]])->orderBy('created_at', 'desc');
+        $query = ScheduleChange::where([['dept', '=', request()->dept], ['created_at', '>=', $firstday], ['created_at', '<', $lastday]])->orderBy('created_at', 'desc');
 
         $data = $query->get();
 
@@ -69,6 +69,11 @@ class ScheduleChangeController extends Controller
 
         $data->status = $request->status;
         $data->kepala = auth()->user()->id_pegawai;
+
+        if ((int) $data->type === 2 && (int) $request->status === 2 && $request->dengan !== null) {
+            $data->dengan = $request->dengan;
+        }
+
         $data->save();
 
         if ((int) $request->status === 3)
@@ -91,10 +96,20 @@ class ScheduleChangeController extends Controller
                 Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => $dengan['id_shift']]);
                 Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
             } else if ((int) $data->type === 2) {
+
                 $pemohon = Schedule::where([
                     ['id_pegawai', '=', $data->pemohon],
                     ['tgl', '=', $first]
                 ])->first();
+
+                if ($request->dengan !== null) {
+                    $dengan = Schedule::where([
+                        ['id_pegawai', '=', $request->dengan],
+                        ['tgl', '=', $first]
+                    ])->first();
+
+                    Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
+                }
 
                 Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => 4]);
             }
