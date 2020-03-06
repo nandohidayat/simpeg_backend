@@ -111,7 +111,11 @@ class ScheduleChangeController extends Controller
                     Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
                 }
 
-                Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => 4]);
+                if ($pemohon === null) {
+                    Schedule::create(['tgl' => $first, 'id_pegawai' => $data->pemohon, 'id_shift' => 4]);
+                } else {
+                    Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => 4]);
+                }
             }
 
             $first->addDay();
