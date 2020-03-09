@@ -53,7 +53,7 @@ class AuthController extends BaseController
             ->join('akses_departemens as ad', function ($join) {
                 $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
                 $join->where('ad.status', 'true');
-                if(!auth()->user()->kepala) {
+                if (!auth()->user()->kepala) {
                     $join->where('ad.only', 'false');
                 }
             })
