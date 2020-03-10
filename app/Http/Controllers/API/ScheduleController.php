@@ -36,23 +36,34 @@ class ScheduleController extends Controller
         if (request()->dept !== null) {
             $dept = request()->dept;
         } else {
-            $listdept = SIMLoginPegawai::where('id_pegawai', auth()->user()->id_pegawai)
-                ->join('f_department as d1', 'd1.id_dept', '=', DB::raw('ANY(f_login_pegawai.id_dept)'))
-                ->select('d1.id_dept', 'd1.nm_dept')
-                ->get();
 
-            foreach ($listdept as $l) {
-                $child = SIMDepartment::where('parent_code', $l->id_dept)
+            if (strpos(auth()->user()->id_dept, 'd-44') !== false) {
+                $query = SIMDepartment::select('id_dept', 'nm_dept');
+            } else {
+                $query = SIMDepartment::whereRaw('id_dept = ANY(\'' . auth()->user()->id_dept . '\')')
                     ->select('id_dept', 'nm_dept')
-                    ->get();
+                    ->orderBy('nm_dept', 'asc');
 
-                if ($child == null) continue;
+                if (strpos(auth()->user()->id_dept, 'd-14') !== false) {
 
-                foreach ($child as $c) {
-                    if (!$listdept->contains('id_dept', $c->id_dept)) $listdept->push($c);
+                    // Ismail 2 = d-63
+                    // Sulaiman 3 = d-65
+                    // Sulaiman 4 = d-74
+                    // Sulaiman 5 = d-10
+                    // Sulaiman 6 = d-66
+                    // Sulaiman 7 = d-75
+                    // Ayyub 1 = d-5
+                    // Ayyub 2 = d-6
+                    // Ayyub 3 = d-7
+
+                    $child = SIMDepartment::whereRaw('f_department.id_dept = ANY(\'{ d-63, d-65, d-74, d-10, d-66, d-75, d-5, d-6, d-7 }\')')
+                        ->select('id_dept', 'nm_dept')
+                        ->orderBy('nm_dept', 'asc');
+                    $query = $query->unionAll($child);
                 }
             }
 
+            $listdept = $query->get();
             $dept = $listdept[0]->id_dept;
         }
 
@@ -74,12 +85,13 @@ class ScheduleController extends Controller
         $date = $firstday->copy();
 
         while (!$date->greaterThan($lastday)) {
-            $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date) {
-                $q->on('sch' . $date->day . '.id_pegawai', '=', 'lp.id_pegawai');
+            $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date, $dept) {
+                $q->where('sch' . $date->day . '.dept', '=', $dept);
+                $q->on('sch' . $date->day . '.pegawai', '=', 'lp.id_pegawai');
                 $q->where('sch' . $date->day . '.tgl', $date->toDateString());
             });
-            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.id_shift', '=', 'shf' . $date->day . '.id_shift');
-            $query->addSelect('sch' . $date->day . '.id_shift as day' . $date->day . '');
+            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.shift', '=', 'shf' . $date->day . '.id_shift');
+            $query->addSelect('sch' . $date->day . '.shift as day' . $date->day . '');
 
             $jam .= 'COALESCE(
                 CASE
@@ -114,6 +126,7 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
+
         $karyawan = DB::table('f_login_pegawai as lp')
             ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
             ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
@@ -125,6 +138,7 @@ class ScheduleController extends Controller
         if (request()->dept === null) {
             $response["dept"] = $listdept;
         }
+
         return response()->json(["status" => "success", "data" => $response], 200);
     }
 
@@ -139,17 +153,20 @@ class ScheduleController extends Controller
         $input = $request->all();
         $last = Carbon::create(request()->year, request()->month)->lastOfMonth()->day;
 
+        error_log(json_encode($input));
+
         foreach ($input as $inp) {
             if (!is_array($inp)) break;
 
-            for ($i = 0; $i < $last; $i++) {
+            for ($i = 1; $i <= $last; $i++) {
                 $obj = array();
-                $obj['id_pegawai'] = $inp['id_pegawai'];
-                $obj['tgl'] = Carbon::create(request()->year, request()->month, $i + 1);
-                $obj['id_shift'] = empty($inp['day' . ($i + 1)]) ? null : $inp['day' . ($i + 1)];
+                $obj['dept'] = request()->dept;
+                $obj['pegawai'] = $inp['id_pegawai'];
+                $obj['tgl'] = Carbon::create(request()->year, request()->month, $i);
+                $obj['shift'] = empty($inp['day' . ($i)]) ? null : $inp['day' . $i];
                 Schedule::updateOrCreate(
-                    ['id_pegawai' => $obj['id_pegawai'], 'tgl' => $obj['tgl']],
-                    ['id_shift' => $obj['id_shift']]
+                    ['dept' => $obj['dept'], 'pegawai' => $obj['pegawai'], 'tgl' => $obj['tgl']],
+                    ['shift' => $obj['shift']]
                 );
             }
         }

@@ -82,11 +82,11 @@ class AbsenController extends Controller
 
         $lastday = $date->diffInMonths($current) === 0 ? $current : $date->copy()->lastOfMonth();
 
-        $data = Schedule::where('schedules.id_pegawai', $id)
+        $data = Schedule::where('schedules.pegawai', $id)
             ->whereBetween('tgl', [$firstday, $lastday])
-            ->whereNotNull('schedules.id_shift')
-            ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.id_pegawai')
-            ->leftJoin('shifts', 'schedules.id_shift', '=', 'shifts.id_shift')
+            ->whereNotNull('schedules.shift')
+            ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
+            ->leftJoin('shifts', 'schedules.shift', '=', 'shifts.id_shift')
             ->leftJoin('presensis as a', function ($join) {
                 $join
                     ->on([
