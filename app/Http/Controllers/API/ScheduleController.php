@@ -153,8 +153,6 @@ class ScheduleController extends Controller
         $input = $request->all();
         $last = Carbon::create(request()->year, request()->month)->lastOfMonth()->day;
 
-        error_log(json_encode($input));
-
         foreach ($input as $inp) {
             if (!is_array($inp)) break;
 
