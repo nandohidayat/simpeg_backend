@@ -37,6 +37,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('karyawan', 'API\KaryawanController');
     Route::apiResource('ruang', 'API\RuangController');
     Route::apiResource('schedule/change', 'API\ScheduleChangeController');
+    Route::apiResource('schedule/request', 'API\ScheduleRequestController');
+    Route::apiResource('schedule/assessor', 'API\ScheduleAssessorController');
     Route::apiResource('schedule', 'API\ScheduleController');
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('pendapatanharian', 'API\PendapatanHarianController');
