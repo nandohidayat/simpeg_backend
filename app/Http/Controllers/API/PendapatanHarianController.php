@@ -17,6 +17,7 @@ class PendapatanHarianController extends Controller
     {
         $data = PendapatanHarian::orderBy('tgl', 'asc')->get();
 
+        if ($data === null) return response()->json(["status" => "failed"], 501);
         return response()->json(["status" => "success", "data" => $data], 200);
     }
 
@@ -32,6 +33,7 @@ class PendapatanHarianController extends Controller
         $data = PendapatanHarian::create($input);
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
+
         return response()->json(["status" => "success", "data" => $data], 200);
     }
 
@@ -55,9 +57,15 @@ class PendapatanHarianController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $data = PendapatanHarian::updateOrCreate(['id_pendapatan_harian' => $id], $request->all());
+        $input = $request->all();
+        $data = PendapatanHarian::find($id);
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
+
+        $data->tgl = $input['tgl'];
+        $data->pendapatan = $input['pendapatan'];
+        $data->save();
+
         return response()->json(["status" => "success"], 201);
     }
 

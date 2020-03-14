@@ -39,12 +39,13 @@ class ScheduleAssessorController extends Controller
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
 
-        $data = ScheduleAssessor::join('f_department as d', 'd.id_dept', '=', 'schedule_assessors.dept')
+        $data = ScheduleAssessor::where('id_schedule_assessor', $data->id_schedule_assessor)
+            ->join('f_department as d', 'd.id_dept', '=', 'schedule_assessors.dept')
             ->join('f_department as a', 'a.id_dept', '=', 'schedule_assessors.assessor')
             ->select('id_schedule_assessor', 'dept', 'assessor', 'd.nm_dept as nm_dept', 'a.nm_dept as nm_ass')
             ->orderBy('nm_dept', 'asc')
             ->orderBy('nm_ass', 'asc')
-            ->get();
+            ->first();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
@@ -77,12 +78,13 @@ class ScheduleAssessorController extends Controller
         $schedule->assessor = $input['assessor'];
         $schedule->save();
 
-        $data = ScheduleAssessor::join('f_department as d', 'd.id_dept', '=', 'schedule_assessors.dept')
+        $data = ScheduleAssessor::where('id_schedule_assessor', $schedule->id_schedule_assessor)
+            ->join('f_department as d', 'd.id_dept', '=', 'schedule_assessors.dept')
             ->join('f_department as a', 'a.id_dept', '=', 'schedule_assessors.assessor')
             ->select('id_schedule_assessor', 'dept', 'assessor', 'd.nm_dept as nm_dept', 'a.nm_dept as nm_ass')
             ->orderBy('nm_dept', 'asc')
             ->orderBy('nm_ass', 'asc')
-            ->get();
+            ->first();
 
         return response()->json(["status" => "success", "data" => $data], 201);
     }

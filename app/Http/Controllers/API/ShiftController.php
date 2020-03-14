@@ -59,9 +59,16 @@ class ShiftController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $data = Shift::updateOrCreate(['id_shift' => $id], $request->all());
+        $input = $request->all();
+        $data = Shift::find($id);
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
+
+        $data->mulai = $input['mulai'];
+        $data->selesai = $input['selesai'];
+        $data->kode = $input['kode'];
+        $data->save();
+
         return response()->json(["status" => "success"], 201);
     }
 
@@ -93,15 +100,13 @@ class ShiftController extends Controller
         $input = $request->all();
         $shift = Shift::all();
 
-        DB::transaction(function () use ($shift, $input) {
-            foreach ($shift as $a) {
-                $status = false;
-                if (in_array($a->id_shift, $input['shift'], true)) {
-                    $status = true;
-                }
-                ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_dept' => $input['departemen']], ['status' => $status]);
+        foreach ($shift as $a) {
+            $status = false;
+            if (in_array($a->id_shift, $input['shift'], true)) {
+                $status = true;
             }
-        });
+            ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_dept' => $input['departemen']], ['status' => $status]);
+        }
 
         return response()->json(["status" => "success"], 201);
     }
