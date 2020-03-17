@@ -6,6 +6,7 @@ use App\ScheduleRequest;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\ScheduleAssessor;
 
 class ScheduleRequestController extends Controller
 {
@@ -26,31 +27,6 @@ class ScheduleRequestController extends Controller
      */
     public function store(Request $request)
     {
-        $input = $request->all();
-
-        // Ayyub 1 = d-5
-        // Ayyub 2 = d-6
-        // Ayyub 3 = d-7
-        // Ismail 2 = d-63
-        // Sulaiman 3 = d-65
-        // Sulaiman 4 = d-74
-        // Sulaiman 5 = d-10
-        // Sulaiman 6 = d-66
-        // Sulaiman 7 = d-75
-
-        $perawat = ['d-5', 'd-6', 'd-7', 'd-63', 'd-65', 'd-74', 'd-10', 'd-66', 'd-75'];
-
-        $input['tgl'] = Carbon::create($input['year'], $input['month']);
-        $input['from'] = $input['dept'];
-
-        if (in_array($input['dept'], $perawat)) {
-            $input['to'] = 'd-14';
-        }
-
-        $data = ScheduleRequest::create($input);
-
-        if ($data === null) return response()->json(["status" => "failed"], 501);
-        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**
@@ -72,6 +48,25 @@ class ScheduleRequestController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $input = $request->all();
+        $data = ScheduleRequest::find($id);
+
+        // 0 = initial
+        // 1 = created
+        // 2 = accepted
+        // 3 = declined
+
+        if ((int) $input['req'] === 1) {
+            $data->status = 1;
+        } else {
+            $data->status = (int) $input['req'];
+            $data->pic = auth()->user()->id_pegawai;
+        }
+
+        $data->save();
+
+        if ($data === null) return response()->json(["status" => "failed"], 501);
+        return response()->json(["status" => "success"], 200);
     }
 
     /**

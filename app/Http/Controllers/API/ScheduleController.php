@@ -7,6 +7,8 @@ use App\Exports\SchedulesExport;
 use App\Http\Controllers\Controller;
 use App\Karyawan;
 use App\Schedule;
+use App\ScheduleAssessor;
+use App\ScheduleRequest;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
 use App\SIMLoginPegawai;
@@ -44,23 +46,12 @@ class ScheduleController extends Controller
                     ->select('id_dept', 'nm_dept')
                     ->orderBy('nm_dept', 'asc');
 
-                if (strpos(auth()->user()->id_dept, 'd-14') !== false) {
+                $child = ScheduleAssessor::whereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\')')
+                    ->join('f_department', 'f_department.id_dept', '=', 'schedule_assessors.dept')
+                    ->select('f_department.id_dept', 'f_department.nm_dept')
+                    ->orderBy('f_department.nm_dept', 'asc');
 
-                    // Ismail 2 = d-63
-                    // Sulaiman 3 = d-65
-                    // Sulaiman 4 = d-74
-                    // Sulaiman 5 = d-10
-                    // Sulaiman 6 = d-66
-                    // Sulaiman 7 = d-75
-                    // Ayyub 1 = d-5
-                    // Ayyub 2 = d-6
-                    // Ayyub 3 = d-7
-
-                    $child = SIMDepartment::whereRaw('f_department.id_dept = ANY(\'{ d-63, d-65, d-74, d-10, d-66, d-75, d-5, d-6, d-7 }\')')
-                        ->select('id_dept', 'nm_dept')
-                        ->orderBy('nm_dept', 'asc');
-                    $query = $query->unionAll($child);
-                }
+                $query = $query->unionAll($child);
             }
 
             $listdept = $query->get();
@@ -125,7 +116,11 @@ class ScheduleController extends Controller
 
         $schedules = $query->get();
 
-        $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
+        $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])
+            ->join('shifts', 'shifts.id_shift', '=', 'shift_departemens.id_shift')
+            ->select('shifts.id_shift', 'shifts.kode')
+            ->orderBy('mulai', 'asc')
+            ->get();
 
         $karyawan = DB::table('f_login_pegawai as lp')
             ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
@@ -133,7 +128,24 @@ class ScheduleController extends Controller
             ->select('lp.id_pegawai', 'dp.nm_pegawai')
             ->get();
 
-        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'karyawan' => $karyawan];
+        $ass = ScheduleAssessor::whereRaw('schedule_assessors.dept = ANY(\'' . auth()->user()->id_dept . '\')')
+            ->orWhereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\') AND schedule_assessors.dept = \'' . $dept . '\'')
+            ->first();
+
+        $assessor = null;
+
+        if ($ass !== null) {
+            error_log($ass->id_schedule_assessor);
+            $assessor = new stdClass();
+
+            $assessor->ass = strpos(auth()->user()->id_dept, $ass->assessor);
+
+            $req = ScheduleRequest::firstOrCreate(['assessor' => $ass->id_schedule_assessor, 'tgl' => $firstday], ['status' => 0]);
+            $assessor->id = $req->id_schedule_request;
+            $assessor->req = $req->status;
+        }
+
+        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'karyawan' => $karyawan, 'assessor' => $assessor];
 
         if (request()->dept === null) {
             $response["dept"] = $listdept;

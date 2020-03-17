@@ -15,8 +15,7 @@ class CreateScheduleRequestsTable extends Migration
     {
         Schema::create('schedule_requests', function (Blueprint $table) {
             $table->bigIncrements('id_schedule_request');
-            $table->string('from');
-            $table->string('to');
+            $table->string('assessor');
             $table->date('tgl');
             $table->integer('status');
             $table->timestamps();
