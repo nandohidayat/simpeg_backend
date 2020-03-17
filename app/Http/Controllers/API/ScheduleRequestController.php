@@ -54,7 +54,6 @@ class ScheduleRequestController extends Controller
         // 0 = initial
         // 1 = created
         // 2 = accepted
-        // 3 = declined
 
         if ((int) $input['req'] === 1) {
             $data->status = 1;

@@ -135,7 +135,6 @@ class ScheduleController extends Controller
         $assessor = null;
 
         if ($ass !== null) {
-            error_log($ass->id_schedule_assessor);
             $assessor = new stdClass();
 
             $assessor->ass = strpos(auth()->user()->id_dept, $ass->assessor);
