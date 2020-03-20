@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Karyawan;
 use App\Schedule;
 use App\ScheduleAssessor;
+use App\ScheduleHoliday;
 use App\ScheduleRequest;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
@@ -240,5 +241,28 @@ class ScheduleController extends Controller
     public function export($id)
     {
         return Excel::download(new SchedulesExport($id, request()->year, request()->month), 'schedules.xlsx');
+    }
+
+    public function holiday()
+    {
+        $endpoint = "https://raw.githubusercontent.com/guangrei/Json-Indonesia-holidays/master/calendar.json";
+        $client = new \GuzzleHttp\Client();
+
+        $data = $client->request('GET', $endpoint)->getBody();
+        $data = json_decode($data);
+
+        foreach ($data as $key => $value) {
+            if ($key === 'created-at') continue;
+
+            $year = substr($key, 0, 4);
+            $month = substr($key, 4, 2);
+            $day = substr($key, 6, 2);
+
+            $date = Carbon::create($year, $month, $day);
+
+            ScheduleHoliday::updateOrCreate(['tgl' => $date, 'keterangan' => $value->deskripsi]);
+        }
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 }
