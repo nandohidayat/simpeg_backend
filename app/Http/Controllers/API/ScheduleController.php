@@ -145,7 +145,14 @@ class ScheduleController extends Controller
             $assessor->req = $req->status;
         }
 
-        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'karyawan' => $karyawan, 'assessor' => $assessor];
+        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->get();
+        $holiday = [];
+        foreach ($dataholiday as $h) {
+            $day = Carbon::createFromFormat('Y-m-d', $h->tgl)->day;
+            array_push($holiday, $day);
+        }
+
+        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'holiday' => $holiday, 'karyawan' => $karyawan, 'assessor' => $assessor];
 
         if (request()->dept === null) {
             $response["dept"] = $listdept;
@@ -264,5 +271,60 @@ class ScheduleController extends Controller
         }
 
         return response()->json(["status" => "success", "data" => $data], 200);
+    }
+
+    public function print()
+    {
+        error_log('IT IS CALLED');
+
+        $thisMonth = Carbon::createFromFormat('Y-m', request()->date);
+        $firstday = $thisMonth->copy()->firstOfMonth();
+        $lastday = $thisMonth->copy()->lastOfMonth();
+
+        $dept = request()->dept;
+
+        $query = DB::table('f_login_pegawai as lp')
+            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
+            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
+            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama');
+
+        $weekend = [];
+
+        $date = $firstday->copy();
+
+        while (!$date->greaterThan($lastday)) {
+            $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date, $dept) {
+                $q->where('sch' . $date->day . '.dept', '=', $dept);
+                $q->on('sch' . $date->day . '.pegawai', '=', 'lp.id_pegawai');
+                $q->where('sch' . $date->day . '.tgl', $date->toDateString());
+            });
+            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.shift', '=', 'shf' . $date->day . '.id_shift');
+            $query->addSelect('shf' . $date->day . '.kode as day' . $date->day . '');
+
+            if ($date->dayOfWeek === 0) array_push($weekend, $date->day);
+
+            $date->addDay();
+        }
+
+        $schedules = $query->get();
+
+
+        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->get();
+        $holiday = [];
+        foreach ($dataholiday as $h) {
+            $day = Carbon::createFromFormat('Y-m-d', $h->tgl)->day;
+            array_push($holiday, $day);
+        }
+
+        $deptname = SIMDepartment::where('id_dept', request()->dept)->first()->nm_dept;
+        $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])
+            ->join('shifts', 'shifts.id_shift', '=', 'shift_departemens.id_shift')
+            ->select('shifts.id_shift', 'shifts.kode')
+            ->orderBy('mulai', 'asc')
+            ->get();
+
+        $response = ["schedule" => $schedules, 'weekend' => $weekend, 'holiday' => $holiday, 'dept' => $deptname, 'shift' => $shift];
+
+        return response()->json(["status" => "success", "data" => $response], 200);
     }
 }
