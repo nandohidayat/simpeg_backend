@@ -275,8 +275,6 @@ class ScheduleController extends Controller
 
     public function print()
     {
-        error_log('IT IS CALLED');
-
         $thisMonth = Carbon::createFromFormat('Y-m', request()->date);
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
@@ -319,7 +317,7 @@ class ScheduleController extends Controller
         $deptname = SIMDepartment::where('id_dept', request()->dept)->first()->nm_dept;
         $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])
             ->join('shifts', 'shifts.id_shift', '=', 'shift_departemens.id_shift')
-            ->select('shifts.id_shift', 'shifts.kode')
+            ->select('shifts.kode', 'shifts.keterangan')
             ->orderBy('mulai', 'asc')
             ->get();
 

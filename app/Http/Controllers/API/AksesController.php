@@ -50,7 +50,6 @@ class AksesController extends Controller
     {
         $input = $request->all();
         $akses = Akses::all();
-        error_log($input['dept']);
         foreach ($akses as $a) {
             $status = false;
             $only = false;
