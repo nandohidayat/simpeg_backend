@@ -18,7 +18,7 @@ class CreateAksesDepartemensTable extends Migration
             $table->bigInteger('id_akses');
             $table->text('id_dept');
             $table->boolean('status');
-            $table->boolean('only')->default(false);
+            $table->boolean('only')->nullable();
             $table->timestamps();
         });
     }
