@@ -12,17 +12,17 @@ class RuangSeeder extends Seeder
     public function run()
     {
         //
-        DB::table('ruangs')->insert([
-            'ruang' => 'Ayyub 1'
-        ]);
-        DB::table('ruangs')->insert([
-            'ruang' => 'Ayyub 2'
-        ]);
-        DB::table('ruangs')->insert([
-            'ruang' => 'Ayyub 3'
-        ]);
-        DB::table('ruangs')->insert([
-            'ruang' => 'SIM'
-        ]);
+        // DB::table('ruangs')->insert([
+        //     'ruang' => 'Ayyub 1'
+        // ]);
+        // DB::table('ruangs')->insert([
+        //     'ruang' => 'Ayyub 2'
+        // ]);
+        // DB::table('ruangs')->insert([
+        //     'ruang' => 'Ayyub 3'
+        // ]);
+        // DB::table('ruangs')->insert([
+        //     'ruang' => 'SIM'
+        // ]);
     }
 }

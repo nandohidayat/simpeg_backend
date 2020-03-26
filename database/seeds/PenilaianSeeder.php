@@ -12,10 +12,10 @@ class PenilaianSeeder extends Seeder
     public function run()
     {
         //
-        DB::table('penilaians')->insert([
-            'mulai' => date('2019-10-10'),
-            'selesai' => date('2019-10-17'),
-            'pegawais_id' => 1
-        ]);
+        // DB::table('penilaians')->insert([
+        //     'mulai' => date('2019-10-10'),
+        //     'selesai' => date('2019-10-17'),
+        //     'pegawais_id' => 1
+        // ]);
     }
 }

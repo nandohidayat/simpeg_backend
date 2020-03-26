@@ -11,11 +11,11 @@ class BagianSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('bagians')->insert([
-            'bagian' => 'Non Medis',
-        ]);
-        DB::table('bagians')->insert([
-            'bagian' => 'Medis',
-        ]);
+        // DB::table('bagians')->insert([
+        //     'bagian' => 'Non Medis',
+        // ]);
+        // DB::table('bagians')->insert([
+        //     'bagian' => 'Medis',
+        // ]);
     }
 }

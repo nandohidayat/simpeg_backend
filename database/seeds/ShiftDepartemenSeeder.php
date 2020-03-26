@@ -12,15 +12,15 @@ class ShiftDepartemenSeeder extends Seeder
      */
     public function run()
     {
-        DB::table('shift_departemens')->insert([
-            'id_shift' => 1,
-            'id_departemen' => 1,
-            'status' => true
-        ]);
-        DB::table('shift_departemens')->insert([
-            'id_shift' => 2,
-            'id_departemen' => 1,
-            'status' => true
-        ]);
+        // DB::table('shift_departemens')->insert([
+        //     'id_shift' => 1,
+        //     'id_departemen' => 1,
+        //     'status' => true
+        // ]);
+        // DB::table('shift_departemens')->insert([
+        //     'id_shift' => 2,
+        //     'id_departemen' => 1,
+        //     'status' => true
+        // ]);
     }
 }
