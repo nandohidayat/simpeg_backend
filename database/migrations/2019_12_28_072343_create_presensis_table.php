@@ -15,10 +15,10 @@ class CreatePresensisTable extends Migration
     {
         Schema::create('presensis', function (Blueprint $table) {
             $table->bigIncrements('id_presensi');
-            $table->tinyInteger('pin');
+            $table->smallInteger('pin');
             $table->dateTime('datetime');
-            $table->tinyInteger('verified');
-            $table->tinyInteger('status');
+            $table->smallInteger('verified');
+            $table->smallInteger('status');
             $table->timestamps();
         });
     }

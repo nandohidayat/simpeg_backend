@@ -15,12 +15,14 @@ class CreateScheduleChangesTable extends Migration
     {
         Schema::create('schedule_changes', function (Blueprint $table) {
             $table->bigIncrements('id_schedule_change');
-            $table->Date('tgl');
             $table->integer('type');
-            $table->bigInteger('pemohon');
-            $table->bigInteger('dengan')->nullable();
-            $table->bigInteger('id_shift')->nullable();
+            $table->date('mulai');
+            $table->date('selesai');
+            $table->string('pemohon');
+            $table->string('dengan')->nullable();
             $table->integer('status')->default(0);
+            $table->string('dept');
+            $table->string('kepala');
             $table->timestamps();
         });
     }
