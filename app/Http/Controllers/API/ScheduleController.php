@@ -118,10 +118,7 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
         $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])
-            ->join('shifts', 'shifts.id_shift', '=', 'shift_departemens.id_shift')
-            ->select('shifts.id_shift', 'shifts.kode')
-            ->orderBy('mulai', 'asc')
-            ->get();
+            ->pluck('id_shift');
 
         $karyawan = DB::table('f_login_pegawai as lp')
             ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
