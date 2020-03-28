@@ -145,10 +145,10 @@ class ScheduleController extends Controller
             $assessor->req = $req->status;
         }
 
-        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->get();
+        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->pluck('tgl');
         $holiday = [];
         foreach ($dataholiday as $h) {
-            $day = Carbon::createFromFormat('Y-m-d', $h->tgl)->day;
+            $day = Carbon::createFromFormat('Y-m-d', $h)->day;
             array_push($holiday, $day);
         }
 
@@ -307,10 +307,10 @@ class ScheduleController extends Controller
         $schedules = $query->get();
 
 
-        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->get();
+        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->pluck('tgl');
         $holiday = [];
         foreach ($dataholiday as $h) {
-            $day = Carbon::createFromFormat('Y-m-d', $h->tgl)->day;
+            $day = Carbon::createFromFormat('Y-m-d', $h)->day;
             array_push($holiday, $day);
         }
 
