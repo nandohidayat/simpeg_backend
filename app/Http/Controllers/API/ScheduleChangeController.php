@@ -85,36 +85,36 @@ class ScheduleChangeController extends Controller
         while ($first->lessThanOrEqualTo($last)) {
             if ((int) $data->type === 1) {
                 $pemohon = Schedule::where([
-                    ['id_pegawai', '=', $data->pemohon],
+                    ['pegawai', '=', $data->pemohon],
                     ['tgl', '=', $first]
                 ])->first();
                 $dengan = Schedule::where([
-                    ['id_pegawai', '=', $data->dengan],
+                    ['pegawai', '=', $data->dengan],
                     ['tgl', '=', $first]
                 ])->first();
 
-                Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => $dengan['id_shift']]);
-                Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
+                Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['shift' => $dengan['shift']]);
+                Schedule::where('id_schedule', $dengan['id_schedule'])->update(['shift' => $pemohon['shift']]);
             } else if ((int) $data->type === 2) {
 
                 $pemohon = Schedule::where([
-                    ['id_pegawai', '=', $data->pemohon],
+                    ['pegawai', '=', $data->pemohon],
                     ['tgl', '=', $first]
                 ])->first();
 
                 if ($request->dengan !== null) {
                     $dengan = Schedule::where([
-                        ['id_pegawai', '=', $request->dengan],
+                        ['pegawai', '=', $request->dengan],
                         ['tgl', '=', $first]
                     ])->first();
 
-                    Schedule::where('id_schedule', $dengan['id_schedule'])->update(['id_shift' => $pemohon['id_shift']]);
+                    Schedule::where('id_schedule', $dengan['id_schedule'])->update(['shift' => $pemohon['shift']]);
                 }
 
                 if ($pemohon === null) {
-                    Schedule::create(['tgl' => $first, 'id_pegawai' => $data->pemohon, 'id_shift' => 4]);
+                    Schedule::create(['tgl' => $first, 'pegawai' => $data->pemohon, 'shift' => 4]);
                 } else {
-                    Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['id_shift' => 4]);
+                    Schedule::where('id_schedule', $pemohon['id_schedule'])->update(['shift' => 4]);
                 }
             }
 
