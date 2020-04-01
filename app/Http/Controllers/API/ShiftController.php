@@ -2,12 +2,10 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Departemen;
 use App\Http\Controllers\Controller;
 use App\Shift;
 use App\ShiftDepartemen;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class ShiftController extends Controller
 {
