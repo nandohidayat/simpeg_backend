@@ -91,7 +91,7 @@ class ShiftController extends Controller
 
     public function getDepartemens($id)
     {
-        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->pluck('id_shift');
+        $shift = ShiftDepartemen::where('id_dept', $id)->pluck('id_shift');
 
         return response()->json(["status" => "success", "data" => $shift], 200);
     }
@@ -99,15 +99,15 @@ class ShiftController extends Controller
     public function createDepartemens(Request $request)
     {
         $input = $request->all();
-        $shift = Shift::all();
 
-        foreach ($shift as $a) {
-            $status = false;
-            if (in_array($a->id_shift, $input['shift'], true)) {
-                $status = true;
-            }
-            ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_dept' => $input['departemen']], ['status' => $status]);
+        ShiftDepartemen::where('id_dept', $input['departemen'])->delete();
+
+        $data = [];
+        foreach ($input['shift'] as $s) {
+            array_push($data, ['id_dept' => $input['departemen'], 'id_shift' => $s]);
         }
+
+        ShiftDepartemen::insert($data);
 
         return response()->json(["status" => "success"], 201);
     }
