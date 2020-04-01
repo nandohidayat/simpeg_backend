@@ -15,8 +15,9 @@ class CreateShiftDepartemensTable extends Migration
     {
         Schema::create('shift_departemens', function (Blueprint $table) {
             $table->bigIncrements('id_shift_departemen');
-            $table->string('id_dept');
             $table->bigInteger('id_shift');
+            $table->string('id_dept');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
