@@ -87,7 +87,7 @@ class ScheduleController extends Controller
 
             $jam .= 'COALESCE(
                 CASE
-                WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai > time \'00:00\' THEN
+                WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai >= time \'00:00\' THEN
                     shf' . $date->day . '.selesai - shf' . $date->day . '.mulai
                 ELSE
                     shf' . $date->day . '.selesai - shf' . $date->day . '.mulai + interval \'24 hours\'
