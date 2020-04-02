@@ -115,21 +115,8 @@ class AbsenController extends Controller
                 'shifts.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
                 DB::raw('cast(min(b.datetime) as time) as keluar'),
-                DB::raw("(
-                    case when
-                        cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes')
-                        OR
-                        (cast(shifts.mulai as time) = time '00:00')
-                    then
-                        'Tidak Terlambat' else 'Terlambat' end)
-                    as keterangan"),
-                DB::raw("(
-                    case when
-                        cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes')
-                        OR (cast(shifts.mulai as time) = time '00:00')
-                    then
-                        (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end)
-                    as pendapatan")
+                DB::raw("(case when cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when cast(a.datetime as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
             ->groupBy('schedules.id_schedule', 'shifts.kode', 'keterangan', 'pendapatan', 'a.datetime', 'shifts.mulai')
             ->get();
