@@ -18,7 +18,7 @@ class CreateScheduleRequestsTable extends Migration
             $table->bigInteger('assessor');
             $table->date('tgl');
             $table->integer('status');
-            $table->string('pic');
+            $table->string('pic')->nullable();
             $table->timestamps();
         });
     }
