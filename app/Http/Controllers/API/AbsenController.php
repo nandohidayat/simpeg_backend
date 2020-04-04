@@ -112,7 +112,7 @@ class AbsenController extends Controller
             ->select(
                 'schedules.id_schedule',
                 'schedules.tgl as tanggal',
-                'shifts.kode as shift',
+                'shifts.kode as shift'
                 // DB::raw('cast(min(a.datetime) as time) as masuk'),
                 // DB::raw('cast(min(b.datetime) as time) as keluar'),
                 // DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
