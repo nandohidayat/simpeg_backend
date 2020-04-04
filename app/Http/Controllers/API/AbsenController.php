@@ -86,39 +86,39 @@ class AbsenController extends Controller
             ->where('schedules.pegawai', $id)
             ->whereBetween('tgl', [$firstday, $lastday])
             ->whereNotNull('schedules.shift')
-            // ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
+            ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
             ->leftJoin('shifts', 'schedules.shift', '=', 'shifts.id_shift')
-            // ->leftJoin('presensis as a', function ($join) {
-            //     $join
-            //         ->on([
-            //             ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
-            //             [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
-            //             [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
-            //             [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
-            //         ])
-            //         ->where([
-            //             ['a.status', '=', '0'],
-            //         ]);
-            // })
-            // ->leftJoin('presensis as b', function ($join) {
-            //     $join
-            //         ->on([
-            //             ['b.pin', '=', 'a.pin'],
-            //             ['b.datetime', '>', 'a.datetime']
-            //         ])
-            //         ->where('b.status', '=', '1');
-            // })
+            ->leftJoin('presensis as a', function ($join) {
+                $join
+                    ->on([
+                        ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
+                        [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
+                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
+                        [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
+                    ])
+                    ->where([
+                        ['a.status', '=', '0'],
+                    ]);
+            })
+            ->leftJoin('presensis as b', function ($join) {
+                $join
+                    ->on([
+                        ['b.pin', '=', 'a.pin'],
+                        ['b.datetime', '>', 'a.datetime']
+                    ])
+                    ->where('b.status', '=', '1');
+            })
             ->orderBy('schedules.tgl')
             ->select(
                 'schedules.id_schedule',
                 'schedules.tgl as tanggal',
-                'shifts.kode as shift'
-                // DB::raw('cast(min(a.datetime) as time) as masuk'),
-                // DB::raw('cast(min(b.datetime) as time) as keluar'),
-                // DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                // DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                'shifts.kode as shift',
+                DB::raw('cast(min(a.datetime) as time) as masuk'),
+                DB::raw('cast(min(b.datetime) as time) as keluar'),
+                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
-            // ->groupBy('schedules.id_schedule', 'shifts.kode')
+            ->groupBy('schedules.id_schedule', 'shifts.kode', 'shifts.mulai')
             ->get();
 
         $sum = 0;
