@@ -41,7 +41,7 @@ class ScheduleController extends Controller
         } else {
 
             if (strpos(auth()->user()->id_dept, 'd-44') !== false) {
-                $query = SIMDepartment::select('id_dept', 'nm_dept');
+                $query = SIMDepartment::select('id_dept', 'nm_dept')->orderBy('nm_dept', 'asc');
             } else {
                 $query = SIMDepartment::whereRaw('id_dept = ANY(\'' . auth()->user()->id_dept . '\')')
                     ->select('id_dept', 'nm_dept')
