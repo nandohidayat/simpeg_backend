@@ -36,9 +36,12 @@ class AuthController extends BaseController
             'user_pegawai' => $request->username,
             'pass_pegawai' => md5($request->password)
         ])
-            ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai')
-            ->leftJoin('f_department as d', 'd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
-            ->select('f_login_pegawai.*', 'f_data_pegawai.nik_pegawai as nik', DB::raw('(CASE WHEN d.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
+            ->join('f_data_pegawai as fdp', function ($join) {
+                $join->on('fdp.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
+                $join->where('fdp.is_active', 'true');
+            })
+            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
+            ->select('f_login_pegawai.id_pegawai', 'fdp.nik_pegawai as nik', 'f_login_pegawai.user_pegawai', 'fdp.id_dept', 'fdp.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
             ->first();
 
         if ($user == null)
@@ -48,8 +51,8 @@ class AuthController extends BaseController
 
         $token = auth()->login($user);
 
-        $dataAkses = DB::table('f_login_pegawai as flp')
-            ->where('flp.id_pegawai', auth()->user()->id_pegawai)
+        $dataAkses = DB::table('f_data_pegawai as fdp')
+            ->where('fdp.id_pegawai', auth()->user()->id_pegawai)
             ->join('akses_departemens as ad', function ($join) {
                 $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
                 $join->where('ad.status', 'true');
