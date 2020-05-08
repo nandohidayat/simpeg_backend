@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Departemen;
 use App\Exports\SchedulesExport;
 use App\Http\Controllers\Controller;
 use App\Karyawan;
@@ -12,11 +11,8 @@ use App\ScheduleHoliday;
 use App\ScheduleRequest;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
-use App\SIMLoginPegawai;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Facades\Excel;
 use stdClass;

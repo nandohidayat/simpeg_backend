@@ -19,6 +19,7 @@ class CreateSchedulesTable extends Migration
             $table->string('pegawai');
             $table->date('tgl');
             $table->bigInteger('shift')->nullable();
+            $table->bigInteger('job')->nullable();
             $table->timestamps();
         });
     }
