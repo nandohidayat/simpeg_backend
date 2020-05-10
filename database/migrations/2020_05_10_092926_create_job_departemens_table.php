@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAdditionalsTable extends Migration
+class CreateJobDepartemensTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class CreateAdditionalsTable extends Migration
      */
     public function up()
     {
-        Schema::create('additionals', function (Blueprint $table) {
-            $table->bigIncrements('id');
+        Schema::create('job_departemens', function (Blueprint $table) {
+            $table->bigIncrements('id_job_departemen');
+            $table->string('id_dept');
+            $table->bigInteger('id_job');
+            $table->boolean('status');
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ class CreateAdditionalsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('additionals');
+        Schema::dropIfExists('job_departemens');
     }
 }

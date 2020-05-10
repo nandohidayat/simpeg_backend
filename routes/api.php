@@ -30,6 +30,8 @@ Route::middleware('auth:api')->group(function () {
     Route::get("logout", "API\AuthController@logout");
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
+    Route::get('job/departemen/{id}', 'API\JobController@getDepartemens');
+    Route::put('job/departemen/{id}', 'API\JobController@createDepartemens');
 
     Route::apiResource('absen', 'API\AbsenController');
     Route::apiResource('akses', 'API\AksesController');
@@ -42,7 +44,8 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('schedule/assessor', 'API\ScheduleAssessorController');
     Route::apiResource('schedule', 'API\ScheduleController');
     Route::apiResource('shift', 'API\ShiftController');
-    Route::apiResource('pendapatanharian', 'API\PendapatanHarianController');
+    Route::apiResource('job', 'API\JobController');
+    Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
 
 
     // OLD CODE
