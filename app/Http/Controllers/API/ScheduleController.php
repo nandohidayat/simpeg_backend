@@ -55,20 +55,13 @@ class ScheduleController extends Controller
             $dept = $listdept[0]->id_dept;
         }
 
-        $query = DB::table('f_login_pegawai as lp')
+        $query = DB::table('f_data_pegawai as dp')
             ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
-            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
-            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama');
+            ->select('dp.id_pegawai', 'dp.nm_pegawai as nama');
 
         $jam = '';
         $header = [];
         $weekend = [];
-
-        $obj = new stdClass();
-        $obj->text = "Nama";
-        $obj->value = "nama";
-        $obj->width = "250px";
-        array_push($header, $obj);
 
         $date = $firstday->copy();
 
