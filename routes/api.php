@@ -42,14 +42,9 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('schedule/change', 'API\ScheduleChangeController');
     Route::apiResource('schedule/request', 'API\ScheduleRequestController');
     Route::apiResource('schedule/assessor', 'API\ScheduleAssessorController');
+    Route::apiResource('schedule/access', 'API\ScheduleAccessController');
     Route::apiResource('schedule', 'API\ScheduleController');
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('job', 'API\JobController');
     Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
-
-
-    // OLD CODE
-    Route::get('penilaian/{id}/update', 'API\PenilaianController@updateDetail');
-    Route::resource('pegawai', 'API\PegawaiController');
-    Route::resource('penilaian', 'API\PenilaianController');
 });
