@@ -4,8 +4,10 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\SchedulesExport;
 use App\Http\Controllers\Controller;
+use App\JobDepartemen;
 use App\Karyawan;
 use App\Schedule;
+use App\ScheduleAccess;
 use App\ScheduleAssessor;
 use App\ScheduleHoliday;
 use App\ScheduleRequest;
@@ -43,24 +45,24 @@ class ScheduleController extends Controller
                     ->select('id_dept', 'nm_dept')
                     ->orderBy('nm_dept', 'asc');
 
-                $child = ScheduleAssessor::whereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\')')
-                    ->join('f_department', 'f_department.id_dept', '=', 'schedule_assessors.dept')
+                $child = ScheduleAccess::whereRaw('schedule_accesses.access = ANY(\'' . auth()->user()->id_dept . '\')')
+                    ->join('f_department', 'f_department.id_dept', '=', 'schedule_accesses.dept')
                     ->select('f_department.id_dept', 'f_department.nm_dept')
                     ->orderBy('f_department.nm_dept', 'asc');
 
                 $query = $query->unionAll($child);
             }
 
-            $listdept = $query->get();
-            $dept = $listdept[0]->id_dept;
+            $depts = $query->get();
+            $dept = $depts[0]->id_dept;
         }
 
         $query = DB::table('f_data_pegawai as dp')
-            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
-            ->select('dp.id_pegawai', 'dp.nm_pegawai as nama');
+            ->whereRaw('\'' . $dept . '\' = ANY(dp.id_dept)')
+            ->where('is_active', true)
+            ->select('dp.id_pegawai', 'dp.nm_pegawai as nama')
+            ->orderBy('nik_pegawai');
 
-        $jam = '';
-        $header = [];
         $weekend = [];
 
         $date = $firstday->copy();
@@ -68,68 +70,48 @@ class ScheduleController extends Controller
         while (!$date->greaterThan($lastday)) {
             $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date, $dept) {
                 $q->where('sch' . $date->day . '.dept', '=', $dept);
-                $q->on('sch' . $date->day . '.pegawai', '=', 'lp.id_pegawai');
+                $q->on('sch' . $date->day . '.pegawai', '=', 'dp.id_pegawai');
                 $q->where('sch' . $date->day . '.tgl', $date->toDateString());
             });
-            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.shift', '=', 'shf' . $date->day . '.id_shift');
-            $query->addSelect('sch' . $date->day . '.shift as day' . $date->day . '');
 
-            $jam .= 'COALESCE(
+            $query->leftJoin('shifts as shf' . $date->day . '', 'shf' . $date->day . '.id_shift', '=', 'sch' . $date->day . '.shift');
+
+            $query->addSelect('sch' . $date->day . '.shift as shift' . $date->day . '');
+            $query->addSelect('sch' . $date->day . '.job as job' . $date->day . '');
+            $query->selectRaw('COALESCE(
                 CASE
                 WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai >= time \'00:00\' THEN
                     shf' . $date->day . '.selesai - shf' . $date->day . '.mulai
                 ELSE
                     shf' . $date->day . '.selesai - shf' . $date->day . '.mulai + interval \'24 hours\'
                 END
-                , interval \'0 hours\')';
-
-            if (!$date->equalTo($lastday)) $jam .= ' + ';
-
-            $obj = new stdClass();
-            $obj->text = $date->day;
-            $obj->value = "day" . ($date->day);
-            $obj->sortable = false;
-            array_push($header, $obj);
+                , interval \'0 hours\') as jam' . $date->day);
 
             if ($date->dayOfWeek === 0) array_push($weekend, $date->day);
 
             $date->addDay();
         }
 
-        $query->addSelect(DB::raw($jam .= 'as jam'));
-
-        $obj = new stdClass();
-        $obj->text = "Total Jam";
-        $obj->value = "jam";
-        $obj->width = "110px";
-        array_push($header, $obj);
-
         $schedules = $query->get();
 
-        $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])
-            ->pluck('id_shift');
+        // $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
+        // $job = JobDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_job');
 
-        $karyawan = DB::table('f_login_pegawai as lp')
-            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
-            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
-            ->select('lp.id_pegawai', 'dp.nm_pegawai')
-            ->get();
+        // $ass = ScheduleAssessor::whereRaw('schedule_assessors.dept = ANY(\'' . auth()->user()->id_dept . '\')')
+        //     ->orWhereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\') AND schedule_assessors.dept = \'' . $dept . '\'')
+        //     ->first();
 
-        $ass = ScheduleAssessor::whereRaw('schedule_assessors.dept = ANY(\'' . auth()->user()->id_dept . '\')')
-            ->orWhereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\') AND schedule_assessors.dept = \'' . $dept . '\'')
-            ->first();
+        // $assessor = null;
 
-        $assessor = null;
+        // if ($ass !== null) {
+        //     $assessor = new stdClass();
 
-        if ($ass !== null) {
-            $assessor = new stdClass();
+        //     $assessor->ass = strpos(auth()->user()->id_dept, $ass->assessor);
 
-            $assessor->ass = strpos(auth()->user()->id_dept, $ass->assessor);
-
-            $req = ScheduleRequest::firstOrCreate(['assessor' => $ass->id_schedule_assessor, 'tgl' => $firstday], ['status' => 0]);
-            $assessor->id = $req->id_schedule_request;
-            $assessor->req = $req->status;
-        }
+        //     $req = ScheduleRequest::firstOrCreate(['assessor' => $ass->id_schedule_assessor, 'tgl' => $firstday], ['status' => 0]);
+        //     $assessor->id = $req->id_schedule_request;
+        //     $assessor->req = $req->status;
+        // }
 
         $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->pluck('tgl');
         $holiday = [];
@@ -138,10 +120,29 @@ class ScheduleController extends Controller
             array_push($holiday, $day);
         }
 
-        $response = ["schedule" => $schedules, "header" => $header, 'shift' => $shift, 'weekend' => $weekend, 'holiday' => $holiday, 'karyawan' => $karyawan, 'assessor' => $assessor];
+        $nama = [];
+        $shift = [];
+        $job = [];
+        $jam = [];
+        foreach ($schedules as $s) {
+            array_push($nama, $s->nama);
+            $stemp = [];
+            $jtemp = [];
+            $temp = strtotime('00:00:00');
+            for ($i = 1; $i <= $lastday->day; $i++) {
+                array_push($stemp, $s->{'shift' . $i});
+                array_push($jtemp, $s->{'job' . $i});
+                $temp += strtotime($s->{'jam' . $i});
+            }
+            array_push($shift, $stemp);
+            array_push($job, $jtemp);
+            array_push($jam, date('H:i:s', $temp));
+        }
+
+        $response = ["nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
 
         if (request()->dept === null) {
-            $response["dept"] = $listdept;
+            $response["dept"] = $depts;
         }
 
         return response()->json(["status" => "success", "data" => $response], 200);

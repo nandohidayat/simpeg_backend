@@ -8,7 +8,7 @@ class Shift extends Model
 {
     protected $primaryKey = 'id_shift';
     protected $hidden = ['created_at', 'updated_at'];
-    protected $fillable = ['mulai', 'selesai', 'kode', 'keterangan'];
+    protected $fillable = ['mulai', 'selesai', 'kode', 'jam', 'keterangan'];
 
     public function shiftDepartemens()
     {
