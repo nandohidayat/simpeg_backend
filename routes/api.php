@@ -29,9 +29,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::get("logout", "API\AuthController@logout");
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
-    Route::post('shift/departemen', 'API\ShiftController@createDepartemens');
+    Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');
     Route::get('job/departemen/{id}', 'API\JobController@getDepartemens');
-    Route::put('job/departemen/{id}', 'API\JobController@createDepartemens');
+    Route::put('job/departemen/{id}', 'API\JobController@updateDepartemens');
 
     Route::apiResource('absen', 'API\AbsenController');
     Route::apiResource('akses', 'API\AksesController');

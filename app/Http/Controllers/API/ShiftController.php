@@ -94,17 +94,20 @@ class ShiftController extends Controller
         return response()->json(["status" => "success", "data" => $shift], 200);
     }
 
-    public function createDepartemens(Request $request)
+    public function updateDepartemens(Request $request, $id)
     {
+
         $input = $request->all();
-        $shift = Shift::all();
+        error_log(json_encode($input));
+        $shift = Shift::pluck('id_shift');
+        $active = array_map('intval', $input['shift']);
 
         foreach ($shift as $a) {
             $status = false;
-            if (in_array($a->id_shift, $input['shift'], true)) {
+            if (in_array($a, $active, true)) {
                 $status = true;
             }
-            ShiftDepartemen::updateOrCreate(['id_shift' => $a->id_shift, 'id_dept' => $input['departemen']], ['status' => $status]);
+            ShiftDepartemen::updateOrCreate(['id_shift' => $a, 'id_dept' => $id], ['status' => $status]);
         }
 
         return response()->json(["status" => "success"], 201);

@@ -92,7 +92,7 @@ class JobController extends Controller
         return response()->json(["status" => "success", "data" => $shift], 200);
     }
 
-    public function createDepartemens(Request $request, $id)
+    public function updateDepartemens(Request $request, $id)
     {
         $input = $request->all();
         $job = Job::pluck('id_job');
