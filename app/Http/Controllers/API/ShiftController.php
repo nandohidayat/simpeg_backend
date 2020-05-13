@@ -45,7 +45,26 @@ class ShiftController extends Controller
      */
     public function show($id)
     {
-        //
+        $parent = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])
+            ->join('shifts', function ($q) {
+                $q->on('shifts.id_shift', '=', 'shift_departemens.id_shift');
+                $q->where('shifts.mulai', '!=', '00:00:00');
+                $q->where('shifts.selesai', '!=', '00:00:00');
+            })
+            ->orderBy('mulai', 'asc')
+            ->select('shift_departemens.id_shift');
+
+        $data = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])
+            ->join('shifts', function ($q) {
+                $q->on('shifts.id_shift', '=', 'shift_departemens.id_shift');
+                $q->where('shifts.mulai', '=', '00:00:00');
+                $q->where('shifts.selesai', '=', '00:00:00');
+            })
+            ->orderBy('mulai', 'asc')
+            ->unionAll($parent)
+            ->pluck('shift_departemens.id_shift');
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**

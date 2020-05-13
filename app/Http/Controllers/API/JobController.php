@@ -45,7 +45,12 @@ class JobController extends Controller
      */
     public function show($id)
     {
-        //
+        $data = JobDepartemen::where(['id_dept' => $id, 'status' => true])
+            ->leftJoin('jobs', 'jobs.id_job', '=', 'job_departemens.id_job')
+            ->orderBy('keterangan', 'asc')
+            ->pluck('job_departemens.id_job');
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**

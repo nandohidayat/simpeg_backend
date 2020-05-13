@@ -37,7 +37,6 @@ class ScheduleController extends Controller
         if (request()->dept !== null) {
             $dept = request()->dept;
         } else {
-
             if (strpos(auth()->user()->id_dept, 'd-44') !== false) {
                 $query = SIMDepartment::select('id_dept', 'nm_dept')->orderBy('nm_dept', 'asc');
             } else {
@@ -93,9 +92,6 @@ class ScheduleController extends Controller
         }
 
         $schedules = $query->get();
-
-        // $shift = ShiftDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_shift');
-        // $job = JobDepartemen::where(['id_dept' => $dept, 'status' => true])->pluck('id_job');
 
         // $ass = ScheduleAssessor::whereRaw('schedule_assessors.dept = ANY(\'' . auth()->user()->id_dept . '\')')
         //     ->orWhereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\') AND schedule_assessors.dept = \'' . $dept . '\'')
