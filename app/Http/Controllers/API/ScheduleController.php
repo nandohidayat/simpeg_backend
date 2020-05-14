@@ -21,6 +21,23 @@ use stdClass;
 
 class ScheduleController extends Controller
 {
+    function timeAdd($first, $second)
+    {
+        $time1 = explode(':', $first);
+        $time2 = explode(':', $second);
+
+        $second = (int) $time1[2] + $time2[2];
+        $temp = (int) $second / 60;
+        $second = $second - ($temp * 60);
+
+        $minute = (int) $time1[1] + $time2[1] + $temp;
+        $temp = (int) $minute / 60;
+        $minute = $minute - ($temp * 60);
+
+        $hour = (int) $time1[0] + $time2[0] + $temp;
+
+        return '' . sprintf("%02d", $hour) . ':' . sprintf("%02d", $minute) . ':' . sprintf("%02d", $second) . '';
+    }
     /**
      * Display a listing of the resource.
      *
@@ -93,49 +110,38 @@ class ScheduleController extends Controller
 
         $schedules = $query->get();
 
-        // $ass = ScheduleAssessor::whereRaw('schedule_assessors.dept = ANY(\'' . auth()->user()->id_dept . '\')')
-        //     ->orWhereRaw('schedule_assessors.assessor = ANY(\'' . auth()->user()->id_dept . '\') AND schedule_assessors.dept = \'' . $dept . '\'')
-        //     ->first();
+        $ass = ScheduleAccess::whereRaw('(schedule_accesses.dept = \'' . $dept . '\' OR (schedule_accesses.access = \'' . $dept . '\' AND \'' . $dept . '\' != ANY(\'' . auth()->user()->id_dept . '\'))) AND schedule_accesses.assessor = true')
+            ->leftJoin('schedule_requests as sr', function ($q) use ($firstday) {
+                $q->on('sr.dept', '=', 'schedule_accesses.dept');
+                $q->where('tgl', $firstday);
+            })
+            ->select(DB::raw('(CASE WHEN schedule_accesses.access = ANY(\'' . auth()->user()->id_dept . '\') THEN true ELSE false END) as assessor'), 'sr.status')
+            ->first();
 
-        // $assessor = null;
+        $holiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
 
-        // if ($ass !== null) {
-        //     $assessor = new stdClass();
-
-        //     $assessor->ass = strpos(auth()->user()->id_dept, $ass->assessor);
-
-        //     $req = ScheduleRequest::firstOrCreate(['assessor' => $ass->id_schedule_assessor, 'tgl' => $firstday], ['status' => 0]);
-        //     $assessor->id = $req->id_schedule_request;
-        //     $assessor->req = $req->status;
-        // }
-
-        $dataholiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->pluck('tgl');
-        $holiday = [];
-        foreach ($dataholiday as $h) {
-            $day = Carbon::createFromFormat('Y-m-d', $h)->day;
-            array_push($holiday, $day);
-        }
-
+        $id = [];
         $nama = [];
         $shift = [];
         $job = [];
         $jam = [];
         foreach ($schedules as $s) {
+            array_push($id, $s->id_pegawai);
             array_push($nama, $s->nama);
             $stemp = [];
             $jtemp = [];
-            $temp = strtotime('00:00:00');
+            $temp = '00:00:00';
             for ($i = 1; $i <= $lastday->day; $i++) {
                 array_push($stemp, $s->{'shift' . $i});
                 array_push($jtemp, $s->{'job' . $i});
-                $temp += strtotime($s->{'jam' . $i});
+                $temp = $this->timeAdd($temp, $s->{'jam' . $i});
             }
             array_push($shift, $stemp);
             array_push($job, $jtemp);
-            array_push($jam, date('H:i:s', $temp));
+            array_push($jam, $temp);
         }
 
-        $response = ["nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
+        $response = ["id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday, 'ass' => $ass];
 
         if (request()->dept === null) {
             $response["dept"] = $depts;
@@ -214,7 +220,40 @@ class ScheduleController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->all();
+
+        $query = 'INSERT INTO schedules (dept, pegawai, tgl, shift, job) VALUES ';
+
+        for ($i = 0; $i < count($input['id']); $i++) {
+            for ($j = 0; $j < count($input['shift'][0]); $j++) {
+                $query .= '(\'' . $id . '\', \'' . $input['id'][$i] . '\', \'' . Carbon::create($input['year'], $input['month'], $j + 1) . '\',' . (empty($input['shift'][$i][$j]) ? 'null' :  $input['shift'][$i][$j]) . ', ' . (empty($input['job'][$i][$j]) ? 'null' :  $input['job'][$i][$j]) . ')';
+
+                if ($j !== count($input['shift'][0]) - 1) {
+                    $query .= ', ';
+                }
+            }
+            if ($i !== count($input['id']) - 1) {
+                $query .= ', ';
+            }
+        }
+
+        $query .= ' ON CONFLICT ON CONSTRAINT schedules_ukey DO UPDATE SET shift = excluded.shift, job = excluded.job';
+
+        DB::select($query);
+
+        // for ($i = 1; $i <= $last; $i++) {
+        //     $obj = array();
+        //     $obj['dept'] = $id;
+        //     $obj['pegawai'] = $inp;
+        //     $obj['tgl'] = Carbon::create(request()->year, request()->month, $i);
+        //     $obj['shift'] = empty($inp['day' . ($i)]) ? null : $inp['day' . $i];
+        //     Schedule::updateOrCreate(
+        //         ['dept' => $id, 'pegawai' => $inp, 'tgl' => $obj['tgl']],
+        //         ['shift' => $obj['shift']]
+        //     );
+        // }
+
+        return response()->json(["status" => "success"], 201);
     }
 
     /**
