@@ -16,7 +16,6 @@ use Illuminate\Support\Facades\Route;
 
 Route::post("login", "API\AuthController@login");
 Route::get("user/{id}", "API\AuthController@user");
-Route::get('schedule/export/{id}', 'API\ScheduleController@export');
 Route::get('schedule/print', 'API\ScheduleController@print');
 Route::get('schedule/holiday', 'API\ScheduleController@holiday');
 
