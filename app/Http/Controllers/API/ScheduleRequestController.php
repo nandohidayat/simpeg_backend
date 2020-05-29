@@ -27,6 +27,23 @@ class ScheduleRequestController extends Controller
      */
     public function store(Request $request)
     {
+        $input = $request->all();
+        $thisMonth = Carbon::create($input['year'], $input['month']);
+        $firstday = $thisMonth->copy()->firstOfMonth();
+
+        // 0 = initial
+        // 1 = created
+        // 2 = accepted
+
+        if ((int) $input['status'] === 1) {
+            ScheduleRequest::updateOrCreate(['dept' => request()->dept, 'tgl' => $firstday], ['status' => 1, 'requestor' => auth()->user()->id_pegawai]);
+        } else if ((int) $input['status'] === 2) {
+            ScheduleRequest::updateOrCreate(['dept' => request()->dept, 'tgl' => $firstday], ['status' => 2, 'assessor' => auth()->user()->id_pegawai]);
+        } else {
+            ScheduleRequest::updateOrCreate(['dept' => request()->dept, 'tgl' => $firstday], ['status' => 0, 'assessor' => null, 'requestor' => null]);
+        }
+
+        return response()->json(["status" => "success"], 200);
     }
 
     /**
@@ -49,22 +66,21 @@ class ScheduleRequestController extends Controller
     public function update(Request $request, $id)
     {
         $input = $request->all();
-        $data = ScheduleRequest::find($id);
+        $thisMonth = Carbon::create($input['year'], $input['month']);
+        $firstday = $thisMonth->copy()->firstOfMonth();
 
         // 0 = initial
         // 1 = created
         // 2 = accepted
 
-        if ((int) $input['req'] === 1) {
-            $data->status = 1;
+        if ((int) $input['status'] === 1) {
+            ScheduleRequest::updateOrCreate(['dept' => $id, 'tgl' => $firstday], ['status' => 1, 'requestor' => auth()->user()->id_pegawai]);
+        } else if ((int) $input['status'] === 2) {
+            ScheduleRequest::updateOrCreate(['dept' => $id, 'tgl' => $firstday], ['status' => 2, 'assessor' => auth()->user()->id_pegawai]);
         } else {
-            $data->status = (int) $input['req'];
-            $data->pic = auth()->user()->id_pegawai;
+            ScheduleRequest::updateOrCreate(['dept' => $id, 'tgl' => $firstday], ['status' => 0, 'assessor' => null, 'requestor' => null]);
         }
 
-        $data->save();
-
-        if ($data === null) return response()->json(["status" => "failed"], 501);
         return response()->json(["status" => "success"], 200);
     }
 

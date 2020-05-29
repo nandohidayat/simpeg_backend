@@ -141,7 +141,11 @@ class ScheduleController extends Controller
             array_push($jam, $temp);
         }
 
-        $response = ["id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday, 'ass' => $ass];
+        $response = ["id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
+
+        if ($ass !== null) {
+            $response["assessor"] = $ass;
+        }
 
         if (request()->dept === null) {
             $response["dept"] = $depts;
