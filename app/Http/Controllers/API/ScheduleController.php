@@ -10,6 +10,7 @@ use App\Schedule;
 use App\ScheduleAccess;
 use App\ScheduleAssessor;
 use App\ScheduleHoliday;
+use App\ScheduleOrder;
 use App\ScheduleRequest;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
@@ -120,6 +121,8 @@ class ScheduleController extends Controller
 
         $holiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
 
+        $order = ScheduleOrder::where('id_dept', $dept)->orderBy('order')->pluck('order');
+
         $id = [];
         $nama = [];
         $shift = [];
@@ -141,7 +144,7 @@ class ScheduleController extends Controller
             array_push($jam, $temp);
         }
 
-        $response = ["id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
+        $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
 
         if ($ass !== null) {
             $response["assessor"] = $ass;
