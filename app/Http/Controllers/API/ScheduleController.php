@@ -39,6 +39,7 @@ class ScheduleController extends Controller
 
         return '' . sprintf("%02d", $hour) . ':' . sprintf("%02d", $minute) . ':' . sprintf("%02d", $second) . '';
     }
+
     /**
      * Display a listing of the resource.
      *
@@ -46,6 +47,8 @@ class ScheduleController extends Controller
      */
     public function index()
     {
+        // TODO: make unique id_dept in schedule_orders
+
         $thisMonth = Carbon::create(request()->year, request()->month);
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
@@ -54,17 +57,26 @@ class ScheduleController extends Controller
 
         if (request()->dept !== null) {
             $dept = request()->dept;
+            $order = explode(',', SIMDepartment::where('f_department.id_dept', $dept)
+                ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+                ->select('so.order')
+                ->first()
+                ->order);
         } else {
             if (strpos(auth()->user()->id_dept, 'd-44') !== false) {
-                $query = SIMDepartment::select('id_dept', 'nm_dept')->orderBy('nm_dept', 'asc');
+                $query = SIMDepartment::join('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+                    ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
+                    ->orderBy('nm_dept', 'asc');
             } else {
-                $query = SIMDepartment::whereRaw('id_dept = ANY(\'' . auth()->user()->id_dept . '\')')
-                    ->select('id_dept', 'nm_dept')
+                $query = SIMDepartment::whereRaw('f_department.id_dept = ANY(\'' . auth()->user()->id_dept . '\')')
+                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+                    ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
                     ->orderBy('nm_dept', 'asc');
 
                 $child = ScheduleAccess::whereRaw('schedule_accesses.access = ANY(\'' . auth()->user()->id_dept . '\')')
                     ->join('f_department', 'f_department.id_dept', '=', 'schedule_accesses.dept')
-                    ->select('f_department.id_dept', 'f_department.nm_dept')
+                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+                    ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
                     ->orderBy('f_department.nm_dept', 'asc');
 
                 $query = $query->unionAll($child);
@@ -72,6 +84,7 @@ class ScheduleController extends Controller
 
             $depts = $query->get();
             $dept = $depts[0]->id_dept;
+            $order = explode(',', $depts[0]->order);
         }
 
         $query = DB::table('f_data_pegawai as dp')
@@ -121,8 +134,6 @@ class ScheduleController extends Controller
 
         $holiday = ScheduleHoliday::whereBetween('tgl', [$firstday, $lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
 
-        $order = ScheduleOrder::where('id_dept', $dept)->orderBy('order')->pluck('order');
-
         $id = [];
         $nama = [];
         $shift = [];
@@ -142,6 +153,24 @@ class ScheduleController extends Controller
             array_push($shift, $stemp);
             array_push($job, $jtemp);
             array_push($jam, $temp);
+        }
+
+        if ($order[0] == "") {
+            $order = array(0);
+        }
+
+        $max = max(array_map('intval', $order));
+        $count = count($id);
+
+        if ($max < $count - 1) {
+            for ($i = $max + 1; $i < $count; $i++) {
+                array_push($order, $i);
+            }
+        } else if ($max > $count) {
+            while ($max !== $count) {
+                unset($order[array_search($max, $order)]);
+                $max = max(array_map('intval', $order));
+            }
         }
 
         $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];

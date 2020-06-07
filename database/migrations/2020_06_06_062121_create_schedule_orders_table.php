@@ -17,7 +17,6 @@ class CreateScheduleOrdersTable extends Migration
             $table->bigIncrements('id_schedule_order');
             $table->string('id_dept');
             $table->integer('order');
-            $table->string('id_pegawai')->nullable();
             $table->timestamps();
         });
     }
