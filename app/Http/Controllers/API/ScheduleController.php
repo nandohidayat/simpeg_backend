@@ -47,8 +47,6 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        // TODO: make unique id_dept in schedule_orders
-
         $thisMonth = Carbon::create(request()->year, request()->month);
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
