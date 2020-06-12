@@ -43,7 +43,7 @@ return [
 
         'api' => [
             'driver' => 'jwt',
-            'provider' => 'login_pegawai',
+            'provider' => 'data_pegawai',
             // 'storage_key' => 'token_sp'
         ],
     ],
@@ -70,9 +70,9 @@ return [
             'driver' => 'eloquent',
             'model' => App\User::class,
         ],
-        'login_pegawai' => [
+        'data_pegawai' => [
             'driver' => 'eloquent',
-            'model' => App\SIMLoginPegawai::class,
+            'model' => App\SIMDataPegawai::class,
         ],
 
         // 'users' => [

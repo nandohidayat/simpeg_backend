@@ -32,17 +32,30 @@ class AuthController extends BaseController
 
     public function login(Request $request)
     {
-        $user = SIMLoginPegawai::where([
-            'user_pegawai' => $request->username,
-            'pass_pegawai' => md5($request->password)
-        ])
-            ->join('f_data_pegawai as fdp', function ($join) {
-                $join->on('fdp.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
-                $join->where('fdp.is_active', 'true');
-            })
-            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
-            ->select('f_login_pegawai.id_pegawai', 'fdp.nik_pegawai as nik', 'f_login_pegawai.user_pegawai', 'fdp.id_dept', 'fdp.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
+
+        $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($request) {
+            $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
+            $query->where([
+                'user_pegawai' => $request->username,
+                'pass_pegawai' => md5($request->password)
+            ]);
+        })
+            ->where('f_data_pegawai.is_active', 'true')
+            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
+            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
             ->first();
+
+        // $user = SIMLoginPegawai::where([
+        //     'user_pegawai' => $request->username,
+        //     'pass_pegawai' => md5($request->password)
+        // ])
+        //     ->join('f_data_pegawai as fdp', function ($join) {
+        //         $join->on('fdp.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
+        //         $join->where('fdp.is_active', 'true');
+        //     })
+        //     ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
+        //     ->select('f_login_pegawai.id_pegawai', 'fdp.nik_pegawai as nik', 'f_login_pegawai.user_pegawai', 'fdp.id_dept', 'fdp.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
+        //     ->first();
 
         if ($user == null)
             return response()->json([
@@ -94,7 +107,8 @@ class AuthController extends BaseController
             'user' => [
                 'id' => auth()->user()->id_pegawai,
                 'nik' => auth()->user()->nik,
-                'username' => auth()->user()->user_pegawai,
+                'nama' => auth()->user()->nama,
+                'dept' => auth()->user()->id_dept
             ],
             'menu' => $menu,
             'akses' => $akses
