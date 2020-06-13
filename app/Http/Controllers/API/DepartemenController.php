@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Departemen;
 use App\Http\Controllers\Controller;
+use App\SIMDataPegawai;
 use App\SIMDepartment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +64,9 @@ class DepartemenController extends Controller
      */
     public function show($id)
     {
-        //
+        $data = SIMDataPegawai::whereRaw('' . $id . ' = ANY(id_dept)')->select('id_pegawai', 'nm_pegawai')->get();
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**

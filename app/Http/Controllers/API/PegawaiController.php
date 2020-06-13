@@ -7,7 +7,9 @@ namespace App\Http\Controllers\API;
 use Illuminate\Http\Request;
 use App\Http\Controllers\API\BaseController as BaseController;
 use App\Pegawai;
+use App\SIMDataPegawai;
 use Illuminate\Support\Facades\DB;
+use Mockery\Undefined;
 use stdClass;
 use Validator;
 
@@ -21,9 +23,16 @@ class PegawaiController extends BaseController
      */
     public function index()
     {
-        $pegawais = Pegawai::select(DB::raw("CONCAT(nik, ' | ', nama) AS text"), 'id as value')->get();
+        $data = null;
 
-        return $this->sendResponse($pegawais->toArray(), 'Pegawais retrieved successfully.');
+        if (request()->dept) {
+            $data = SIMDataPegawai::whereRaw('\'' . request()->dept . '\' = ANY(id_dept)')
+                ->where('is_active', true)
+                ->select('id_pegawai', 'nm_pegawai')
+                ->get();
+        }
+
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
 

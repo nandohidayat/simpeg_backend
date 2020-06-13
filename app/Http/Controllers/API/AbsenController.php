@@ -18,44 +18,64 @@ class AbsenController extends Controller
      */
     public function index()
     {
-        $start = Carbon::now('+07:00')->startOfDay();
-        $end = Carbon::now('+07:00')->endOfDay();
+        $data = null;
 
-        $log = DB::connection('mysql2')->table('log_presensi')->whereBetween('DateTime', [$start, $end])->get();
+        if (request()->pegawai) {
+            $date = Carbon::create(request()->year, request()->month);
+            $firstday = $date->copy()->firstOfMonth();
+            $current = Carbon::now();
 
-        foreach ($log as $l) {
-            if ($l->Status === 0) {
-                $schedule = Schedule::where('schedules.nik', $l->PIN)
-                    ->where('schedules.tgl', $start)
-                    ->orderBy('schedules.tgl', 'desc')
-                    ->select('schedules.masuk')
-                    ->first();
+            $lastday = $date->diffInMonths($current) === 0 ? $current : $date->copy()->lastOfMonth();
 
-                if ($schedule === null) continue;
+            $data = Schedule::where('schedules.pegawai', request()->pegawai)
+                ->whereBetween('tgl', [$firstday, $lastday])
+                ->whereNotNull('schedules.shift')
+                ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
+                ->leftjoin('f_department as d', 'd.id_dept', '=', 'schedules.dept')
+                ->leftJoin('shifts', 'schedules.shift', '=', 'shifts.id_shift')
+                ->leftJoin('presensis as a', function ($join) {
+                    $join
+                        ->on([
+                            ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
+                            [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
+                            [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
+                            [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
+                        ])
+                        ->where([
+                            ['a.status', '=', '0'],
+                        ]);
+                })
+                ->leftJoin('presensis as b', function ($join) {
+                    $join
+                        ->on([
+                            ['b.pin', '=', 'a.pin'],
+                            ['b.datetime', '>', 'a.datetime']
+                        ])
+                        ->where('b.status', '=', '1');
+                })
+                ->orderBy('schedules.tgl')
+                ->select(
+                    'schedules.id_schedule',
+                    'schedules.tgl as tanggal',
+                    'd.nm_dept as dept',
+                    'shifts.kode as shift',
+                    DB::raw('cast(min(a.datetime) as time) as masuk'),
+                    DB::raw('cast(min(b.datetime) as time) as keluar'),
+                    DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                    DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                )
+                ->groupBy('schedules.id_schedule', 'd.nm_dept', 'shifts.kode', 'shifts.mulai')
+                ->get();
 
-                $masuk = Carbon::create($l->DateTime)->toTimeString();
-                $mulai = Carbon::create($schedule->mulai)->toTimeString();
-
-                if ($schedule->masuk === null) {
-                    $schedule->masuk = $masuk;
-                    $schedule->save();
-                }
-            } else if ($l->Status === 1) {
-                $schedule = Schedule::where('schedules.nik', $l->PIN)
-                    ->whereNotNull('schedules.masuk')
-                    ->orderBy('schedules.tgl', 'desc')
-                    ->select('schedules.keluar')
-                    ->first();
-
-                if ($schedule === null) continue;
-
-                if ($schedule->keluar === null) {
-                    $schedule->keluar = Carbon::create($l->DateTime)->toTimeString();
-                }
+            $sum = 0;
+            foreach ($data as $d) {
+                $sum += $d->pendapatan;
             }
+
+            return response()->json(["status" => "success", "data" => ["absen" => $data, "pendapatan" => $sum]], 200);
         }
 
-        return response()->json(["status" => "success", "data" => $log], 200);
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**

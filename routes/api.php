@@ -37,6 +37,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('bagian', 'API\BagianController');
     Route::apiResource('departemen', 'API\DepartemenController');
     Route::apiResource('karyawan', 'API\KaryawanController');
+    Route::apiResource('pegawai', 'API\PegawaiController');
     Route::apiResource('ruang', 'API\RuangController');
     Route::apiResource('schedule/change', 'API\ScheduleChangeController');
     Route::apiResource('schedule/request', 'API\ScheduleRequestController');
