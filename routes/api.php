@@ -18,6 +18,7 @@ Route::post("login", "API\AuthController@login");
 Route::get("user/{id}", "API\AuthController@user");
 Route::get('schedule/print', 'API\ScheduleController@print');
 Route::get('schedule/holiday', 'API\ScheduleController@holiday');
+Route::get('schedule/export', 'API\ScheduleController@export');
 
 // Route::middleware('auth:api')->get('/user', function (Request $request) {
 //     return $request->user();

@@ -3,16 +3,19 @@
 namespace App\Exports;
 
 use App\Schedule;
+use App\SIMDepartment;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Request;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class SchedulesExport implements FromCollection
+class SchedulesExport implements FromCollection, WithHeadings, ShouldAutoSize
 {
 
-    protected $year, $month;
+    protected $dept, $year, $month;
 
     function __construct($dept, $year, $month)
     {
@@ -26,47 +29,36 @@ class SchedulesExport implements FromCollection
      */
     public function collection()
     {
+        return Schedule::all();
+    }
+
+    public function headings(): array
+    {
         $thisMonth = Carbon::create($this->year, $this->month);
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
 
-        $dept = $this->dept;
+        $locale = $thisMonth->copy()->locale('id_ID');
 
-        $query = DB::table('f_login_pegawai as lp')
-            ->whereRaw('\'' . $dept . '\' = ANY(lp.id_dept)')
-            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'lp.id_pegawai')
-            ->select('lp.id_pegawai', 'dp.nm_pegawai as nama');
+        $dept = SIMDepartment::where('id_dept', $this->dept)->first()->nm_dept;
 
-        $jam = '';
+        $header = [
+            ['Jadwal ' . $dept . '', null, null],
+            [],
+            [
+                'Bulan : ' . $locale->isoFormat('MMMM Y') . ''
+            ],
+            [
+                'id',
+                'nik',
+                'nama',
+            ]
+        ];
 
-        $date = $firstday->copy();
-
-        while (!$date->greaterThan($lastday)) {
-            $query->leftJoin('schedules as sch' . $date->day . '', function ($q) use ($date) {
-                $q->on('sch' . $date->day . '.id_pegawai', '=', 'lp.id_pegawai');
-                $q->where('sch' . $date->day . '.tgl', $date->toDateString());
-            });
-            $query->leftJoin('shifts as shf' . $date->day . '', 'sch' . $date->day . '.id_shift', '=', 'shf' . $date->day . '.id_shift');
-            $query->addSelect('shf' . $date->day . '.kode as day' . $date->day . '');
-
-            $jam .= 'COALESCE(
-                CASE
-                WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai > time \'00:00\' THEN
-                    shf' . $date->day . '.selesai - shf' . $date->day . '.mulai
-                ELSE
-                    shf' . $date->day . '.selesai - shf' . $date->day . '.mulai + interval \'24 hours\'
-                END
-                , interval \'0 hours\')';
-
-            if (!$date->equalTo($lastday)) $jam .= ' + ';
-
-            $date->addDay();
+        for ($i = $firstday->day; $i <= $lastday->day; $i++) {
+            array_push($header[3], '' . $i . '');
         }
 
-        $query->addSelect(DB::raw($jam .= 'as jam'));
-
-        $schedules = $query->get();
-
-        return $schedules;
+        return $header;
     }
 }

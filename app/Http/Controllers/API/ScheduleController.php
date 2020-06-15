@@ -371,4 +371,9 @@ class ScheduleController extends Controller
 
         return response()->json(["status" => "success", "data" => $response], 200);
     }
+
+    public function export()
+    {
+        return Excel::download(new SchedulesExport(request()->dept, request()->year, request()->month), 'jadwal.xlsx');
+    }
 }
