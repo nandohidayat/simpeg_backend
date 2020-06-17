@@ -14,11 +14,12 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Events\AfterSheet;
+use stdClass;
 
 class SchedulesExport implements FromCollection, WithHeadings, WithEvents
 {
 
-    protected $dept, $year, $month, $thisMonth, $firstday, $lastday;
+    protected $dept, $year, $month, $thisMonth, $firstday, $lastday, $count, $weekend;
 
     function columnLetter($c)
     {
@@ -34,6 +35,19 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
         }
 
         return $letter;
+    }
+
+    function emptySchedule()
+    {
+        $data = new Collection();
+        $data->put('id_pegawai', null);
+        $data->put('no', null);
+        $data->put('nama', null);
+        for ($i = 1; $i <= $this->lastday->day; $i++) {
+            $data->put('shift' . $i . '', null);
+        }
+
+        return $data;
     }
 
     function __construct($dept, $year, $month)
@@ -57,7 +71,7 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             ->select('dp.id_pegawai', DB::raw('ROW_NUMBER () OVER (ORDER BY nik_pegawai) as no'), 'dp.nm_pegawai as nama')
             ->orderBy('nik_pegawai');
 
-        $weekend = [];
+        $this->weekend = [];
 
         $date = $this->firstday->copy();
 
@@ -71,7 +85,7 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             $query->leftJoin('shifts as shf' . $date->day . '', 'shf' . $date->day . '.id_shift', '=', 'sch' . $date->day . '.shift');
             $query->addSelect('shf' . $date->day . '.kode as shift' . $date->day . '');
 
-            if ($date->dayOfWeek === 0) array_push($weekend, $date->day);
+            if ($date->dayOfWeek === 0) array_push($this->weekend, $date->day);
 
             $date->addDay();
         }
@@ -84,7 +98,39 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             ->first()
             ->order);
 
-        return $schedule;
+        if ($order[0] == "") {
+            $order = array(0);
+        }
+
+        $max = max(array_map('intval', $order));
+        $count = count($schedule);
+
+        if ($max < $count - 1) {
+            for ($i = $max + 1; $i < $count; $i++) {
+                array_push($order, $i);
+            }
+        } else if ($max > $count) {
+            while ($max !== $count) {
+                unset($order[array_search($max, $order)]);
+                $max = max(array_map('intval', $order));
+            }
+        }
+
+        $this->count = count($order);
+        $no = 0;
+        $data = new Collection();
+
+        foreach ($order as $o) {
+            if ($o === "NaN") {
+                $data->push($this->emptySchedule());
+            } else {
+                $schedule[(int) $o]->no = ++$no;
+                $schedule[(int) $o]->nama = ucwords(strtolower($schedule[(int) $o]->nama));
+                $data->push($schedule[(int) $o]);
+            }
+        }
+
+        return $data;
     }
 
     public function headings(): array
@@ -100,10 +146,10 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                 'Bulan : ' . $locale->isoFormat('MMMM Y') . ''
             ],
             [
-                'ID',
-                'NO',
-                'NAMA',
-                'TANGGAL'
+                'Id',
+                'No',
+                'Nama',
+                'Tanggal'
             ],
             [null, null, null]
         ];
@@ -125,9 +171,18 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                 $event->sheet->getDelegate()->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
                 $event->sheet->getDelegate()->getStyle($event->sheet->getDelegate()->calculateWorksheetDimension())->getFont()->setName('Times New Roman');
 
+                $event->sheet->getDelegate()->getPageMargins()->setTop(0.764);
+                $event->sheet->getDelegate()->getPageMargins()->setBottom(0.764);
+                $event->sheet->getDelegate()->getPageMargins()->setLeft(0.256);
+                $event->sheet->getDelegate()->getPageMargins()->setRight(0.256);
+                $event->sheet->getDelegate()->getPageMargins()->setHeader(0.304);
+                $event->sheet->getDelegate()->getPageMargins()->setFooter(0.304);
+
+                $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '' . ($this->count + 5) . '')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
                 $event->sheet->getDelegate()->getColumnDimension('A')->setVisible(false);
                 $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(4);
-                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(25);
+                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(21);
 
                 $event->sheet->getDelegate()->mergeCells('A1:' . $this->columnLetter($lastcol) . '1');
                 $event->sheet->getDelegate()->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -149,8 +204,14 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                 $event->sheet->getDelegate()->getStyle('C4')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
                 for ($i = 4; $i <= $lastcol; $i++) {
-                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.2);
+                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.7);
                     $event->sheet->getDelegate()->getStyle('' . $this->columnLetter($i) . '5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                }
+
+                foreach ($this->weekend as $w) {
+                    $col = $this->columnLetter($w + 3);
+                    $row = $this->count + 5;
+                    $event->sheet->getDelegate()->getStyle('' . $col . '5:' . $col . '' . $row . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
                 }
             },
         ];
