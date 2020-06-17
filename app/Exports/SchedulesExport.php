@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Schedule;
+use App\ScheduleOrder;
 use App\SIMDepartment;
 use Carbon\Carbon;
 use GuzzleHttp\Psr7\Request;
@@ -75,7 +76,15 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             $date->addDay();
         }
 
-        return $query->get();
+        $schedule = $query->get();
+
+        $order = explode(',', SIMDepartment::where('f_department.id_dept', $this->dept)
+            ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+            ->select('so.order')
+            ->first()
+            ->order);
+
+        return $schedule;
     }
 
     public function headings(): array
@@ -113,6 +122,12 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
         return [
             AfterSheet::class => function (AfterSheet $event) use ($lastcol) {
                 $event->sheet->getDelegate()->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+                $event->sheet->getDelegate()->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+                $event->sheet->getDelegate()->getStyle($event->sheet->getDelegate()->calculateWorksheetDimension())->getFont()->setName('Times New Roman');
+
+                $event->sheet->getDelegate()->getColumnDimension('A')->setVisible(false);
+                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(4);
+                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(25);
 
                 $event->sheet->getDelegate()->mergeCells('A1:' . $this->columnLetter($lastcol) . '1');
                 $event->sheet->getDelegate()->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
@@ -128,17 +143,13 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                 $event->sheet->getDelegate()->mergeCells('D4:' . $this->columnLetter($lastcol) . '4');
                 $event->sheet->getDelegate()->getStyle('D4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-                $event->sheet->getDelegate()->getColumnDimension('A')->setVisible(false);
                 $event->sheet->getDelegate()->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getStyle('B4')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
                 $event->sheet->getDelegate()->getStyle('C4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getStyle('C4')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(4);
-                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(26);
-
                 for ($i = 4; $i <= $lastcol; $i++) {
-                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3);
+                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.2);
                     $event->sheet->getDelegate()->getStyle('' . $this->columnLetter($i) . '5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 }
             },
