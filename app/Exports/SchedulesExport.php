@@ -3,6 +3,8 @@
 namespace App\Exports;
 
 use App\Schedule;
+use App\ScheduleHoliday;
+use App\ShiftDepartemen;
 use App\ScheduleOrder;
 use App\SIMDepartment;
 use Carbon\Carbon;
@@ -164,13 +166,15 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
     public function registerEvents(): array
     {
         $lastcol = 3 + $this->lastday->day;
+        $shift = ShiftDepartemen::where([['id_dept', '=', $this->dept], ['status', '=', true]])
+            ->join('shifts as s', 's.id_shift', '=', 'shift_departemens.id_shift')
+            ->select('s.kode', 's.keterangan')
+            ->get();
+
+        $holiday = ScheduleHoliday::whereBetween('tgl', [$this->firstday, $this->lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
 
         return [
-            AfterSheet::class => function (AfterSheet $event) use ($lastcol) {
-                $event->sheet->getDelegate()->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
-                $event->sheet->getDelegate()->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
-                $event->sheet->getDelegate()->getStyle($event->sheet->getDelegate()->calculateWorksheetDimension())->getFont()->setName('Times New Roman');
-
+            AfterSheet::class => function (AfterSheet $event) use ($lastcol, $shift, $holiday) {
                 $event->sheet->getDelegate()->getPageMargins()->setTop(0.764);
                 $event->sheet->getDelegate()->getPageMargins()->setBottom(0.764);
                 $event->sheet->getDelegate()->getPageMargins()->setLeft(0.256);
@@ -178,41 +182,56 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                 $event->sheet->getDelegate()->getPageMargins()->setHeader(0.304);
                 $event->sheet->getDelegate()->getPageMargins()->setFooter(0.304);
 
-                $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '' . ($this->count + 5) . '')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-
                 $event->sheet->getDelegate()->getColumnDimension('A')->setVisible(false);
+
                 $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(4);
                 $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(21);
+                for ($i = 4; $i <= $lastcol; $i++) {
+                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.7);
+                }
 
                 $event->sheet->getDelegate()->mergeCells('A1:' . $this->columnLetter($lastcol) . '1');
-                $event->sheet->getDelegate()->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $event->sheet->getDelegate()->getStyle('A1')->getFont()->setBold(true);
-
                 $event->sheet->getDelegate()->mergeCells('A3:' . $this->columnLetter($lastcol) . '3');
-                $event->sheet->getDelegate()->getStyle('A3')->getFont()->setBold(true);
-
                 $event->sheet->getDelegate()->mergeCells('A4:A5');
                 $event->sheet->getDelegate()->mergeCells('B4:B5');
                 $event->sheet->getDelegate()->mergeCells('C4:C5');
-
                 $event->sheet->getDelegate()->mergeCells('D4:' . $this->columnLetter($lastcol) . '4');
-                $event->sheet->getDelegate()->getStyle('D4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-                $event->sheet->getDelegate()->getStyle('B4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $event->sheet->getDelegate()->getStyle('B4')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
-                $event->sheet->getDelegate()->getStyle('C4')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-                $event->sheet->getDelegate()->getStyle('C4')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '5')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 
-                for ($i = 4; $i <= $lastcol; $i++) {
-                    $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.7);
-                    $event->sheet->getDelegate()->getStyle('' . $this->columnLetter($i) . '5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('A1:' . $this->columnLetter($lastcol) . '5')->getFont()->setBold(true);
+                $event->sheet->getDelegate()->getStyle('B' . ($this->count + 7) . '')->getFont()->setBold(true);
+
+                $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '' . ($this->count + 5) . '')->getBorders()->getAllBorders()->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
+
+                $event->sheet->getDelegate()->getCell('B' . ($this->count + 7) . '')->setValue('Keterangan');
+                foreach ($shift as $k => $s) {
+                    $event->sheet->getDelegate()->getCell('B' . ($this->count + 8 + $k) . '')->setValue('' . $s->kode . ' = ' . $s->keterangan . '');
                 }
+
+                $event->sheet->getDelegate()->getCell('E' . ($this->count + 8) . '')->setValue('Hari Minggu');
+                $event->sheet->getDelegate()->getCell('E' . ($this->count + 9) . '')->setValue('Hari Libur');
+                $event->sheet->getDelegate()->getStyle('I' . ($this->count + 8) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
+                $event->sheet->getDelegate()->getStyle('I' . ($this->count + 9) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
+                $event->sheet->getDelegate()->getCell('E' . ($this->count + 9) . '')->setValue('Hari Libur');
 
                 foreach ($this->weekend as $w) {
                     $col = $this->columnLetter($w + 3);
                     $row = $this->count + 5;
                     $event->sheet->getDelegate()->getStyle('' . $col . '5:' . $col . '' . $row . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
                 }
+
+                foreach ($holiday as $h) {
+                    $col = $this->columnLetter((int) $h + 3);
+                    $row = $this->count + 5;
+                    $event->sheet->getDelegate()->getStyle('' . $col . '5:' . $col . '' . $row . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
+                }
+
+                $event->sheet->getDelegate()->getPageSetup()->setOrientation(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::ORIENTATION_LANDSCAPE);
+                $event->sheet->getDelegate()->getPageSetup()->setPaperSize(\PhpOffice\PhpSpreadsheet\Worksheet\PageSetup::PAPERSIZE_A4);
+                $event->sheet->getDelegate()->getStyle($event->sheet->getDelegate()->calculateWorksheetDimension())->getFont()->setName('Times New Roman');
             },
         ];
     }
