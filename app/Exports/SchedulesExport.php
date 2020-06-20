@@ -142,10 +142,10 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
         $dept = SIMDepartment::where('id_dept', $this->dept)->first()->nm_dept;
 
         $header = [
-            ['Jadwal ' . $dept . '', null, null],
+            [$this->dept, 'Jadwal ' . $dept . ''],
             [],
             [
-                'Bulan : ' . $locale->isoFormat('MMMM Y') . ''
+                '' . $this->year . '/' . $this->month . '', 'Bulan : ' . $locale->isoFormat('MMMM Y') . ''
             ],
             [
                 'Id',
@@ -190,14 +190,14 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                     $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.7);
                 }
 
-                $event->sheet->getDelegate()->mergeCells('A1:' . $this->columnLetter($lastcol) . '1');
-                $event->sheet->getDelegate()->mergeCells('A3:' . $this->columnLetter($lastcol) . '3');
+                $event->sheet->getDelegate()->mergeCells('B1:' . $this->columnLetter($lastcol) . '1');
+                $event->sheet->getDelegate()->mergeCells('B3:' . $this->columnLetter($lastcol) . '3');
                 $event->sheet->getDelegate()->mergeCells('A4:A5');
                 $event->sheet->getDelegate()->mergeCells('B4:B5');
                 $event->sheet->getDelegate()->mergeCells('C4:C5');
                 $event->sheet->getDelegate()->mergeCells('D4:' . $this->columnLetter($lastcol) . '4');
 
-                $event->sheet->getDelegate()->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('B1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '5')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
                 $event->sheet->getDelegate()->getStyle('B4:' . $this->columnLetter($lastcol) . '5')->getAlignment()->setVertical(\PhpOffice\PhpSpreadsheet\Style\Alignment::VERTICAL_CENTER);
 

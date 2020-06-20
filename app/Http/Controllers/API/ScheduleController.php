@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Exports\SchedulesExport;
 use App\Http\Controllers\Controller;
+use App\Imports\SchedulesImport;
 use App\JobDepartemen;
 use App\Karyawan;
 use App\Schedule;
@@ -375,5 +376,12 @@ class ScheduleController extends Controller
     public function export()
     {
         return Excel::download(new SchedulesExport(request()->dept, request()->year, request()->month), 'jadwal.xlsx');
+    }
+
+    public function import()
+    {
+        Excel::import(new SchedulesImport, request()->file('schedules'));
+
+        return response()->json(["status" => "success"], 200);
     }
 }
