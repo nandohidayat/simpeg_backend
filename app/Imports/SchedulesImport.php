@@ -28,23 +28,22 @@ class SchedulesImport implements ToCollection
 
         $i = 5;
         while (true) {
-            if ($rows[$i][0] === null) break;
+            if ($rows[$i][0] !== null) {
+                for ($j = 3; $j <= count($rows[5]) - 1; $j++) {
+                    $shift = $shifts->first(function ($item) use ($rows, $i, $j) {
+                        return $item->kode == $rows[$i][$j];
+                    });
 
-            for ($j = 3; $j <= count($rows[5]) - 1; $j++) {
-                $shift = $shifts->first(function ($item) use ($rows, $i, $j) {
-                    return $item->kode == $rows[$i][$j];
-                });
+                    $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($year, $month, $j - 2) . '\',' . (empty($rows[$i][$j]) ? 'null' :  $shift->id_shift) . ')';
 
-                $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($year, $month, $j - 2) . '\',' . (empty($rows[$i][$j]) ? 'null' :  $shift->id_shift) . ')';
-
-                if ($j !== count($rows[5]) - 1) {
-                    $query .= ', ';
+                    if ($j !== count($rows[5]) - 1) {
+                        $query .= ', ';
+                    }
                 }
             }
 
-            if ($rows[$i + 1][0] !== null) {
-                $query .= ', ';
-            }
+            if ($rows[$i + 2][1] === 'Keterangan') break;
+            else if ($rows[$i][0] !== null) $query .= ', ';
 
             $i++;
         }
