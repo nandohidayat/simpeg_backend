@@ -15,6 +15,7 @@ use App\SIMDataPegawai;
 use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -32,7 +33,6 @@ class AuthController extends BaseController
 
     public function login(Request $request)
     {
-
         $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($request) {
             $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
             $query->where([
@@ -41,21 +41,7 @@ class AuthController extends BaseController
             ]);
         })
             ->where('f_data_pegawai.is_active', 'true')
-            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
-            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
             ->first();
-
-        // $user = SIMLoginPegawai::where([
-        //     'user_pegawai' => $request->username,
-        //     'pass_pegawai' => md5($request->password)
-        // ])
-        //     ->join('f_data_pegawai as fdp', function ($join) {
-        //         $join->on('fdp.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
-        //         $join->where('fdp.is_active', 'true');
-        //     })
-        //     ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_login_pegawai.id_pegawai')
-        //     ->select('f_login_pegawai.id_pegawai', 'fdp.nik_pegawai as nik', 'f_login_pegawai.user_pegawai', 'fdp.id_dept', 'fdp.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
-        //     ->first();
 
         if ($user == null)
             return response()->json([
@@ -64,54 +50,9 @@ class AuthController extends BaseController
 
         $token = auth()->login($user);
 
-        $dataAkses = DB::table('f_data_pegawai as fdp')
-            ->where('fdp.id_pegawai', auth()->user()->id_pegawai)
-            ->join('akses_departemens as ad', function ($join) {
-                $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . auth()->user()->id_dept . '\')'));
-                $join->where('ad.status', 'true');
-                if (!auth()->user()->kepala) {
-                    $join->where('ad.only', 'false');
-                }
-            })
-            ->join('akses as a', 'a.id_akses', '=', 'ad.id_akses')
-            ->join('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
-            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon')
-            ->groupBy('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses')
-            ->orderBy('a.id_akses')
-            ->get();
-
-        $menu = [];
-        $akses = [];
-        $i = -1;
-        $before = null;
-        foreach ($dataAkses as $da) {
-            if ($before !== $da->kategori) {
-                $i++;
-                $before = $da->kategori;
-                $obj = new stdClass();
-                $obj->icon = $da->icon;
-                $obj->header = $da->kategori;
-                $obj->children = [];
-                array_push($menu, $obj);
-            }
-            $obj = new stdClass();
-            $obj->header = $da->akses;
-            $obj->link = $da->url;
-            array_push($menu[$i]->children, $obj);
-            array_push($akses, $da->url);
-        }
-
         return response()->json([
             'token' => $token,
             'expires_at' => auth()->factory()->getTTL(),
-            'user' => [
-                'id' => auth()->user()->id_pegawai,
-                'nik' => auth()->user()->nik,
-                'nama' => auth()->user()->nama,
-                'dept' => auth()->user()->id_dept
-            ],
-            'menu' => $menu,
-            'akses' => $akses
         ]);
     }
 
@@ -174,15 +115,53 @@ class AuthController extends BaseController
      *
      * @return [json] user object
      */
-    public function user($id)
+    public function user()
     {
-        $data = DB::table('f_data_pegawai as dp')
-            ->where('nik_pegawai', $id)
-            ->join('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
-            ->select('lp.user_pegawai as username')
+        $user = SIMDataPegawai::where('id_pegawai', auth()->user()->id_pegawai)
+            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
+            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
             ->first();
-        // $data = User::where('nik', $id)->select('username')->first();
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        $dataAkses = DB::table('f_data_pegawai as fdp')
+            ->where('fdp.id_pegawai', $user->id_pegawai)
+            ->join('akses_departemens as ad', function ($join) use ($user) {
+                $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . $user->id_dept . '\')'));
+                $join->where('ad.status', 'true');
+                if (!$user->kepala) {
+                    $join->where('ad.only', 'false');
+                }
+            })
+            ->join('akses as a', 'a.id_akses', '=', 'ad.id_akses')
+            ->join('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
+            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon')
+            ->groupBy('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses')
+            ->orderBy('a.id_akses')
+            ->get();
+
+        $menu = [];
+        $akses = [];
+        $i = -1;
+        $before = null;
+        foreach ($dataAkses as $da) {
+            if ($before !== $da->kategori) {
+                $i++;
+                $before = $da->kategori;
+                $obj = new stdClass();
+                $obj->icon = $da->icon;
+                $obj->header = $da->kategori;
+                $obj->children = [];
+                array_push($menu, $obj);
+            }
+            $obj = new stdClass();
+            $obj->header = $da->akses;
+            $obj->link = $da->url;
+            array_push($menu[$i]->children, $obj);
+            array_push($akses, $da->url);
+        }
+
+        $user->menu = $menu;
+        $user->akses = $akses;
+
+        return response()->json(["status" => "success", "user" => $user], 200);
     }
 }

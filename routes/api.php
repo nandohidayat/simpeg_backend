@@ -15,9 +15,10 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post("login", "API\AuthController@login");
-Route::get("user/{id}", "API\AuthController@user");
+
 Route::get('schedule/print', 'API\ScheduleController@print');
 Route::get('schedule/holiday', 'API\ScheduleController@holiday');
+
 Route::get('schedule/excel', 'API\ScheduleController@export');
 Route::post('schedule/excel', 'API\ScheduleController@import');
 
@@ -28,6 +29,7 @@ Route::post('schedule/excel', 'API\ScheduleController@import');
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
+    Route::get("user", "API\AuthController@user");
     Route::get("logout", "API\AuthController@logout");
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');
