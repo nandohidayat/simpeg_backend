@@ -30,6 +30,7 @@ class ShiftController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
+
         $data = Shift::create($input);
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
@@ -84,6 +85,7 @@ class ShiftController extends Controller
         $data->mulai = $input['mulai'];
         $data->selesai = $input['selesai'];
         $data->kode = $input['kode'];
+        $data->color = $input['color'];
         $data->keterangan = $input['keterangan'];
         $data->save();
 
