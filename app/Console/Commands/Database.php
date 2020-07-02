@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -38,19 +39,21 @@ class Database extends Command
      */
     public function handle()
     {
-        $data = DB::table('shifts')->get();
+        $date = Carbon::create(2020, 6);
+        $first = $date->copy()->firstOfMonth();
+        $last = $first->copy()->addMonth();
+
+        $data = DB::connection('mysql2')
+            ->table('log_presensi')
+            ->whereBetween('DateTime', [$first, $last])
+            ->get();
 
         foreach ($data as $d) {
-            DB::table('shifts_new')
-                ->insert([
-                    'id_shift' => $d->id_shift,
-                    'mulai' => $d->mulai,
-                    'selesai' => $d->selesai,
-                    'kode' => $d->kode,
-                    'keterangan' => $d->keterangan,
-                    'created_at' => $d->created_at,
-                    'updated_at' => $d->updated_at
-                ]);
+            DB::table('presensis')
+                ->updateOrInsert(
+                    ['pin' => $d->PIN, 'datetime' => $d->DateTime],
+                    ['verified' => $d->Verified, 'status' => $d->Status, 'source' => $d->Source]
+                );
         }
 
         error_log('SUCCESS BRO');
