@@ -380,7 +380,7 @@ class ScheduleController extends Controller
 
     public function import()
     {
-        Excel::import(new SchedulesImport, request()->file('schedules'));
+        Excel::import(new SchedulesImport(request()->year, request()->month), request()->file('schedules'));
 
         return response()->json(["status" => "success"], 200);
     }

@@ -11,13 +11,18 @@ use Maatwebsite\Excel\Concerns\ToCollection;
 
 class SchedulesImport implements ToCollection
 {
+    protected $year, $month, $lastday;
+
+    function __construct($year, $month)
+    {
+        $this->year = $year;
+        $this->month = $month;
+        $this->lastday = Carbon::create($year, $month)->lastOfMonth()->day;
+    }
+
     public function collection(Collection $rows)
     {
         $dept = $rows[0][0];
-
-        $date = explode('/', $rows[2][0]);
-        $year = $date[0];
-        $month = $date[1];
 
         $shifts = ShiftDepartemen::where([['id_dept', '=', $dept], ['status', '=', true]])
             ->join('shifts as s', 's.id_shift', '=', 'shift_departemens.id_shift')
@@ -29,14 +34,14 @@ class SchedulesImport implements ToCollection
         $i = 5;
         while (true) {
             if ($rows[$i][0] !== null) {
-                for ($j = 3; $j <= count($rows[5]) - 1; $j++) {
+                for ($j = 3; (int) $rows[4][$j] <= $this->lastday; $j++) {
                     $shift = $shifts->first(function ($item) use ($rows, $i, $j) {
                         return $item->kode == $rows[$i][$j];
                     });
 
-                    $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($year, $month, $j - 2) . '\',' . (empty($rows[$i][$j]) ? 'null' :  $shift->id_shift) . ')';
+                    $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($this->year, $this->month, $j - 2) . '\',' . (empty($rows[$i][$j]) ? 'null' :  $shift->id_shift) . ')';
 
-                    if ($j !== count($rows[5]) - 1) {
+                    if ($rows[4][$j] !== $this->lastday) {
                         $query .= ', ';
                     }
                 }
