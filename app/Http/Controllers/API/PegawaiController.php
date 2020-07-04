@@ -25,11 +25,13 @@ class PegawaiController extends BaseController
     {
         $data = null;
 
-        if (request()->dept) {
+        if ((int) request()->select === 1) {
             $data = SIMDataPegawai::whereRaw('\'' . request()->dept . '\' = ANY(id_dept)')
                 ->where('is_active', true)
                 ->select('id_pegawai', 'nm_pegawai')
                 ->get();
+        } else {
+            $data = SIMDataPegawai::select('id_pegawai')->get();
         }
 
         return response()->json(["status" => "success", "data" => $data], 200);
