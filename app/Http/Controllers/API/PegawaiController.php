@@ -23,17 +23,17 @@ class PegawaiController extends BaseController
      */
     public function index()
     {
-        $data = null;
+        $query = SIMDataPegawai::orderBy('nm_pegawai');
 
         if ((int) request()->select === 1) {
-            $data = SIMDataPegawai::whereRaw('\'' . request()->dept . '\' = ANY(id_dept)')
-                ->where('is_active', true)
-                ->select('id_pegawai', 'nm_pegawai')
-                ->orderBy('nm_pegawai')
-                ->get();
-        } else {
-            $data = SIMDataPegawai::orderBy('nm_pegawai')->get();
+            if (request()->dept) {
+                $query->whereRaw('\'' . request()->dept . '\' = ANY(id_dept)');
+            }
+            $query->where('is_active', true);
+            $query->select('id_pegawai', 'nm_pegawai');
         }
+
+        $data = $query->orderBy('nm_pegawai')->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }

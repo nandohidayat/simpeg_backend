@@ -5,6 +5,7 @@ namespace App\Http\Controllers\API;
 use App\Akses;
 use App\AksesDepartemen;
 use App\AksesKategori;
+use App\AksesUser;
 use App\Departemen;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
@@ -74,12 +75,10 @@ class AksesController extends Controller
      */
     public function show($id)
     {
-        $semua = AksesDepartemen::where(['id_dept' => $id, 'status' => 'true'])
-            ->pluck('id_akses');
-        $kepala = AksesDepartemen::where(['id_dept' => $id, 'status' => 'true', 'only' => 'true'])
+        $akses = AksesUser::where(['id_pegawai' => $id, 'status' => 'true'])
             ->pluck('id_akses');
 
-        return response()->json(["status" => "success", "data" => ['semua' => $semua, 'kepala' => $kepala]], 200);
+        return response()->json(["status" => "success", "data" => ['akses' => $akses]], 200);
     }
 
     /**
@@ -91,7 +90,18 @@ class AksesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $input = $request->all();
+        $akses = Akses::all();
+        foreach ($akses as $a) {
+            $status = false;
+            if (in_array($a->id_akses, $input['akses'], true)) {
+                $status = true;
+            }
+
+            AksesUser::updateOrCreate(['id_akses' => $a->id_akses, 'id_pegawai' => $id], ['status' => $status]);
+        }
+
+        return response()->json(["status" => "success"], 201);
     }
 
     /**
