@@ -85,11 +85,11 @@ class ShiftController extends Controller
         $data->mulai = $input['mulai'];
         $data->selesai = $input['selesai'];
         $data->kode = $input['kode'];
-        $data->color = $input['color'];
+        $data->color = $input['color'] || null;
         $data->keterangan = $input['keterangan'];
         $data->save();
 
-        return response()->json(["status" => "success"], 201);
+        return response()->json(["status" => "success", "data" => $data], 201);
     }
 
     /**
