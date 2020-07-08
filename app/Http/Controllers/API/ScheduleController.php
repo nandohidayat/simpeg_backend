@@ -48,7 +48,13 @@ class ScheduleController extends Controller
      */
     public function index()
     {
-        $thisMonth = Carbon::create(request()->year, request()->month);
+        $thisMonth = null;
+        if (request()->year || request()->month) {
+            $thisMonth = Carbon::create(request()->year, request()->month);
+        } else {
+            $thisMonth = Carbon::now();
+        }
+
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
 
@@ -62,8 +68,8 @@ class ScheduleController extends Controller
                 ->first()
                 ->order);
         } else {
-            if (strpos(auth()->user()->id_dept, 'd-44') !== false) {
-                $query = SIMDepartment::join('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+            if ((int) request()->semua === 1) {
+                $query = SIMDepartment::leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
                     ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
                     ->orderBy('nm_dept', 'asc');
             } else {

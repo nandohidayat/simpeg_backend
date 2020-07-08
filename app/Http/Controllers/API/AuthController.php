@@ -51,8 +51,7 @@ class AuthController extends BaseController
         $token = auth()->login($user);
 
         return response()->json([
-            'token' => $token,
-            'expires_at' => auth()->factory()->getTTL(),
+            'token' => $token
         ]);
     }
 
@@ -119,48 +118,48 @@ class AuthController extends BaseController
     {
         $user = SIMDataPegawai::where('id_pegawai', auth()->user()->id_pegawai)
             ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
-            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept', DB::raw('(CASE WHEN fd.id_dept IS NOT NULL THEN true ELSE false END) as kepala'))
+            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept')
             ->first();
 
-        $dataAkses = DB::table('f_data_pegawai as fdp')
-            ->where('fdp.id_pegawai', $user->id_pegawai)
-            ->join('akses_departemens as ad', function ($join) use ($user) {
-                $join->on('ad.id_dept', '=', DB::raw('ANY(\'' . $user->id_dept . '\')'));
-                $join->where('ad.status', 'true');
-                if (!$user->kepala) {
-                    $join->where('ad.only', 'false');
-                }
-            })
-            ->join('akses as a', 'a.id_akses', '=', 'ad.id_akses')
-            ->join('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
-            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon')
+        $dataAkses = DB::table('akses_users as au')
+            ->where('id_pegawai', auth()->user()->id_pegawai)
+            ->where('status', true)
+            ->join('akses as a', 'a.id_akses', '=', 'au.id_akses')
+            ->leftJoin('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
+            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses', 'a.view')
             ->groupBy('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses')
             ->orderBy('a.id_akses')
             ->get();
 
         $menu = [];
         $akses = [];
+        $option = [];
         $i = -1;
         $before = null;
         foreach ($dataAkses as $da) {
-            if ($before !== $da->kategori) {
-                $i++;
-                $before = $da->kategori;
+            if (!$da->view) {
+                array_push($option, $da->id_akses);
+            } else {
+                if ($before !== $da->kategori) {
+                    $i++;
+                    $before = $da->kategori;
+                    $obj = new stdClass();
+                    $obj->icon = $da->icon;
+                    $obj->header = $da->kategori;
+                    $obj->children = [];
+                    array_push($menu, $obj);
+                }
                 $obj = new stdClass();
-                $obj->icon = $da->icon;
-                $obj->header = $da->kategori;
-                $obj->children = [];
-                array_push($menu, $obj);
+                $obj->header = $da->akses;
+                $obj->link = $da->url;
+                array_push($menu[$i]->children, $obj);
+                array_push($akses, $da->url);
             }
-            $obj = new stdClass();
-            $obj->header = $da->akses;
-            $obj->link = $da->url;
-            array_push($menu[$i]->children, $obj);
-            array_push($akses, $da->url);
         }
 
         $user->menu = $menu;
         $user->akses = $akses;
+        $user->option = $option;
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
