@@ -381,7 +381,8 @@ class ScheduleController extends Controller
 
     public function export()
     {
-        return Excel::download(new SchedulesExport(request()->dept, request()->year, request()->month), 'jadwal.xlsx');
+        $dept = SIMDepartment::where('id_dept', request()->dept)->first();
+        return Excel::download(new SchedulesExport(request()->dept, request()->year, request()->month), '' . $dept->nm_dept . '(' . request()->year . '-' . request()->month . ').xlsx');
     }
 
     public function import()

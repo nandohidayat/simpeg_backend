@@ -168,7 +168,7 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
         $lastcol = 3 + $this->lastday->day;
         $shift = ShiftDepartemen::where([['id_dept', '=', $this->dept], ['status', '=', true]])
             ->join('shifts as s', 's.id_shift', '=', 'shift_departemens.id_shift')
-            ->select('s.kode', 's.keterangan')
+            ->select('s.kode', 's.mulai', 's.selesai', 's.keterangan')
             ->get();
 
         $holiday = ScheduleHoliday::whereBetween('tgl', [$this->firstday, $this->lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
@@ -208,14 +208,14 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
 
                 $event->sheet->getDelegate()->getCell('B' . ($this->count + 7) . '')->setValue('Keterangan');
                 foreach ($shift as $k => $s) {
-                    $event->sheet->getDelegate()->getCell('B' . ($this->count + 8 + $k) . '')->setValue('' . $s->kode . ' = ' . $s->keterangan . '');
+                    $event->sheet->getDelegate()->getCell('B' . ($this->count + 8 + $k) . '')->setValue('' . $s->kode . '');
+                    $event->sheet->getDelegate()->getCell('C' . ($this->count + 8 + $k) . '')->setValue('' . $s->keterangan . ' (' . Carbon::createFromTimeString($s->mulai)->format('H:i') . ' - ' . Carbon::createFromTimeString($s->selesai)->format('H:i') . ')');
                 }
 
-                $event->sheet->getDelegate()->getCell('E' . ($this->count + 8) . '')->setValue('Hari Minggu');
-                $event->sheet->getDelegate()->getCell('E' . ($this->count + 9) . '')->setValue('Hari Libur');
-                $event->sheet->getDelegate()->getStyle('I' . ($this->count + 8) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
-                $event->sheet->getDelegate()->getStyle('I' . ($this->count + 9) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
-                $event->sheet->getDelegate()->getCell('E' . ($this->count + 9) . '')->setValue('Hari Libur');
+                $event->sheet->getDelegate()->getCell('F' . ($this->count + 8) . '')->setValue('Hari Minggu');
+                $event->sheet->getDelegate()->getCell('F' . ($this->count + 9) . '')->setValue('Hari Libur');
+                $event->sheet->getDelegate()->getStyle('J' . ($this->count + 8) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
+                $event->sheet->getDelegate()->getStyle('J' . ($this->count + 9) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
 
                 foreach ($this->weekend as $w) {
                     $col = $this->columnLetter($w + 3);
