@@ -142,21 +142,21 @@ class ScheduleController extends Controller
         $id = [];
         $nama = [];
         $shift = [];
-        $job = [];
+        // $job = [];
         $jam = [];
         foreach ($schedules as $s) {
             array_push($id, $s->id_pegawai);
             array_push($nama, $s->nama);
             $stemp = [];
-            $jtemp = [];
+            // $jtemp = [];
             $temp = '00:00:00';
             for ($i = 1; $i <= $lastday->day; $i++) {
                 array_push($stemp, $s->{'shift' . $i});
-                array_push($jtemp, $s->{'job' . $i});
+                // array_push($jtemp, $s->{'job' . $i});
                 $temp = $this->timeAdd($temp, $s->{'jam' . $i});
             }
             array_push($shift, $stemp);
-            array_push($job, $jtemp);
+            // array_push($job, $jtemp);
             array_push($jam, $temp);
         }
 
@@ -178,7 +178,7 @@ class ScheduleController extends Controller
             }
         }
 
-        $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'job' => $job, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
+        $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
 
         if ($ass !== null) {
             $response["assessor"] = $ass;
