@@ -34,7 +34,8 @@ class SchedulesImport implements ToCollection
         $i = 5;
         while (true) {
             if ($rows[$i][0] !== null) {
-                for ($j = 3; (int) $rows[4][$j] <= $this->lastday; $j++) {
+                $j = 3;
+                while (true) {
                     $shift = $shifts->first(function ($item) use ($rows, $i, $j) {
                         return $item->kode == $rows[$i][$j];
                     });
@@ -44,6 +45,9 @@ class SchedulesImport implements ToCollection
                     if ($rows[4][$j] !== $this->lastday) {
                         $query .= ', ';
                     }
+
+                    if ((int) $rows[4][$j] == $this->lastday) break;
+                    $j++;
                 }
             }
 
