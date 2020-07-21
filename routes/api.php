@@ -22,15 +22,11 @@ Route::get('schedule/holiday', 'API\ScheduleController@holiday');
 Route::get('schedule/excel', 'API\ScheduleController@export');
 Route::post('schedule/excel', 'API\ScheduleController@import');
 
-// Route::middleware('auth:api')->get('/user', function (Request $request) {
-//     return $request->user();
-// });
-
-
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
+    Route::post("refresh", "API\AuthController@refresh");
+    Route::post("logout", "API\AuthController@logout");
     Route::get("user", "API\AuthController@user");
-    Route::get("logout", "API\AuthController@logout");
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');
     Route::get('job/departemen/{id}', 'API\JobController@getDepartemens');

@@ -163,4 +163,11 @@ class AuthController extends BaseController
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
+
+    public function refresh()
+    {
+        $token = auth()->refresh();
+
+        return response()->json(["token" => $token], 200);
+    }
 }
