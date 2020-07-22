@@ -18,7 +18,7 @@ class DepartemenController extends Controller
      */
     public function index()
     {
-        if (request()->select == true) {
+        if ((int)request()->select === 1) {
             $data = DB::connection('pgsql2')
                 ->table('department')
                 ->select('nm_dept')
