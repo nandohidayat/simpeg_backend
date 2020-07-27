@@ -18,16 +18,15 @@ class DepartemenController extends Controller
      */
     public function index()
     {
+        $query = DB::table('f_department')->orderBy('nm_dept', 'asc');
+        $data = null;
+
         if ((int)request()->select === 1) {
-            $data = DB::connection('pgsql2')
-                ->table('department')
-                ->select('nm_dept')
-                ->orderBy('nm_dept', 'asc')
-                ->pluck('nm_dept');
+            $query->select('nm_dept');
+            $data = $query->pluck('nm_dept');
         } else {
-            $data = SIMDepartment::select('id_dept', 'nm_dept')
-                ->orderBy('nm_dept')
-                ->get();
+            $query->select('id_dept', 'nm_dept');
+            $data = $query->get();
         }
 
         return response()->json(["status" => "success", "data" => $data], 200);
