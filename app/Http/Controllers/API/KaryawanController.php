@@ -61,16 +61,16 @@ class KaryawanController extends Controller
     {
         $data = DB::table('f_data_pegawai as dp')
             ->whereRaw('dp.nik_pegawai = \'' . sprintf("%05d", (int) $id) . '\'')
-            ->join('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
+            ->leftjoin('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
             ->leftjoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dp.id_dept)'))
             ->leftjoin('f_sub_department as sd', 'sd.id_subdept', '=', DB::raw('ANY(dp.id_subdept)'))
             ->select('dp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'lp.user_pegawai as username', 'dp.email_pegawai as email', DB::raw('json_agg(d.nm_dept) as dept'), DB::raw('json_agg(sd.nm_subdept) as subdept'), 'dp.is_active as status', 'dp.jenis_kelamin as kelamin', 'dp.alamat_pegawai as alamat', 'dp.no_telp as hp', 'dp.no_rekening as rekening')
             ->groupBy('dp.id_pegawai', 'dp.nik_pegawai', 'dp.nm_pegawai', 'lp.user_pegawai', 'dp.email_pegawai', 'dp.is_active', 'dp.jenis_kelamin', 'dp.alamat_pegawai', 'dp.no_telp', 'dp.no_rekening')
-            ->first();
+            ->get();
 
-        $data->nik = (int) $data->nik;
-        $data->dept = json_decode($data->dept)[0] !== null ? json_decode($data->dept) : [];
-        $data->subdept = json_decode($data->subdept)[0] !== null ? json_decode($data->subdept) : [];
+        // $data->nik = (int) $data->nik;
+        // $data->dept = json_decode($data->dept)[0] !== null ? json_decode($data->dept) : [];
+        // $data->subdept = json_decode($data->subdept)[0] !== null ? json_decode($data->subdept) : [];
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
