@@ -60,34 +60,19 @@ class KaryawanController extends Controller
     public function show($id)
     {
         $data = DB::table('f_data_pegawai as dp')
-            ->where('dp.nik_pegawai', $id)
+            ->whereRaw('dp.nik_pegawai = \'' . sprintf("%05d", (int) $id) . '\'')
             ->join('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
-            ->leftjoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(lp.id_dept)'))
-            ->leftjoin('f_sub_department as sd', 'sd.id_subdept', '=', DB::raw('ANY(lp.id_subdept)'))
-            ->select('lp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'd.nm_dept as dept', 'sd.nm_subdept as subdept')
-            ->get();
+            ->leftjoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dp.id_dept)'))
+            ->leftjoin('f_sub_department as sd', 'sd.id_subdept', '=', DB::raw('ANY(dp.id_subdept)'))
+            ->select('dp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'lp.user_pegawai as username', 'dp.email_pegawai as email', DB::raw('json_agg(d.nm_dept) as dept'), DB::raw('json_agg(sd.nm_subdept) as subdept'), 'dp.is_active as status', 'dp.jenis_kelamin as kelamin', 'dp.alamat_pegawai as alamat', 'dp.no_telp as hp', 'dp.no_rekening as rekening')
+            ->groupBy('dp.id_pegawai', 'dp.nik_pegawai', 'dp.nm_pegawai', 'lp.user_pegawai', 'dp.email_pegawai', 'dp.is_active', 'dp.jenis_kelamin', 'dp.alamat_pegawai', 'dp.no_telp', 'dp.no_rekening')
+            ->first();
 
-        $obj = new stdClass();
-        $obj->id = $data[0]->id;
-        $obj->nik = $data[0]->nik;
-        $obj->nama = $data[0]->nama;
-        $obj->dept = [];
-        $obj->subdept = [];
+        $data->nik = (int) $data->nik;
+        $data->dept = json_decode($data->dept)[0] !== null ? json_decode($data->dept) : [];
+        $data->subdept = json_decode($data->subdept)[0] !== null ? json_decode($data->subdept) : [];
 
-        foreach ($data as $d) {
-            if (!in_array($d->dept, $obj->dept, true))
-                array_push($obj->dept, $d->dept);
-            if (!in_array($d->subdept, $obj->subdept, true))
-                array_push($obj->subdept, $d->subdept);
-        }
-
-        // $data = Karyawan::where('nik', $id)
-        //     ->join('departemens', 'karyawans.id_departemen', '=', 'departemens.id_departemen')
-        //     ->join('ruangs', 'karyawans.id_ruang', '=', 'ruangs.id_ruang')
-        //     ->select('karyawans.nik', 'karyawans.nama', 'karyawans.id_departemen', 'karyawans.id_ruang', 'departemens.departemen', 'ruangs.ruang')
-        //     ->first();
-
-        return response()->json(["status" => "success", "data" => $obj], 200);
+        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**
