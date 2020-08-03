@@ -13,7 +13,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use DB;
 use stdClass;
 use DOMDocument;
-// use App\Helper\Myhelper;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 
@@ -73,7 +72,6 @@ class PendapatanPegController extends Controller
             unset($row[0]);
             unset($row[1]);
 
-            
             foreach($row as $key2 => $value)
             {
                 $pegawai = new stdClass();
@@ -97,14 +95,10 @@ class PendapatanPegController extends Controller
                         $data->$obj = $value[$i];
                     } 
                     $data = json_encode($data);
-                    // echo $data;
-                    // die();
-                    
                     /**
                      * jika tidak ada id_profilp dan bulan kirim, maka lakukan insert
                      * jika ada id_profilp dan bulan kirim, maka lakukan update sesuai dengan tipe form
                      */
-
                     $cek_data = DB::table('pendapatan_pegawai')
                     ->where('nik_pegawai', $pegawai['NIK'])
                     ->where('id_profilp', $id_profilp)
@@ -158,7 +152,6 @@ class PendapatanPegController extends Controller
                     
                     foreach($template_total2 as $key => $total)
                     {
-                        
                         $arr_template[$key] = null;
                         foreach($total as $key2 => $value)
                         {
@@ -177,41 +170,52 @@ class PendapatanPegController extends Controller
                 } 
             }
         }
-        // return response()->json(["status" => "success"], 201);
+        return response()->json(["status" => "success"], 201);
     }
 
-
-    public function buatEmailSimultan(Request $request) 
+    public function buatEmail(Request $request) 
     {
         $id_profilp = $request->post('id_profilp');
-        $bulan_premi = $request->post('dateunggah');
-        $data = DB::table('pendapatan_pegawai as pg')
+        $bulan_kirim = $request->post('bulan_kirim');
+        $id_pegawai = $request->post('id_pegawai') ?? 'empty';
+        $query = DB::table('pendapatan_pegawai as pg')
             ->leftJoin('profil_pendapatan as pp', 'pp.id_profilp' , '=', 'pg.id_profilp')
-            ->leftJoin('data_pegawai as dg', 'pg.id_pegawai', '=', 'dg.id_pegawai')
-            ->leftJoin('department as d', 'd.id_dept', '=',DB::raw('ANY(dg.id_dept)'))
+            ->leftJoin('f_data_pegawai as dg', 'pg.id_pegawai', '=', 'dg.id_pegawai')
+            ->leftJoin('f_department as d', 'd.id_dept', '=',DB::raw('ANY(dg.id_dept)'))
             ->select('pg.id_pendapatan','pg.bulan_kirim', 'pp.nama_pendapatan', DB::raw("to_char(pg.bulan_kirim, 'MM-YYYY') AS bulan_kirim2"), 'dg.nm_pegawai', DB::raw("string_agg(d.nm_dept,':') AS nm_dept"), 'dg.email_pegawai')
             ->where("pg.id_profilp", $id_profilp)
-            ->whereRaw("to_char(pg.bulan_kirim, 'MM-YYYY') = '".$bulan_premi."'")
-            ->whereRaw("dg.email_pegawai NOT LIKE ''")
-            ->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','pp.nama_pendapatan')
-            ->get();
-        $helper = new Myhelper();
-        foreach ($data as $key => $value)
+            ->whereRaw("to_char(pg.bulan_kirim, 'MM-YYYY') = '".$bulan_kirim."'")
+            ->whereRaw("dg.email_pegawai NOT LIKE ''");
+            if($id_pegawai != 'empty')
+            {
+                $query->whereRaw("dg.id_pegawai = '".$id_pegawai."'");
+            }
+            $query->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','pp.nama_pendapatan');
+            $query->limit(5);
+            $data = $query->get();
+            
+        if($data->isEmpty())
         {
-            DB::table('kirim_email')->insert([
-                'penerima_email'    => $value->email_pegawai,
-                'subjek_email'      => $value->nama_pendapatan.' '.$this->bulan_indo($value->bulan_kirim2),
-                'id_pendapatan'     => $value->id_pendapatan,
-                'insertintodb'      => 'NOW()'              
-                ]);
-        }
-        //Membuat cron job
-        $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg2/kirim_email"');
-        if(is_null($output))
+            return response()->json(["status" => "failed", "message" => "Data tidak ditemukan, pastikan id pegawai benar dan email tidak kosong."], 404);
+        }else
         {
-            $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/simpeg2/kirim_email") | sudo crontab -u www-data -');
+            foreach ($data as $key => $value)
+            {
+                DB::table('kirim_email')->insert([
+                    'penerima_email'    => $value->email_pegawai,
+                    'subjek_email'      => $value->nama_pendapatan.' '.$this->bulan_indo($value->bulan_kirim2),
+                    'id_pendapatan'     => $value->id_pendapatan,
+                    'insertintodb'      => 'NOW()'              
+                    ]);
+            }
+            //Membuat cron job
+            $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg_backend/api/email/kirim"');
+            if(is_null($output))
+            {
+                $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/simpeg_backend/api/email/kirim") | sudo crontab -u www-data -');
+            }
+            return response()->json(["status" => "success"], 201);
         }
-        return response()->json(["status" => "success"], 201);
     }
 
     public function kirimEmail(Request $request) 
@@ -226,7 +230,7 @@ class PendapatanPegController extends Controller
             ->whereRaw("status_email is null")
             ->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','ke.id_email','pp.nama_pendapatan')
             ->limit(5)
-            ->get();
+            ->dd();
             // var_dump($data);
             foreach ($data as $key => $value)
             {
@@ -235,14 +239,11 @@ class PendapatanPegController extends Controller
 
             if(!isset($data[0]))
             {
-                /**
-                 * Konfig wget di crontab diganti menggunakan fitur Console laravel
-                 */
                 // tidak ada antrian email, hapus cron job
-                $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg2/kirim_email"');
+                $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg_backend/api/email/kirim"');
                 if(!is_null($output))
                 {
-                    $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'wget http://localhost/simpeg2/kirim_email' | crontab -u www-data -");
+                    $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'wget http://localhost/simpeg_backend/api/email/kirim' | crontab -u www-data -");
                 }
             }
     }
@@ -328,12 +329,10 @@ class PendapatanPegController extends Controller
             }
         } 
         
-        // just some setup
         $dom = new DOMDocument;
         $dom->loadXml('<html><body/></html>');
         $body = $dom->documentElement->firstChild;
 
-        // this is the part you are looking for    
         $template = $dom->createDocumentFragment();
         $template->appendXML($tr);
         $body->appendChild($template);
@@ -375,8 +374,6 @@ class PendapatanPegController extends Controller
         }
     }
 
-    
-
     public function testTemplate()
     {
         $data = DB::table('pendapatan_pegawai as pg')
@@ -397,8 +394,6 @@ class PendapatanPegController extends Controller
         
         $data = json_decode($data);
         $data = $data[0];
-        // var_dump($data[0]->nama_pendapata);
-        // var_dump($data);echo '<br>';echo '<br>';
         $nama_slip = $data->nama_pendapatan.'<br>'.$this->bulan_indo($data->bulan_kirim2);
         
         $tr = "<tr>";
@@ -426,7 +421,6 @@ class PendapatanPegController extends Controller
         
         $keys = array_merge($key_perso, $key_keu, $key_total);
         $kontens = array_merge($konten_perso, $konten_keu, $konten_total);
-        // dd($keys);
         for ($i = 0; $i <= count($keys)-1; $i++) 
         {
             if(strpos($keys[$i], 'N:') !== false)
@@ -475,7 +469,6 @@ class PendapatanPegController extends Controller
         $dom->loadXml('<html><body/></html>');
         $body = $dom->documentElement->firstChild;
 
-        // this is the part you are looking for    
         $template = $dom->createDocumentFragment();
         $template->appendXML($tr);
         $body->appendChild($template);
