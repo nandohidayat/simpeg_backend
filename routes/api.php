@@ -22,6 +22,11 @@ Route::get('schedule/holiday', 'API\ScheduleController@holiday');
 Route::get('schedule/excel', 'API\ScheduleController@export');
 Route::post('schedule/excel', 'API\ScheduleController@import');
 
+Route::get('pendapatanpeg/profilp', 'API\PendapatanPegController@exportTemplatePeg');
+Route::get('pendapatanpeg/pendapatan', 'API\PendapatanPegController@exportPendapatanPeg');
+Route::post('pendapatanpeg/pendapatan', 'API\PendapatanPegController@importPendapatanPeg');
+Route::get('testemail', 'API\PendapatanPegController@testTemplate');
+
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::post("refresh", "API\AuthController@refresh");
