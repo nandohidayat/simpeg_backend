@@ -138,7 +138,6 @@ class PendapatanPegController extends Controller
                 $query->whereRaw("dg.id_pegawai = '".$id_pegawai."'");
             }
             $query->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','pp.nama_pendapatan');
-            $query->limit(5);
             $data = $query->get();
             
         if($data->isEmpty())
