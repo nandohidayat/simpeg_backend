@@ -178,12 +178,12 @@ class PendapatanPegController extends Controller
             /**
              * untuk debug where clause email pegawai di disable
              */
-            // ->whereRaw("dg.email_pegawai not ilike ''")
+            ->whereRaw("dg.email_pegawai not ilike ''")
             ->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','ke.id_email','pp.nama_pendapatan')
             ->limit(5)
             ->get();
             
-            var_dump($data);
+            // var_dump($data);
             $arr_template = [];
             foreach ($data as $key => $value)
             {
