@@ -256,7 +256,7 @@ class PendapatanPegController extends Controller
         $data = strip_tags(preg_replace("/&(?!#?[a-z0-9]+;)/", "&amp;",$data));
         
         $data = json_decode($data);
-        $data = $data[0];
+        // $data = $data[0];
         // var_dump($data[0]->nama_pendapata);
         // var_dump($data);echo '<br>';echo '<br>';
         $nama_slip = $data->nama_pendapatan.'<br>'.$this->bulan_indo($data->bulan_kirim2);
