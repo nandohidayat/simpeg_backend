@@ -58,10 +58,7 @@ class PendapatanPegController extends Controller
         }
         $time=time();
         $hasil_import = Excel::toArray(new PendapatanPegImport, $file);
-        $template_total = DB::table('profil_pendapatan')
-        ->where('id_profilp', $id_profilp)
-        ->value('format_total');
-        $arr_template = [];
+        
         foreach($hasil_import as $key => $row)
         {
             /**
@@ -117,56 +114,6 @@ class PendapatanPegController extends Controller
                         ->where('id_pegawai', $id_pegawai)
                         ->update([$tipe_form => $data]);
                     }
-                    $data = DB::table('pendapatan_pegawai')
-                    ->select('detail_personalia', 'detail_keuangan')
-                    ->where('nik_pegawai', $pegawai['NIK'])
-                    ->where('id_profilp', $id_profilp)
-                    ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '".$bulan_kirim."'")
-                    ->first();
-                    $personalia = json_decode($data->detail_personalia,true);
-                    $keuangan = json_decode($data->detail_keuangan,true);
-                    $total_hitung = 0;
-                    foreach($personalia as $key =>$total)
-                    {
-                        if(strpos($key, 'P:') !== false)
-                        {
-                            $total_hitung += (int)$total;
-                        }
-                        if(strpos($key, 'M:') !== false)
-                        {
-                            $total_hitung -= (int)$total;
-                        }
-                    }
-                    foreach($keuangan as $key =>$total)
-                    {
-                        if(strpos($key, 'P:') !== false)
-                        {
-                            $total_hitung += (int)$total;
-                        }
-                        if(strpos($key, 'M:') !== false)
-                        {
-                            $total_hitung -= (int)$total;
-                        }
-                    }
-                    $template_total2 = json_decode($template_total,true);
-                    
-                    foreach($template_total2 as $key => $total)
-                    {
-                        $arr_template[$key] = null;
-                        foreach($total as $key2 => $value)
-                        {
-                            if(strpos($key2, 'T:') !== false)
-                            {
-                                $arr_template[$key2] = $total_hitung;
-                            }
-                        }
-                    }
-                    $template_total2 = json_encode($arr_template);
-                    DB::table('pendapatan_pegawai')
-                        ->where('id_profilp', $id_profilp)
-                        ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '".$bulan_kirim."'")
-                        ->where('id_pegawai', $id_pegawai)
-                        ->update(['detail_total' => $template_total2]);
                 } 
             }
         }
@@ -209,10 +156,10 @@ class PendapatanPegController extends Controller
                     ]);
             }
             //Membuat cron job
-            $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg_backend/api/email/kirim"');
+            $output = shell_exec('sudo crontab -l -u www-data | grep -i "http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
             if(is_null($output))
             {
-                $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/simpeg_backend/api/email/kirim") | sudo crontab -u www-data -');
+                $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim") | sudo crontab -u www-data -');
             }
             return response()->json(["status" => "success"], 201);
         }
@@ -228,22 +175,76 @@ class PendapatanPegController extends Controller
             ->select('ke.id_email', 'ke.subjek_email', 'pg.*', 'pp.nama_pendapatan', DB::raw("to_char(pg.bulan_kirim, 'MM-YYYY') AS bulan_kirim2"), 'dg.nm_pegawai', DB::raw("string_agg(d.nm_dept,':') AS nm_dept"), 'dg.email_pegawai')
             ->whereRaw('sendingdatetime is null')
             ->whereRaw("status_email is null")
+            /**
+             * untuk debug where clause email pegawai di disable
+             */
+            // ->whereRaw("dg.email_pegawai not ilike ''")
             ->groupBy('pg.id_pendapatan','dg.nm_pegawai','dg.email_pegawai','ke.id_email','pp.nama_pendapatan')
             ->limit(5)
-            ->dd();
-            // var_dump($data);
+            ->get();
+            
+            var_dump($data);
+            $arr_template = [];
             foreach ($data as $key => $value)
             {
+                $template_total = DB::table('profil_pendapatan')
+                ->where('id_profilp', $value->id_profilp)
+                ->value('format_total');
+                $personalia = json_decode($value->detail_personalia,true);
+                $keuangan = json_decode($value->detail_keuangan,true);
+                $total_hitung = 0;
+                foreach($personalia as $key =>$total_perso)
+                {
+                    if(strpos($key, 'P:') !== false)
+                    {
+                        $total_hitung += (int)$total_perso;
+                    }
+                    if(strpos($key, 'M:') !== false)
+                    {
+                        $total_hitung -= (int)$total_perso;
+                    }
+                }
+                foreach($keuangan as $key =>$total_keu)
+                {
+                    if(strpos($key, 'P:') !== false)
+                    {
+                        $total_hitung += (int)$total_keu;
+                    }
+                    if(strpos($key, 'M:') !== false)
+                    {
+                        $total_hitung -= (int)$total_keu;
+                    }
+                }
+                $template_total2 = json_decode($template_total,true);
+
+                foreach($template_total2 as $key => $total_temp)
+                {
+                    $arr_template[$key] = null;
+                    foreach($total_temp as $key2 => $value2)
+                    {
+                        if(strpos($key2, 'T:') !== false)
+                        {
+                            $arr_template[$key2] = $total_hitung;
+                        }
+                    }
+                }
+                
+                $template_total2 = json_encode($arr_template);
+                DB::table('pendapatan_pegawai')
+                ->where('id_profilp', $value->id_profilp)
+                ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '".$value->bulan_kirim2."'")
+                ->where('id_pegawai', $value->id_pegawai)
+                ->update(['detail_total' => $template_total2]);
                $this->kirimSlip($value); 
             }
 
             if(!isset($data[0]))
             {
                 // tidak ada antrian email, hapus cron job
-                $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/simpeg_backend/api/email/kirim"');
+                $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
                 if(!is_null($output))
                 {
-                    $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'wget http://localhost/simpeg_backend/api/email/kirim' | crontab -u www-data -");
+                    $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim' | crontab -u www-data -");
                 }
             }
     }
