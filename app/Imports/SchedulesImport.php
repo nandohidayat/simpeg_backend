@@ -37,10 +37,10 @@ class SchedulesImport implements ToCollection
                 $j = 3;
                 while (true) {
                     $shift = $shifts->first(function ($item) use ($rows, $i, $j) {
-                        return $item->kode == $rows[$i][$j];
+                        return $item->kode === $rows[$i][$j];
                     });
 
-                    $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($this->year, $this->month, $j - 2) . '\',' . (empty($rows[$i][$j] || $shift === null) ? 'null' :  $shift->id_shift) . ')';
+                    $query .= '(\'' . $dept . '\', \'' . $rows[$i][0] . '\', \'' . Carbon::create($this->year, $this->month, $j - 2) . '\',' . (empty($rows[$i][$j]) || empty($shift) ? 'null' :  $shift->id_shift) . ')';
 
                     if ($rows[4][$j] !== $this->lastday) {
                         $query .= ', ';
