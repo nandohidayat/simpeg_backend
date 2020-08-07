@@ -35,6 +35,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post("refresh", "API\AuthController@refresh");
     Route::post("logout", "API\AuthController@logout");
     Route::get("user", "API\AuthController@user");
+    Route::put('reset/{id}', 'API\AuthController@reset');
+
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');
     Route::get('job/departemen/{id}', 'API\JobController@getDepartemens');

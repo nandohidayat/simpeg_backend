@@ -170,4 +170,14 @@ class AuthController extends BaseController
 
         return response()->json(["token" => $token], 200);
     }
+
+    public function reset($id)
+    {
+        DB::connection('pgsql2')
+            ->table('login_pegawai')
+            ->where('id_pegawai', $id)
+            ->update(['pass_pegawai' => md5(1234)]);
+
+        return response()->json(["status" => 'success'], 200);
+    }
 }
