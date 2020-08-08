@@ -51,6 +51,8 @@ class PublishLog extends Command
             $log->id_dept = $d->id_dept;
             $log->type = 0;
             $log->tgl = new Carbon('first day of January 2020', 'Asia/Jakarta');
+
+            $log->save();
         }
     }
 }
