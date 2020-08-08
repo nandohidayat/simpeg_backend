@@ -58,5 +58,5 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('job', 'API\JobController');
     Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
-    Route::apiResource('log/departemen', 'API\LogDepartemen');
+    Route::apiResource('log/departemen', 'API\LogDepartemenController');
 });
