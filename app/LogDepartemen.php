@@ -9,5 +9,5 @@ class LogDepartemen extends Model
     protected $primaryKey = 'id_log_departemen';
     protected $keyType = 'text';
     protected $hidden = ['created_at', 'updated_at'];
-    protected $fillable = ['id_pegawai', 'type', 'id_dept', 'tgl'];
+    protected $fillable = ['id_log_departemen', 'type', 'id_dept', 'tgl'];
 }
