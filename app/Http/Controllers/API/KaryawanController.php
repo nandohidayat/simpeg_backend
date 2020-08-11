@@ -92,7 +92,26 @@ class KaryawanController extends Controller
      */
     public function update(Request $request, $id)
     {
-        Karyawan::updateOrCreate(['nik' => $id], $request->all());
+        $input = $request->all();
+
+        DB::connection('pgsql2')
+            ->table('data_pegawai')
+            ->where('id_pegawai', $id)
+            ->update([
+                'nik_pegawai' => sprintf("%05d", (int) $input['nik']),
+                'nm_pegawai' => $input['nama'],
+                'alamat_pegawai' => $input['alamat'],
+                'jenis_kelamin' => $input['kelamin'],
+                'no_telp' => $input['hp'],
+                'is_active' => $input['status'],
+                'email_pegawai' => $input['email'],
+                'no_rekening' => $input['rekening']
+            ]);
+
+        DB::connection('pgsql2')
+            ->table('login_pegawai')
+            ->where('id_pegawai', $id)
+            ->update(['user_pegawai' => $input['username']]);
 
         return response()->json(["status" => "success"], 200);
     }
