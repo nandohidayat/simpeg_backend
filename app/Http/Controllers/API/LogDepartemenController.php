@@ -20,7 +20,7 @@ class LogDepartemenController extends Controller
                 if (!in_array($l->id_dept, $dept)) array_push($dept, $l->id_dept);
             }
             if ((int)$l->type === 1) {
-                $dept = array_diff($dept, $l->id_dept);
+                $dept = array_diff($dept, array($l->id_dept));
             }
         }
 
@@ -67,7 +67,7 @@ class LogDepartemenController extends Controller
             ->leftjoin('f_department', 'f_department.id_dept', '=', 'log_departemens.id_dept')
             ->select('log_departemens.id_log_departemen', 'log_departemens.tgl', 'log_departemens.type', DB::raw('(case when log_departemens.type = 0 then \'Masuk\' else \'Keluar\' end) as nm_type'), 'log_departemens.id_dept', 'f_department.nm_dept')
             ->orderBy('tgl', 'desc')
-            ->get();
+            ->first();
 
         return response()->json(["status" => "success", 'data' => $data], 201);
     }
@@ -83,7 +83,7 @@ class LogDepartemenController extends Controller
         $data = SIMDataPegawai::whereRaw('f_data_pegawai.nik_pegawai = \'' . sprintf("%05d", (int) $id) . '\'')
             ->rightJoin('log_departemens', 'log_departemens.id_pegawai', '=', 'f_data_pegawai.id_pegawai')
             ->leftjoin('f_department', 'f_department.id_dept', '=', 'log_departemens.id_dept')
-            ->select('log_departemens.tgl', 'log_departemens.type', DB::raw('(case when log_departemens.type = 0 then \'Masuk\' else \'Keluar\' end) as nm_type'), 'log_departemens.id_dept', 'f_department.nm_dept')
+            ->select('log_departemens.id_log_departemen', 'log_departemens.tgl', 'log_departemens.type', DB::raw('(case when log_departemens.type = 0 then \'Masuk\' else \'Keluar\' end) as nm_type'), 'log_departemens.id_dept', 'f_department.nm_dept')
             ->orderBy('tgl', 'desc')
             ->get();
 
@@ -118,8 +118,7 @@ class LogDepartemenController extends Controller
         $data = LogDepartemen::where('id_log_departemen', $id)
             ->leftjoin('f_department', 'f_department.id_dept', '=', 'log_departemens.id_dept')
             ->select('log_departemens.id_log_departemen', 'log_departemens.tgl', 'log_departemens.type', DB::raw('(case when log_departemens.type = 0 then \'Masuk\' else \'Keluar\' end) as nm_type'), 'log_departemens.id_dept', 'f_department.nm_dept')
-            ->orderBy('tgl', 'desc')
-            ->get();
+            ->first();
 
         return response()->json(["status" => "success", 'data' => $data], 201);
     }
