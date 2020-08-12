@@ -18,64 +18,6 @@ class AbsenController extends Controller
      */
     public function index()
     {
-        $data = null;
-
-        if (request()->pegawai) {
-            $date = Carbon::create(request()->year, request()->month);
-            $firstday = $date->copy()->firstOfMonth();
-            $current = Carbon::now();
-
-            $lastday = $date->diffInMonths($current) === 0 ? $current : $date->copy()->lastOfMonth();
-
-            $data = Schedule::where('schedules.pegawai', request()->pegawai)
-                ->whereBetween('tgl', [$firstday, $lastday])
-                ->whereNotNull('schedules.shift')
-                ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
-                ->leftjoin('f_department as d', 'd.id_dept', '=', 'schedules.dept')
-                ->leftJoin('shifts', 'schedules.shift', '=', 'shifts.id_shift')
-                ->leftJoin('presensis as a', function ($join) {
-                    $join
-                        ->on([
-                            ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
-                            [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
-                            [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
-                            [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
-                        ])
-                        ->where([
-                            ['a.status', '=', '0'],
-                        ]);
-                })
-                ->leftJoin('presensis as b', function ($join) {
-                    $join
-                        ->on([
-                            ['b.pin', '=', 'a.pin'],
-                            ['b.datetime', '>', 'a.datetime']
-                        ])
-                        ->where('b.status', '=', '1');
-                })
-                ->orderBy('schedules.tgl')
-                ->select(
-                    'schedules.id_schedule',
-                    'schedules.tgl as tanggal',
-                    'd.nm_dept as dept',
-                    'shifts.kode as shift',
-                    DB::raw('cast(min(a.datetime) as time) as masuk'),
-                    DB::raw('cast(min(b.datetime) as time) as keluar'),
-                    DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes 59 seconds') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                    DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes 59 seconds') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
-                )
-                ->groupBy('schedules.id_schedule', 'd.nm_dept', 'shifts.kode', 'shifts.mulai')
-                ->get();
-
-            $sum = 0;
-            foreach ($data as $d) {
-                $sum += $d->pendapatan;
-            }
-
-            return response()->json(["status" => "success", "data" => ["absen" => $data, "pendapatan" => $sum]], 200);
-        }
-
-        return response()->json(["status" => "success", "data" => $data], 200);
     }
 
     /**
@@ -102,19 +44,26 @@ class AbsenController extends Controller
 
         $lastday = $date->diffInMonths($current) === 0 ? $current : $date->copy()->lastOfMonth();
 
-        $data = Schedule::where('schedules.dept', request()->dept)
-            ->where('schedules.pegawai', $id)
-            ->whereBetween('tgl', [$firstday, $lastday])
-            ->whereNotNull('schedules.shift')
-            ->leftjoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'schedules.pegawai')
-            ->leftJoin('shifts', 'schedules.shift', '=', 'shifts.id_shift')
+        $data = DB::table(DB::raw("generate_series('" . $firstday . "','" . $lastday . "', '1 day'::interval) tanggal"))
+            ->leftJoin('log_departemens as ld', function ($join) use ($id) {
+                $join->where('ld.id_pegawai', $id);
+                $join->whereRaw('coalesce(ld.keluar, tanggal) >= tanggal');
+                $join->on('ld.masuk', '<=', 'tanggal');
+            })
+            ->join('f_department as fd', 'fd.id_dept', '=', 'ld.id_dept')
+            ->join('schedules as sch', function ($join) use ($id) {
+                $join->where('sch.pegawai', $id);
+                $join->on([['sch.dept', '=', 'ld.id_dept'], ['sch.tgl', '=', 'tanggal']]);
+            })
+            ->join('shifts as shf', 'shf.id_shift', '=', 'sch.shift')
+            ->join('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'ld.id_pegawai')
             ->leftJoin('presensis as a', function ($join) {
                 $join
                     ->on([
                         ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
-                        [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(schedules.tgl as date)')],
-                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shifts.mulai as time) - interval '2 hours'")],
-                        [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shifts.selesai as time)")]
+                        [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(tanggal as date)')],
+                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shf.mulai as time) - interval '2 hours'")],
+                        [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shf.selesai as time)")]
                     ])
                     ->where([
                         ['a.status', '=', '0'],
@@ -128,17 +77,17 @@ class AbsenController extends Controller
                     ])
                     ->where('b.status', '=', '1');
             })
-            ->orderBy('schedules.tgl')
+            ->orderBy('tanggal')
             ->select(
-                'schedules.id_schedule',
-                'schedules.tgl as tanggal',
-                'shifts.kode as shift',
+                DB::raw('tanggal::date'),
+                'fd.nm_dept as dept',
+                'shf.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
                 DB::raw('cast(min(b.datetime) as time) as keluar'),
-                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shifts.mulai as time) + interval '5 minutes') OR (cast(shifts.mulai as time) = time '00:00') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= schedules.tgl ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shf.mulai as time) + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shf.mulai as time) + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
-            ->groupBy('schedules.id_schedule', 'shifts.kode', 'shifts.mulai')
+            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai')
             ->get();
 
         $sum = 0;
