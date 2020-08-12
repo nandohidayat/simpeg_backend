@@ -16,9 +16,9 @@ class CreateLogDepartemensTable extends Migration
         Schema::create('log_departemens', function (Blueprint $table) {
             $table->bigIncrements('id_log_departemen');
             $table->string('id_pegawai');
-            $table->integer('type');
             $table->string('id_dept');
-            $table->date('tgl');
+            $table->date('masuk')->nullable();
+            $table->date('keluar')->nullable();
             $table->timestamps();
         });
     }
