@@ -160,6 +160,7 @@ class AuthController extends BaseController
         $user->menu = $menu;
         $user->akses = $akses;
         $user->option = $option;
+        $user->nik = (int) $user->nik;
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
@@ -179,5 +180,28 @@ class AuthController extends BaseController
             ->update(['pass_pegawai' => md5(1234)]);
 
         return response()->json(["status" => 'success'], 200);
+    }
+
+    public function password(Request $request, $id)
+    {
+        $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($id, $request) {
+            $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
+            $query->where([
+                'f_login_pegawai.id_pegawai' => $id,
+                'f_login_pegawai.pass_pegawai' => md5($request->current)
+            ]);
+        })
+            ->first();
+
+        if ($user == null)
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 500);
+
+        $password = md5($request->password);
+
+        SIMLoginPegawai::where('id_pegawai', $id)->update(['pass_pegawai' => $password]);
+
+        return response()->json(["status" => 'success'], 201);
     }
 }
