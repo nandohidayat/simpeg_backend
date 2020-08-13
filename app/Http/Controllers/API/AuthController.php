@@ -160,6 +160,7 @@ class AuthController extends BaseController
         $user->menu = $menu;
         $user->akses = $akses;
         $user->option = $option;
+        $user->nik = (int) $user->nik;
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
