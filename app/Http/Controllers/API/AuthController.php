@@ -184,6 +184,12 @@ class AuthController extends BaseController
 
     public function password(Request $request, $id)
     {
+        if (empty($request->current)) {
+            return response()->json([
+                'message' => 'Unauthorized'
+            ], 500);
+        }
+
         $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($id, $request) {
             $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
             $query->where([
