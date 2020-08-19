@@ -25,8 +25,20 @@ class ScheduleController extends Controller
 {
     function timeAdd($first, $second)
     {
-        $secs = strtotime($second) - strtotime("00:00:00");
-        return date("H:i:s", strtotime($first) + $secs);
+        $time1 = explode(':', $first);
+        $time2 = explode(':', $second);
+
+        $second = (int) $time1[2] + $time2[2];
+        $temp = (int) $second / 60;
+        $second = $second % 60;
+
+        $minute = (int) $time1[1] + $time2[1] + $temp;
+        $temp = (int) $minute / 60;
+        $minute = $minute % 60;
+
+        $hour = (int) $time1[0] + $time2[0] + $temp;
+
+        return '' . sprintf("%02d", $hour) . ':' . sprintf("%02d", $minute) . ':' . sprintf("%02d", $second) . '';
     }
 
     /**
