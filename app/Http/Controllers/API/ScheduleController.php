@@ -25,20 +25,8 @@ class ScheduleController extends Controller
 {
     function timeAdd($first, $second)
     {
-        $time1 = explode(':', $first);
-        $time2 = explode(':', $second);
-
-        $second = (int) $time1[2] + $time2[2];
-        $temp = (int) $second / 60;
-        $second = $second - ($temp * 60);
-
-        $minute = (int) $time1[1] + $time2[1] + $temp;
-        $temp = (int) $minute / 60;
-        $minute = $minute - ($temp * 60);
-
-        $hour = (int) $time1[0] + $time2[0] + $temp;
-
-        return '' . sprintf("%02d", $hour) . ':' . sprintf("%02d", $minute) . ':' . sprintf("%02d", $second) . '';
+        $secs = strtotime($second) - strtotime("00:00:00");
+        return date("H:i:s", strtotime($first) + $secs);
     }
 
     /**
@@ -142,21 +130,17 @@ class ScheduleController extends Controller
         $id = [];
         $nama = [];
         $shift = [];
-        // $job = [];
         $jam = [];
         foreach ($schedules as $s) {
             array_push($id, $s->id_pegawai);
             array_push($nama, $s->nama);
             $stemp = [];
-            // $jtemp = [];
             $temp = '00:00:00';
             for ($i = 1; $i <= $lastday->day; $i++) {
                 array_push($stemp, $s->{'shift' . $i});
-                // array_push($jtemp, $s->{'job' . $i});
                 $temp = $this->timeAdd($temp, $s->{'jam' . $i});
             }
             array_push($shift, $stemp);
-            // array_push($job, $jtemp);
             array_push($jam, $temp);
         }
 
