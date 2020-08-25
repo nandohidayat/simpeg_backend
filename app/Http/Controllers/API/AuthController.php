@@ -190,13 +190,10 @@ class AuthController extends BaseController
             ], 500);
         }
 
-        $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($id, $request) {
-            $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
-            $query->where([
-                'f_login_pegawai.id_pegawai' => $id,
-                'f_login_pegawai.pass_pegawai' => md5($request->current)
-            ]);
-        })
+        $user = SIMLoginPegawai::where([
+            'id_pegawai' => $id,
+            'pass_pegawai' => md5($request->current)
+        ])
             ->first();
 
         if ($user == null)
