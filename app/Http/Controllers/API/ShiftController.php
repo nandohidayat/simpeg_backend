@@ -16,7 +16,7 @@ class ShiftController extends Controller
      */
     public function index()
     {
-        $data = Shift::orderBy('mulai', 'asc')->get();
+        $data = Shift::orderBy('mulai', 'asc')->orderBy('selesai', 'asc')->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
@@ -110,7 +110,7 @@ class ShiftController extends Controller
 
     public function getDepartemens($id)
     {
-        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->pluck('id_shift');
+        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->select('id_shift')->get();
 
         return response()->json(["status" => "success", "data" => $shift], 200);
     }
