@@ -37,6 +37,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get("user", "API\AuthController@user");
     Route::put("password/{id}", "API\AuthController@password");
     Route::put('reset/{id}', 'API\AuthController@reset');
+    Route::delete('delete/{id}', 'API\AuthController@delete');
 
     Route::get('shift/departemen/{id}', 'API\ShiftController@getDepartemens');
     Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');

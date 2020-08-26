@@ -207,4 +207,20 @@ class AuthController extends BaseController
 
         return response()->json(["status" => 'success'], 201);
     }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $data = SIMLoginPegawai::find($id);
+
+        if ($data === null) return response()->json(["status" => "not found"], 401);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
+    }
 }
