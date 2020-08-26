@@ -48,7 +48,7 @@ class AuthController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
 
-        $token = auth()->login($user);
+        $token = auth()->setTTL(86400)->login($user);
 
         return response()->json([
             'token' => $token
