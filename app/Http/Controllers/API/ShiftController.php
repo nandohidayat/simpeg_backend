@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Shift;
 use App\ShiftDepartemen;
 use Illuminate\Http\Request;
+use Mockery\Undefined;
 
 class ShiftController extends Controller
 {
@@ -16,7 +17,7 @@ class ShiftController extends Controller
      */
     public function index()
     {
-        $data = Shift::orderBy('mulai', 'asc')->get();
+        $data = Shift::orderBy('mulai', 'asc')->orderBy('selesai', 'asc')->orderBy('kode', 'asc')->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
@@ -31,7 +32,13 @@ class ShiftController extends Controller
     {
         $input = $request->all();
 
-        $data = Shift::create($input);
+        $data = new Shift;
+        $data->mulai = $input['mulai'];
+        $data->selesai = $input['selesai'];
+        $data->kode = $input['kode'];
+        $data->color = isset($input['color']) ? $input['color'] : null;
+        $data->keterangan = $input['keterangan'];
+        $data->save();
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
 
@@ -85,7 +92,7 @@ class ShiftController extends Controller
         $data->mulai = $input['mulai'];
         $data->selesai = $input['selesai'];
         $data->kode = $input['kode'];
-        $data->color = $input['color'];
+        $data->color = isset($input['color']) ? $input['color'] : null;
         $data->keterangan = $input['keterangan'];
         $data->save();
 
@@ -110,7 +117,7 @@ class ShiftController extends Controller
 
     public function getDepartemens($id)
     {
-        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->pluck('id_shift');
+        $shift = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])->select('id_shift')->get();
 
         return response()->json(["status" => "success", "data" => $shift], 200);
     }
@@ -119,14 +126,14 @@ class ShiftController extends Controller
     {
 
         $input = $request->all();
-        error_log(json_encode($input));
         $shift = Shift::pluck('id_shift');
-        $active = array_map('intval', $input['shift']);
 
         foreach ($shift as $a) {
             $status = false;
-            if (in_array($a, $active, true)) {
-                $status = true;
+            foreach ($input['shift'] as $i) {
+                if ((int)$i['id_shift'] === (int)$a) {
+                    $status = true;
+                }
             }
             ShiftDepartemen::updateOrCreate(['id_shift' => $a, 'id_dept' => $id], ['status' => $status]);
         }

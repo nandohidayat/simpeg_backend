@@ -48,7 +48,7 @@ class AuthController extends BaseController
                 'message' => 'Unauthorized'
             ], 401);
 
-        $token = auth()->login($user);
+        $token = auth()->setTTL(86400)->login($user);
 
         return response()->json([
             'token' => $token
@@ -190,13 +190,10 @@ class AuthController extends BaseController
             ], 500);
         }
 
-        $user = SIMDataPegawai::rightJoin('f_login_pegawai', function ($query) use ($id, $request) {
-            $query->on('f_data_pegawai.id_pegawai', '=', 'f_login_pegawai.id_pegawai');
-            $query->where([
-                'f_login_pegawai.id_pegawai' => $id,
-                'f_login_pegawai.pass_pegawai' => md5($request->current)
-            ]);
-        })
+        $user = SIMLoginPegawai::where([
+            'id_pegawai' => $id,
+            'pass_pegawai' => md5($request->current)
+        ])
             ->first();
 
         if ($user == null)
@@ -209,5 +206,21 @@ class AuthController extends BaseController
         SIMLoginPegawai::where('id_pegawai', $id)->update(['pass_pegawai' => $password]);
 
         return response()->json(["status" => 'success'], 201);
+    }
+
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function destroy($id)
+    {
+        $data = SIMLoginPegawai::find($id);
+
+        if ($data === null) return response()->json(["status" => "not found"], 401);
+
+        $data->delete();
+        return response()->json(["status" => "success"], 201);
     }
 }

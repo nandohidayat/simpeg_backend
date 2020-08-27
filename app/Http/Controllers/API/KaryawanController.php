@@ -54,7 +54,28 @@ class KaryawanController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
-        Karyawan::create($input);
+
+        $dup = DB::table('f_data_pegawai')->where('nik_pegawai', sprintf("%05d", (int) $input['nik']))->first();
+
+        if ($dup) {
+            return response()->json(["status" => "error", 'message' => 'Duplicated NIK Pegawai'], 501);
+        }
+
+        $id = DB::table('fi_id_pegawai_seq')->first()->id_pegawai;
+        DB::table('f_data_pegawai')
+            ->insert(
+                [
+                    'id_pegawai' => $id,
+                    'nik_pegawai' => sprintf("%05d", (int) $input['nik']),
+                    'nm_pegawai' => $input['nama'],
+                    'alamat_pegawai' => $input['alamat'],
+                    'jenis_kelamin' => $input['kelamin'],
+                    'no_telp' => $input['hp'],
+                    'is_active' => $input['status'],
+                    'email_pegawai' => $input['email'],
+                    'no_rekening' => $input['rekening']
+                ],
+            );
 
         return response()->json(["status" => "success"], 201);
     }
@@ -94,19 +115,27 @@ class KaryawanController extends Controller
     {
         $input = $request->all();
 
+        $dup = DB::table('f_data_pegawai')->where('nik_pegawai', sprintf("%05d", (int) $input['nik']))->first();
+
+        if ($dup->id_pegawai === $id) {
+            return response()->json(["status" => "error", 'message' => 'Duplicated NIK Pegawai'], 501);
+        }
+
         DB::connection('pgsql2')
             ->table('data_pegawai')
             ->where('id_pegawai', $id)
-            ->update([
-                'nik_pegawai' => sprintf("%05d", (int) $input['nik']),
-                'nm_pegawai' => $input['nama'],
-                'alamat_pegawai' => $input['alamat'],
-                'jenis_kelamin' => $input['kelamin'],
-                'no_telp' => $input['hp'],
-                'is_active' => $input['status'],
-                'email_pegawai' => $input['email'],
-                'no_rekening' => $input['rekening']
-            ]);
+            ->update(
+                [
+                    'nik_pegawai' => sprintf("%05d", (int) $input['nik']),
+                    'nm_pegawai' => $input['nama'],
+                    'alamat_pegawai' => $input['alamat'],
+                    'jenis_kelamin' => $input['kelamin'],
+                    'no_telp' => $input['hp'],
+                    'is_active' => $input['status'],
+                    'email_pegawai' => $input['email'],
+                    'no_rekening' => $input['rekening']
+                ]
+            );
 
         DB::connection('pgsql2')
             ->table('login_pegawai')

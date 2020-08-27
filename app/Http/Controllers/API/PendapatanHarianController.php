@@ -30,7 +30,10 @@ class PendapatanHarianController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
-        $data = PendapatanHarian::create($input);
+        $data = new PendapatanHarian;
+        $data->tgl = $input['tgl'];
+        $data->pendapatan = $input['pendapatan'];
+        $data->save();
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
 
