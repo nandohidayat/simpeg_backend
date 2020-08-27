@@ -35,7 +35,11 @@ class ScheduleAccessController extends Controller
     public function store(Request $request)
     {
         $input = $request->all();
-        $data = ScheduleAccess::create($input);
+        $data = new ScheduleAccess;
+        $data->dept = $input['dept'];
+        $data->access = $input['access'];
+        $data->assessor = $input['assessor'];
+        $data->save();
 
         if ($data === null) return response()->json(["status" => "failed"], 501);
 
