@@ -15,9 +15,13 @@ class LogDepartemenController extends Controller
         $log = LogDepartemen::where('id_pegawai', $pegawai)->whereRaw('keluar IS NULL')->orderBy('masuk', 'asc')->get();
         $dept = [];
 
+        error_log(json_encode($log));
+
         foreach ($log as $l) {
             if (!in_array($l->id_dept, $dept)) array_push($dept, $l->id_dept);
         }
+
+        error_log(json_encode($dept));
 
         return $dept;
     }
@@ -49,6 +53,7 @@ class LogDepartemenController extends Controller
         $log->id_pegawai = $input['pegawai'];
         $log->id_dept = $input['dept'];
         $log->masuk = $input['masuk'];
+        $log->keluar = isset($input['keluar']) ? $input['keluar'] : null;
 
         $log->save();
 
@@ -130,7 +135,7 @@ class LogDepartemenController extends Controller
         DB::connection('pgsql2')
             ->table('data_pegawai')
             ->where('id_pegawai', $log->id_pegawai)
-            ->update(['id_dept' => DB::raw('ARRAY[\'' . implode("','", $this->currentDept($log->pegawai)) . '\']')]);
+            ->update(['id_dept' => DB::raw('ARRAY[\'' . implode("','", $this->currentDept($log->id_pegawai)) . '\']')]);
 
         return response()->json(["status" => "success"], 201);
     }

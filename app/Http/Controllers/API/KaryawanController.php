@@ -117,7 +117,7 @@ class KaryawanController extends Controller
 
         $dup = DB::table('f_data_pegawai')->where('nik_pegawai', sprintf("%05d", (int) $input['nik']))->first();
 
-        if ($dup->id_pegawai === $id) {
+        if ($dup->id_pegawai !== $id) {
             return response()->json(["status" => "error", 'message' => 'Duplicated NIK Pegawai'], 501);
         }
 
