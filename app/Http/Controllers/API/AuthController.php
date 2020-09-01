@@ -128,7 +128,8 @@ class AuthController extends BaseController
             ->leftJoin('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
             ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses', 'a.view')
             ->groupBy('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses')
-            ->orderBy('a.id_akses')
+            ->orderBy('ak.kategori')
+            ->orderBy('a.akses')
             ->get();
 
         $menu = [];

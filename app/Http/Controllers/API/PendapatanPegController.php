@@ -462,4 +462,11 @@ class PendapatanPegController extends Controller
         $tgl_indo = $bulan[(int)$split[0]] . ' ' . $split[1];
         return $tgl_indo;
     }
+
+    public function getProfil()
+    {
+        $data = DB::table('profil_pendapatan')->select('id_profilp as value', 'nama_pendapatan as text')->orderBy('nama_pendapatan')->get();
+
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
 }

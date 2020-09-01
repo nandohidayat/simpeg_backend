@@ -30,6 +30,8 @@ Route::get('email/test', 'API\PendapatanPegController@testTemplate');
 Route::get('email/kirim', 'API\PendapatanPegController@kirimEmail');
 Route::post('email/buat', 'API\PendapatanPegController@buatEmail');
 
+Route::get('pendapatanpeg/profil', 'API\PendapatanPegController@getProfil');
+
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
     Route::post("refresh", "API\AuthController@refresh");
@@ -60,5 +62,6 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('job', 'API\JobController');
     Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
+    Route::apiResource('pendapatan/profil', 'API\ProfilPendapatanController');
     Route::apiResource('log/departemen', 'API\LogDepartemenController');
 });

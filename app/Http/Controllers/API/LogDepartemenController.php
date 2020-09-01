@@ -15,13 +15,9 @@ class LogDepartemenController extends Controller
         $log = LogDepartemen::where('id_pegawai', $pegawai)->whereRaw('keluar IS NULL')->orderBy('masuk', 'asc')->get();
         $dept = [];
 
-        error_log(json_encode($log));
-
         foreach ($log as $l) {
             if (!in_array($l->id_dept, $dept)) array_push($dept, $l->id_dept);
         }
-
-        error_log(json_encode($dept));
 
         return $dept;
     }
