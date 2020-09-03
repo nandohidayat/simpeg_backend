@@ -157,6 +157,7 @@ class PendapatanPegController extends Controller
     {
         $data = DB::table('kirim_email as ke')
             ->leftJoin('pendapatan_pegawai as pg', 'ke.id_pendapatan', '=', 'pg.id_pendapatan')
+            // TODO: kenapa di join?
             ->leftJoin('profil_pendapatan as pp', 'pp.id_profilp', '=', 'pg.id_profilp')
             ->leftJoin('f_data_pegawai as dg', 'pg.id_pegawai', '=', 'dg.id_pegawai')
             ->leftJoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dg.id_dept)'))
