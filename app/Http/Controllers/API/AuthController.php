@@ -51,7 +51,7 @@ class AuthController extends BaseController
         $token = auth()->setTTL(86400)->login($user);
 
         return response()->json([
-            'token' => $token
+            'token' => $token,
         ]);
     }
 
@@ -223,5 +223,12 @@ class AuthController extends BaseController
 
         $data->delete();
         return response()->json(["status" => "success"], 201);
+    }
+
+    public function try()
+    {
+        $data = DB::connection('pgsql3')->table('appmenu')->get();
+
+        return response()->json(["status" => "success", 'data' => $data], 200);
     }
 }

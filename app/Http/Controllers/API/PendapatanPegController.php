@@ -51,10 +51,10 @@ class PendapatanPegController extends Controller
         $file = request()->file('file');
         $id_profilp = request()->post('id_profilp');
         $bulan_kirim = request()->post('bulan_kirim');
-        if (request()->post('tipe_form') == 'personalia') {
+        if (request()->post('tipe_form') == 'format_personalia') {
             $tipe_form = "detail_personalia";
         }
-        if (request()->post('tipe_form') == 'keuangan') {
+        if (request()->post('tipe_form') == 'format_keuangan') {
             $tipe_form = 'detail_keuangan';
         }
         $time = time();
