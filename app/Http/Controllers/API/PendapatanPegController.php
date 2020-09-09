@@ -11,11 +11,11 @@ use App\Imports\PendapatanPegImport;
 use App\Exports\PendapatanPegExport;
 use App\Exports\TemplatePegExport;
 use Maatwebsite\Excel\Facades\Excel;
-use stdClass;
 use DOMDocument;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class PendapatanPegController extends Controller
 {
@@ -475,5 +475,43 @@ class PendapatanPegController extends Controller
         $data = DB::table('profil_pendapatan')->select('id_profilp as value', 'nama_pendapatan as text')->orderBy('nama_pendapatan')->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
+    }
+
+    public function getPendapatan()
+    {
+        $tipe = null;
+        if (request()->tipe === 'format_personalia') {
+            $tipe = 'detail_personalia';
+        } else if (request()->tipe === 'format_keuangan') {
+            $tipe = 'detail_keuangan';
+        }
+
+        $profil = DB::table('pendapatan_pegawai')
+            ->where('id_profilp', request()->profil)
+            ->whereRaw("to_char(bulan_kirim, 'YYYY-MM') = '" . request()->date . "'")
+            ->select('' . $tipe . '')
+            ->get();
+
+        $data = [];
+        $header = [];
+
+        if (count($profil) > 1) {
+            foreach (json_decode($profil[0]->$tipe) as $key => $value) {
+                $obj = new stdClass;
+                $obj->value = $key;
+
+                $temp = explode(':', $key);
+
+                $obj->text = end($temp);
+
+                array_push($header, $obj);
+            }
+
+            foreach ($profil as $p) {
+                array_push($data, json_decode($p->$tipe));
+            }
+        }
+
+        return response()->json(["status" => "success", "data" => ['data' => $data, 'header' => $header]], 200);
     }
 }
