@@ -61,9 +61,8 @@ class AbsenController extends Controller
                 $join
                     ->on([
                         ['a.pin', '=', DB::raw('cast(dp.nik_pegawai as int)')],
-                        [DB::raw('cast(a.datetime as date)'), '=', DB::raw('cast(tanggal as date)')],
-                        [DB::raw('cast(a.datetime as time)'), '>', DB::raw("cast(shf.mulai as time) - interval '2 hours'")],
-                        [DB::raw('cast(a.datetime as time)'), '<', DB::raw("cast(shf.selesai as time)")]
+                        ['a.datetime', '>=', DB::raw("(tanggal.tanggal + shf.mulai - interval '2 hours')")],
+                        ['a.datetime', '<=', DB::raw("(case when shf.selesai > shf.mulai then tanggal.tanggal + shf.selesai else tanggal.tanggal + shf.selesai + interval '1 day' end)")]
                     ])
                     ->where([
                         ['a.status', '=', '0'],
@@ -73,7 +72,8 @@ class AbsenController extends Controller
                 $join
                     ->on([
                         ['b.pin', '=', 'a.pin'],
-                        ['b.datetime', '>', 'a.datetime']
+                        ['b.datetime', '>', 'a.datetime'],
+                        ['b.datetime', '<=', DB::raw("(tanggal.tanggal + shf.selesai + interval '8 hours')")]
                     ])
                     ->where('b.status', '=', '1');
             })
@@ -84,10 +84,10 @@ class AbsenController extends Controller
                 'shf.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
                 DB::raw('cast(min(b.datetime) as time) as keluar'),
-                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shf.mulai as time) + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                DB::raw("(case when cast(min(a.datetime) as time) < (cast(shf.mulai as time) + interval '6 minutes') then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND min(b.datetime) >= (tanggal.tanggal + shf.selesai) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
-            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai')
+            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai')
             ->get();
 
         $sum = 0;
