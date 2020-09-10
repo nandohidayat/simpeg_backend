@@ -72,8 +72,8 @@ class AbsenController extends Controller
                 $join
                     ->on([
                         ['b.pin', '=', 'a.pin'],
-                        ['b.datetime', '>', 'a.datetime'],
-                        ['b.datetime', '<=', DB::raw("(tanggal.tanggal + shf.selesai + interval '8 hours')")]
+                        ['b.datetime', '>', DB::raw("(tanggal.tanggal + shf.mulai)")],
+                        ['b.datetime', '<', DB::raw("(case when shf.selesai > shf.mulai then tanggal.tanggal + interval '1 day' else tanggal.tanggal + interval '2 days' end)")]
                     ])
                     ->where('b.status', '=', '1');
             })
@@ -83,9 +83,9 @@ class AbsenController extends Controller
                 'fd.nm_dept as dept',
                 'shf.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
-                DB::raw('cast(min(b.datetime) as time) as keluar'),
+                DB::raw('cast(max(b.datetime) as time) as keluar'),
                 DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND min(b.datetime) >= (tanggal.tanggal + shf.selesai) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND max(b.datetime) >= (tanggal.tanggal + shf.selesai) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
             ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai')
             ->get();
