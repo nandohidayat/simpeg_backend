@@ -11,11 +11,11 @@ use App\Imports\PendapatanPegImport;
 use App\Exports\PendapatanPegExport;
 use App\Exports\TemplatePegExport;
 use Maatwebsite\Excel\Facades\Excel;
-use stdClass;
 use DOMDocument;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class PendapatanPegController extends Controller
 {
@@ -51,66 +51,72 @@ class PendapatanPegController extends Controller
         $file = request()->file('file');
         $id_profilp = request()->post('id_profilp');
         $bulan_kirim = request()->post('bulan_kirim');
-        if (request()->post('tipe_form') == 'personalia') {
+
+        if (request()->post('tipe_form') == 'format_personalia') {
             $tipe_form = "detail_personalia";
         }
-        if (request()->post('tipe_form') == 'keuangan') {
+        if (request()->post('tipe_form') == 'format_keuangan') {
             $tipe_form = 'detail_keuangan';
         }
-        $time = time();
+
         $hasil_import = Excel::toArray(new PendapatanPegImport, $file);
 
+        $query = "INSERT INTO pendapatan_pegawai (id_profilp, id_pegawai, nik_pegawai, bulan_kirim, " . $tipe_form . ") VALUES ";
+
         foreach ($hasil_import as $key => $row) {
+
             /**
              * unset($row) untuk menghapus header dalam hasil import excel,
              * yang selanjutnya menyisakan row data gaji pegawai (tanpa header)
              */
+
             $head = $row[0];
             unset($row[0]);
             unset($row[1]);
 
             foreach ($row as $key2 => $value) {
+
                 $pegawai = new stdClass();
                 for ($i = 0; $i <= 2; $i++) {
                     $obj = $head[$i];
                     $pegawai->$obj = $value[$i];
                 }
+
                 /**
                  * fungsi loop for diatas untuk mengambil nik pegawai
                  * dan selanjutnya diteruskan kedalam parameter query dibawah
                  */
-                $pegawai = get_object_vars($pegawai);
-                $id_pegawai = DB::table('f_data_pegawai')->where('nik_pegawai', $pegawai['NIK'])->value('id_pegawai');
+
+                $id_pegawai = DB::table('f_data_pegawai')->where('nik_pegawai', $pegawai->NIK)->value('id_pegawai');
+
                 if (!is_null($id_pegawai)) {
                     $data = new stdClass();
+
                     for ($i = 2; $i <= count($head) - 1; $i++) {
                         $obj = $head[$i];
                         $data->$obj = $value[$i];
                     }
+
                     $data = json_encode($data);
+
                     /**
                      * jika tidak ada id_profilp dan bulan kirim, maka lakukan insert
                      * jika ada id_profilp dan bulan kirim, maka lakukan update sesuai dengan tipe form
                      */
-                    $cek_data = DB::table('pendapatan_pegawai')
-                        ->where('nik_pegawai', $pegawai['NIK'])
-                        ->where('id_profilp', $id_profilp)
-                        ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '" . $bulan_kirim . "'")
-                        ->value('id_pegawai');
 
-                    if (is_null($cek_data)) {
-                        DB::insert(DB::raw("INSERT INTO pendapatan_pegawai (id_profilp, id_pegawai, nik_pegawai, bulan_kirim, " . $tipe_form . ") VALUES
-                            ('" . $id_profilp . "', '" . $id_pegawai . "', '" . $pegawai['NIK'] . "', TO_DATE('" . $bulan_kirim . "', 'MM-YYYY'), '" . $data . "')"));
-                    } else {
-                        DB::table('pendapatan_pegawai')
-                            ->where('id_profilp', $id_profilp)
-                            ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '" . $bulan_kirim . "'")
-                            ->where('id_pegawai', $id_pegawai)
-                            ->update([$tipe_form => $data]);
+                    $query .= '(' . $id_profilp . ', \'' . $id_pegawai . '\', \'' . $pegawai->NIK . '\', TO_DATE(\'' . $bulan_kirim . '\', \'MM-YYYY\'), \'' . $data . '\')';
+
+                    if ($key2 <= count($row)) {
+                        $query .= ', ';
                     }
                 }
             }
         }
+
+        $query .= ' ON CONFLICT ON CONSTRAINT pendapatan_pegawai_ukey DO UPDATE SET ' . $tipe_form . ' = excluded.' . $tipe_form . '';
+
+        DB::select($query);
+
         return response()->json(["status" => "success"], 201);
     }
 
@@ -157,6 +163,7 @@ class PendapatanPegController extends Controller
     {
         $data = DB::table('kirim_email as ke')
             ->leftJoin('pendapatan_pegawai as pg', 'ke.id_pendapatan', '=', 'pg.id_pendapatan')
+            // TODO: kenapa di join?
             ->leftJoin('profil_pendapatan as pp', 'pp.id_profilp', '=', 'pg.id_profilp')
             ->leftJoin('f_data_pegawai as dg', 'pg.id_pegawai', '=', 'dg.id_pegawai')
             ->leftJoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dg.id_dept)'))
@@ -461,5 +468,50 @@ class PendapatanPegController extends Controller
 
         $tgl_indo = $bulan[(int)$split[0]] . ' ' . $split[1];
         return $tgl_indo;
+    }
+
+    public function getProfil()
+    {
+        $data = DB::table('profil_pendapatan')->select('id_profilp as value', 'nama_pendapatan as text')->orderBy('nama_pendapatan')->get();
+
+        return response()->json(["status" => "success", "data" => $data], 200);
+    }
+
+    public function getPendapatan()
+    {
+        $tipe = null;
+        if (request()->tipe === 'format_personalia') {
+            $tipe = 'detail_personalia';
+        } else if (request()->tipe === 'format_keuangan') {
+            $tipe = 'detail_keuangan';
+        }
+
+        $profil = DB::table('pendapatan_pegawai')
+            ->where('id_profilp', request()->profil)
+            ->whereRaw("to_char(bulan_kirim, 'YYYY-MM') = '" . request()->date . "'")
+            ->select('' . $tipe . '')
+            ->get();
+
+        $data = [];
+        $header = [];
+
+        if (count($profil) > 1) {
+            foreach (json_decode($profil[0]->$tipe) as $key => $value) {
+                $obj = new stdClass;
+                $obj->value = $key;
+
+                $temp = explode(':', $key);
+
+                $obj->text = end($temp);
+
+                array_push($header, $obj);
+            }
+
+            foreach ($profil as $p) {
+                array_push($data, json_decode($p->$tipe));
+            }
+        }
+
+        return response()->json(["status" => "success", "data" => ['data' => $data, 'header' => $header]], 200);
     }
 }

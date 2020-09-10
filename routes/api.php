@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::post("login", "API\AuthController@login");
+Route::get('try', "API\AuthController@try");
 
 Route::get('schedule/print', 'API\ScheduleController@print');
 Route::get('schedule/holiday', 'API\ScheduleController@holiday');
@@ -25,10 +26,12 @@ Route::post('schedule/excel', 'API\ScheduleController@import');
 Route::get('pendapatanpeg/profilp', 'API\PendapatanPegController@exportTemplatePeg');
 Route::get('pendapatanpeg/pendapatan', 'API\PendapatanPegController@exportPendapatanPeg');
 Route::post('pendapatanpeg/pendapatan', 'API\PendapatanPegController@importPendapatanPeg');
+Route::get('pendapatanpeg/profil', 'API\PendapatanPegController@getProfil');
 
 Route::get('email/test', 'API\PendapatanPegController@testTemplate');
 Route::get('email/kirim', 'API\PendapatanPegController@kirimEmail');
 Route::post('email/buat', 'API\PendapatanPegController@buatEmail');
+
 
 Route::middleware('auth:api')->group(function () {
     Route::post("register", "API\AuthController@register");
@@ -43,6 +46,8 @@ Route::middleware('auth:api')->group(function () {
     Route::put('shift/departemen/{id}', 'API\ShiftController@updateDepartemens');
     Route::get('job/departemen/{id}', 'API\JobController@getDepartemens');
     Route::put('job/departemen/{id}', 'API\JobController@updateDepartemens');
+
+    Route::get('pendapatanpeg', 'API\PendapatanPegController@getPendapatan');
 
     Route::apiResource('absen', 'API\AbsenController');
     Route::apiResource('akses', 'API\AksesController');
@@ -60,5 +65,6 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('job', 'API\JobController');
     Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
+    Route::apiResource('pendapatan/profil', 'API\ProfilPendapatanController');
     Route::apiResource('log/departemen', 'API\LogDepartemenController');
 });
