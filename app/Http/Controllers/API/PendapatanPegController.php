@@ -479,6 +479,8 @@ class PendapatanPegController extends Controller
 
     public function getPendapatan()
     {
+        setlocale(LC_MONETARY, 'id_ID');
+
         $tipe = null;
         if (request()->tipe === 'format_personalia') {
             $tipe = 'detail_personalia';
@@ -486,29 +488,60 @@ class PendapatanPegController extends Controller
             $tipe = 'detail_keuangan';
         }
 
-        $profil = DB::table('pendapatan_pegawai')
-            ->where('id_profilp', request()->profil)
-            ->whereRaw("to_char(bulan_kirim, 'YYYY-MM') = '" . request()->date . "'")
-            ->select('' . $tipe . '')
+        $profil = DB::table('pendapatan_pegawai as pp')
+            ->where('pp.id_profilp', request()->profil)
+            ->whereRaw("to_char(pp.bulan_kirim, 'YYYY-MM') = '" . request()->date . "'")
+            ->leftJoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'pp.id_pegawai')
+            ->select('' . $tipe . '', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama')
+            ->orderBy('nik')
             ->get();
 
         $data = [];
         $header = [];
 
-        if (count($profil) > 1) {
+        if (count($profil) > 0) {
+            $obj = new stdClass;
+            $obj->value = 'nik';
+            $obj->text = 'NIK';
+            $obj->width = '100';
+            $obj->divider = true;
+            array_push($header, $obj);
+
+            $obj = new stdClass;
+            $obj->value = 'nama';
+            $obj->text = 'Nama';
+            $obj->width = '250';
+            $obj->divider = true;
+            array_push($header, $obj);
+
             foreach (json_decode($profil[0]->$tipe) as $key => $value) {
                 $obj = new stdClass;
                 $obj->value = $key;
 
                 $temp = explode(':', $key);
-
                 $obj->text = end($temp);
+
+                $obj->width = '160';
+                $obj->divider = true;
 
                 array_push($header, $obj);
             }
 
             foreach ($profil as $p) {
-                array_push($data, json_decode($p->$tipe));
+                $obj = new stdClass;
+
+                foreach (json_decode($p->$tipe) as $k => $v) {
+                    if (strpos($k, 'N:') !== false) {
+                        $obj->$k = 'Rp ' . number_format($v, 2, ',', '.') . '';
+                    } else {
+                        $obj->$k = $v;
+                    }
+                }
+
+                unset($p->$tipe);
+
+                $temp = (object) array_merge((array)$p, (array)$obj);
+                array_push($data, $temp);
             }
         }
 
