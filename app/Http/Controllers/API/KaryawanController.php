@@ -24,8 +24,11 @@ class KaryawanController extends Controller
     {
         $query = DB::table('f_data_pegawai as fdp');
         if ((int)request()->select === 1) {
-            $query->whereRaw('\'' . request()->dept . '\' = ANY(fdp.id_dept)');
+            if (request()->dept) {
+                $query->whereRaw('\'' . request()->dept . '\' = ANY(fdp.id_dept)');
+            }
             $query->select('fdp.id_pegawai', 'fdp.nm_pegawai');
+            $query->orderBy('nik_pegawai');
         } else {
             $query->leftJoin('f_department as fd', 'fd.id_dept', '=', DB::raw('ANY(fdp.id_dept)'));
             $query->select('fdp.id_pegawai', 'fdp.nik_pegawai as nik', 'fdp.nm_pegawai as nama', 'fdp.jenis_kelamin as kelamin', DB::raw('json_agg(fd.nm_dept) as dept'), DB::raw('case when fdp.is_active = true then \'Active\' else \'Non Active\' end as status'));
