@@ -122,6 +122,10 @@ class PendapatanPegController extends Controller
 
     public function buatEmail(Request $request)
     {
+        if (empty($request->id_profilp)) {
+            return response()->json(["status" => "error", 'message' => 'Profil nya dipilih dulu'], 501);
+        }
+
         $id_profilp = $request->post('id_profilp');
         $bulan_kirim = $request->post('bulan_kirim');
         $id_pegawai = $request->post('id_pegawai') ?? 'empty';
@@ -225,9 +229,9 @@ class PendapatanPegController extends Controller
 
         if (!isset($data[0])) {
             // tidak ada antrian email, hapus cron job
-            $output = shell_exec('sudo crontab -l -u www-data | grep -i "wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
+            $output = shell_exec('sudo crontab -l -u www-data | grep -i "curl http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
             if (!is_null($output)) {
-                $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim' | crontab -u www-data -");
+                $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'curl http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim' | crontab -u www-data -");
             }
         }
     }
@@ -329,7 +333,7 @@ class PendapatanPegController extends Controller
             //Recipients
             $mail->setFrom('rsroemaniv2@gmail.com', 'RS Roemani Muhammadiyah');
             // $mail->addAddress($data->email_pegawai, $data->nm_pegawai);     // Add a recipient
-            $mail->addAddress('mibrahimua@yahoo.com', 'M Ibrahim U Albab');
+            $mail->addAddress('mattborgic@gmail.com', 'Nando Bruh');
 
             $email_body = view('template_email', ['nama_slip' => $nama_slip, 'table' => $dom->saveXml()]);
             $mail->isHTML(true);

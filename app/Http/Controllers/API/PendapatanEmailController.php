@@ -15,9 +15,7 @@ class PendapatanEmailController extends Controller
      */
     public function index()
     {
-        error_log(request()->profil);
-        if (request()->profil == 'undefined') {
-            error_log('lalala');
+        if (empty(request()->profil)) {
             return response()->json(["status" => "error", 'message' => 'Profil nya dipilih dulu'], 501);
         }
         $data = DB::table('pendapatan_pegawai as pp')
