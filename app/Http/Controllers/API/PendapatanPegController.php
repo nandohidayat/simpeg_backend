@@ -126,8 +126,6 @@ class PendapatanPegController extends Controller
             return response()->json(["status" => "error", 'message' => 'Profil nya dipilih dulu'], 501);
         }
 
-        error_log($request->id_pegawai);
-
         $id_profilp = $request->post('id_profilp');
         $bulan_kirim = $request->post('bulan_kirim');
         $id_pegawai = $request->post('id_pegawai') ?? 'empty';
