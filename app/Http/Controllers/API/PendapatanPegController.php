@@ -155,9 +155,9 @@ class PendapatanPegController extends Controller
                 ]);
             }
             //Membuat cron job
-            $output = shell_exec('sudo crontab -l -u www-data | grep -i "http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
+            $output = shell_exec('sudo crontab -l -u www-data | grep -i "http://localhost/php74/simpeg_testing/simpeg_backend/public/api/email/kirim"');
             if (is_null($output)) {
-                $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim") | sudo crontab -u www-data -');
+                $cron = shell_exec('(sudo crontab -u www-data -l ; echo "* * * * * wget http://localhost/php74/simpeg_testing/simpeg_backend/public/api/email/kirim") | sudo crontab -u www-data -');
             }
             return response()->json(["status" => "success"], 201);
         }
@@ -229,9 +229,9 @@ class PendapatanPegController extends Controller
 
         if (!isset($data[0])) {
             // tidak ada antrian email, hapus cron job
-            $output = shell_exec('sudo crontab -l -u www-data | grep -i "curl http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim"');
+            $output = shell_exec('sudo crontab -l -u www-data | grep -i "curl http://localhost/php74/simpeg_testing/simpeg_backend/public/api/email/kirim"');
             if (!is_null($output)) {
-                $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'curl http://localhost/php74/simpeg/simpeg_backend/public/api/email/kirim' | crontab -u www-data -");
+                $remove_cron = shell_exec("sudo crontab -u www-data -l | grep -v 'curl http://localhost/php74/simpeg_testing/simpeg_backend/public/api/email/kirim' | crontab -u www-data -");
             }
         }
     }
