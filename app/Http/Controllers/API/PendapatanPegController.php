@@ -518,34 +518,37 @@ class PendapatanPegController extends Controller
             $obj->divider = true;
             array_push($header, $obj);
 
-            foreach (json_decode($profil[0]->$tipe) as $key => $value) {
-                $obj = new stdClass;
-                $obj->value = $key;
+            if (isset($profil[0]->$tipe)) {
 
-                $temp = explode(':', $key);
-                $obj->text = end($temp);
+                foreach (json_decode($profil[0]->$tipe) as $key => $value) {
+                    $obj = new stdClass;
+                    $obj->value = $key;
 
-                $obj->width = '160';
-                $obj->divider = true;
+                    $temp = explode(':', $key);
+                    $obj->text = end($temp);
 
-                array_push($header, $obj);
-            }
+                    $obj->width = '160';
+                    $obj->divider = true;
 
-            foreach ($profil as $p) {
-                $obj = new stdClass;
-
-                foreach (json_decode($p->$tipe) as $k => $v) {
-                    if (strpos($k, 'N:') !== false) {
-                        $obj->$k = 'Rp ' . number_format($v, 2, ',', '.') . '';
-                    } else {
-                        $obj->$k = $v;
-                    }
+                    array_push($header, $obj);
                 }
 
-                unset($p->$tipe);
+                foreach ($profil as $p) {
+                    $obj = new stdClass;
 
-                $temp = (object) array_merge((array)$p, (array)$obj);
-                array_push($data, $temp);
+                    foreach (json_decode($p->$tipe) as $k => $v) {
+                        if (strpos($k, 'N:') !== false) {
+                            $obj->$k = 'Rp ' . number_format($v, 2, ',', '.') . '';
+                        } else {
+                            $obj->$k = $v;
+                        }
+                    }
+
+                    unset($p->$tipe);
+
+                    $temp = (object) array_merge((array)$p, (array)$obj);
+                    array_push($data, $temp);
+                }
             }
         }
 
