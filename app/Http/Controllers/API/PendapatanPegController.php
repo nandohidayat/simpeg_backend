@@ -332,8 +332,8 @@ class PendapatanPegController extends Controller
 
             //Recipients
             $mail->setFrom('rsroemaniv2@gmail.com', 'RS Roemani Muhammadiyah');
-            // $mail->addAddress($data->email_pegawai, $data->nm_pegawai);     // Add a recipient
-            $mail->addAddress('mattborgic@gmail.com', 'Nando Bruh');
+            $mail->addAddress($data->email_pegawai, $data->nm_pegawai);     // Add a recipient
+            // $mail->addAddress('mattborgic@gmail.com', 'Nando Bruh');
 
             $email_body = view('template_email', ['nama_slip' => $nama_slip, 'table' => $dom->saveXml()]);
             $mail->isHTML(true);
