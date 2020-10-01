@@ -174,11 +174,11 @@ class ScheduleController extends Controller
             }
         }
 
-        while ($order[0] == '') {
+        while ($order[0] == 'NaN') {
             array_shift($order);
         }
 
-        while (end($order) == '') {
+        while (end($order) == 'NaN') {
             array_pop($order);
         }
 
