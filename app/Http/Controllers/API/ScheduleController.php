@@ -174,6 +174,14 @@ class ScheduleController extends Controller
             }
         }
 
+        while ($order[0] == 'NaN') {
+            array_shift($order);
+        }
+
+        while (end($order) == 'NaN') {
+            array_pop($order);
+        }
+
         $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
 
         if ($ass !== null) {
