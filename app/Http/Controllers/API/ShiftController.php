@@ -60,6 +60,7 @@ class ShiftController extends Controller
                 $q->where('shifts.selesai', '=', '00:00:00');
             })
             ->orderBy('mulai', 'asc')
+            ->orderBy('kode', 'asc')
             ->select('shift_departemens.id_shift');
 
         $data = ShiftDepartemen::where(['id_dept' => $id, 'status' => true])
@@ -69,6 +70,7 @@ class ShiftController extends Controller
                 $q->where('shifts.selesai', '!=', '00:00:00');
             })
             ->orderBy('mulai', 'asc')
+            ->orderBy('selesai', 'asc')
             ->unionAll($parent)
             ->pluck('shift_departemens.id_shift');
 
