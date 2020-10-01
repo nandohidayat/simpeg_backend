@@ -174,9 +174,26 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
     public function registerEvents(): array
     {
         $lastcol = 3 + $this->lastday->day;
-        $shift = ShiftDepartemen::where([['id_dept', '=', $this->dept], ['status', '=', true]])
-            ->join('shifts as s', 's.id_shift', '=', 'shift_departemens.id_shift')
-            ->select('s.kode', 's.mulai', 's.selesai', 's.keterangan')
+        $parent = ShiftDepartemen::where(['id_dept' => $this->dept, 'status' => true])
+            ->join('shifts', function ($q) {
+                $q->on('shifts.id_shift', '=', 'shift_departemens.id_shift');
+                $q->where('shifts.mulai', '=', '00:00:00');
+                $q->where('shifts.selesai', '=', '00:00:00');
+            })
+            ->orderBy('mulai', 'asc')
+            ->orderBy('kode', 'asc')
+            ->select('shifts.kode', 'shifts.mulai', 'shifts.selesai', 'shifts.keterangan');
+
+        $shift = ShiftDepartemen::where(['id_dept' => $this->dept, 'status' => true])
+            ->join('shifts', function ($q) {
+                $q->on('shifts.id_shift', '=', 'shift_departemens.id_shift');
+                $q->where('shifts.mulai', '!=', '00:00:00');
+                $q->where('shifts.selesai', '!=', '00:00:00');
+            })
+            ->orderBy('mulai', 'asc')
+            ->orderBy('selesai', 'asc')
+            ->unionAll($parent)
+            ->select('shifts.kode', 'shifts.mulai', 'shifts.selesai', 'shifts.keterangan')
             ->get();
 
         $holiday = ScheduleHoliday::whereBetween('tgl', [$this->firstday, $this->lastday])->select(DB::raw('EXTRACT(DAY FROM tgl) as tgl'))->pluck('tgl');
