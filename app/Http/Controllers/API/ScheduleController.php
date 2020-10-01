@@ -156,30 +156,35 @@ class ScheduleController extends Controller
             array_push($jam, $temp);
         }
 
-        if ($order[0] == "") {
-            $order = array(0);
-        }
-
-        $max = max(array_map('intval', $order));
         $count = count($id);
 
-        if ($max < $count - 1) {
-            for ($i = $max + 1; $i < $count; $i++) {
-                array_push($order, $i);
+        if ($count > 0) {
+            if ($order[0] == "") {
+                $order = array(0);
             }
-        } else if ($max > $count) {
-            while ($max !== $count) {
-                unset($order[array_search($max, $order)]);
-                $max = max(array_map('intval', $order));
+
+            $max = max(array_map('intval', $order));
+
+            if ($max < $count - 1) {
+                for ($i = $max + 1; $i < $count; $i++) {
+                    array_push($order, $i);
+                }
+            } else if ($max > $count - 1) {
+                while ($max !== $count) {
+                    unset($order[array_search($max, $order)]);
+                    $max = max(array_map('intval', $order));
+                }
             }
-        }
 
-        while ($order[0] == 'NaN') {
-            array_shift($order);
-        }
+            while ($order[0] === 'NaN') {
+                array_shift($order);
+            }
 
-        while (end($order) == 'NaN') {
-            array_pop($order);
+            while (end($order) === 'NaN') {
+                array_pop($order);
+            }
+        } else {
+            $order = array();
         }
 
         $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
