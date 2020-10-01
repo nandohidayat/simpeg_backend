@@ -118,6 +118,14 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             }
         }
 
+        while ($order[0] == '') {
+            array_shift($order);
+        }
+
+        while (end($order) == '') {
+            array_pop($order);
+        }
+
         $this->count = count($order);
         $no = 0;
         $data = new Collection();
@@ -184,7 +192,7 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
 
                 $event->sheet->getDelegate()->getColumnDimension('A')->setVisible(false);
 
-                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(4);
+                $event->sheet->getDelegate()->getColumnDimension('B')->setWidth(5);
                 $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(21);
                 for ($i = 4; $i <= $lastcol; $i++) {
                     $event->sheet->getDelegate()->getColumnDimension('' . $this->columnLetter($i) . '')->setWidth(3.7);
@@ -212,10 +220,10 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                     $event->sheet->getDelegate()->getCell('C' . ($this->count + 8 + $k) . '')->setValue('' . $s->keterangan . ' (' . Carbon::createFromTimeString($s->mulai)->format('H:i') . ' - ' . Carbon::createFromTimeString($s->selesai)->format('H:i') . ')');
                 }
 
-                $event->sheet->getDelegate()->getCell('F' . ($this->count + 8) . '')->setValue('Hari Minggu');
-                $event->sheet->getDelegate()->getCell('F' . ($this->count + 9) . '')->setValue('Hari Libur');
-                $event->sheet->getDelegate()->getStyle('J' . ($this->count + 8) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
-                $event->sheet->getDelegate()->getStyle('J' . ($this->count + 9) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
+                $event->sheet->getDelegate()->getCell('O' . ($this->count + 8) . '')->setValue('Hari Minggu');
+                $event->sheet->getDelegate()->getCell('O' . ($this->count + 9) . '')->setValue('Hari Libur');
+                $event->sheet->getDelegate()->getStyle('S' . ($this->count + 8) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffbababa');
+                $event->sheet->getDelegate()->getStyle('S' . ($this->count + 9) . '')->getFill()->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)->getStartColor()->setARGB('ffff8b8b');
 
                 foreach ($this->weekend as $w) {
                     $col = $this->columnLetter($w + 3);
