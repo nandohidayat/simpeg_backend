@@ -112,7 +112,6 @@ class ScheduleController extends Controller
             $query->leftJoin('shifts as shf' . $date->day . '', 'shf' . $date->day . '.id_shift', '=', 'sch' . $date->day . '.shift');
 
             $query->addSelect('sch' . $date->day . '.shift as shift' . $date->day . '');
-            $query->addSelect('sch' . $date->day . '.job as job' . $date->day . '');
             $query->selectRaw('COALESCE(
                 CASE
                 WHEN shf' . $date->day . '.selesai - shf' . $date->day . '.mulai >= time \'00:00\' THEN

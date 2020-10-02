@@ -100,30 +100,35 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
             ->first()
             ->order);
 
-        if ($order[0] == "") {
-            $order = array(0);
-        }
-
-        $max = max(array_map('intval', $order));
         $count = count($schedule);
 
-        if ($max < $count - 1) {
-            for ($i = $max + 1; $i < $count; $i++) {
-                array_push($order, $i);
+        if ($count > 0) {
+            if ($order[0] == "") {
+                $order = array(0);
             }
-        } else if ($max > $count) {
-            while ($max !== $count) {
-                unset($order[array_search($max, $order)]);
-                $max = max(array_map('intval', $order));
+
+            $max = max(array_map('intval', $order));
+
+            if ($max < $count - 1) {
+                for ($i = $max + 1; $i < $count; $i++) {
+                    array_push($order, $i);
+                }
+            } else if ($max > $count - 1) {
+                while ($max !== $count) {
+                    unset($order[array_search($max, $order)]);
+                    $max = max(array_map('intval', $order));
+                }
             }
-        }
 
-        while ($order[0] == 'NaN') {
-            array_shift($order);
-        }
+            while ($order[0] === 'NaN') {
+                array_shift($order);
+            }
 
-        while (end($order) == 'NaN') {
-            array_pop($order);
+            while (end($order) === 'NaN') {
+                array_pop($order);
+            }
+        } else {
+            $order = array();
         }
 
         $this->count = count($order);
