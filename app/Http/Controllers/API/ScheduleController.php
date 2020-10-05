@@ -92,9 +92,14 @@ class ScheduleController extends Controller
             $order = explode(',', $depts[0]->order);
         }
 
-        $query = DB::table('f_data_pegawai as dp')
-            ->whereRaw('\'' . $dept . '\' = ANY(dp.id_dept)')
-            ->where('is_active', true)
+        $query = DB::table('log_departemens as ld')
+            ->where('ld.id_dept', $dept)
+            ->where('ld.masuk', '<=', $lastday)
+            ->whereRaw('coalesce(ld.keluar, \'' . $lastday . '\') >= \'' . $firstday . '\'')
+            ->join('f_data_pegawai as dp', function ($query) {
+                $query->on('dp.id_pegawai', '=', 'ld.id_pegawai');
+                $query->where('dp.is_active', true);
+            })
             ->select('dp.id_pegawai', 'dp.nm_pegawai as nama')
             ->orderBy('nik_pegawai');
 
@@ -185,6 +190,8 @@ class ScheduleController extends Controller
         } else {
             $order = array();
         }
+
+        $order = array_values($order);
 
         $response = ["order" => $order, "id" => $id, "nama" => $nama, 'day' => $lastday->day, 'shift' => $shift, 'jam' => $jam, 'weekend' => $weekend, 'holiday' => $holiday];
 
