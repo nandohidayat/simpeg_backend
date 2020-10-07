@@ -53,6 +53,7 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('akses', 'API\AksesController');
     Route::apiResource('bagian', 'API\BagianController');
     Route::apiResource('departemen', 'API\DepartemenController');
+    Route::apiResource('group', 'API\GroupController');
     Route::apiResource('karyawan', 'API\KaryawanController');
     Route::apiResource('pegawai', 'API\PegawaiController');
     Route::apiResource('ruang', 'API\RuangController');
