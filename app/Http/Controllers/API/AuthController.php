@@ -125,42 +125,21 @@ class AuthController extends BaseController
             ->where('id_pegawai', auth()->user()->id_pegawai)
             ->where('status', true)
             ->join('akses as a', 'a.id_akses', '=', 'au.id_akses')
-            ->leftJoin('akses_kategoris as ak', 'ak.id_akses_kategori', '=', 'a.id_akses_kategori')
-            ->select('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses', 'a.view')
-            ->groupBy('a.akses', 'a.url', 'ak.kategori', 'ak.icon', 'a.id_akses')
-            ->orderBy('ak.kategori')
-            ->orderBy('a.akses')
+            ->select('a.id_akses_kategori', 'a.id_akses')
             ->get();
 
         $menu = [];
         $akses = [];
-        $option = [];
-        $i = -1;
-        $before = null;
-        foreach ($dataAkses as $da) {
-            if (!$da->view) {
-                array_push($option, $da->id_akses);
-            } else {
-                if ($before !== $da->kategori) {
-                    $i++;
-                    $before = $da->kategori;
-                    $obj = new stdClass();
-                    $obj->icon = $da->icon;
-                    $obj->header = $da->kategori;
-                    $obj->children = [];
-                    array_push($menu, $obj);
-                }
-                $obj = new stdClass();
-                $obj->header = $da->akses;
-                $obj->link = $da->url;
-                array_push($menu[$i]->children, $obj);
-                array_push($akses, $da->url);
+
+        foreach ($dataAkses as $d) {
+            if (!in_array($d->id_akses_kategori, $menu)) {
+                array_push($menu, $d->id_akses_kategori);
             }
+            array_push($akses, $d->id_akses);
         }
 
         $user->menu = $menu;
         $user->akses = $akses;
-        $user->option = $option;
         $user->nik = (int) $user->nik;
 
         return response()->json(["status" => "success", "user" => $user], 200);
