@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateAksesGroupsTable extends Migration
+class CreateAksesSubmenusTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class CreateAksesGroupsTable extends Migration
      */
     public function up()
     {
-        Schema::create('akses_groups', function (Blueprint $table) {
-            $table->bigIncrements('id_akses_group');
-            $table->bigInteger('id_group');
-            $table->bigInteger('id_akses');
-            $table->boolean('status');
+        Schema::create('akses_submenus', function (Blueprint $table) {
+            $table->bigIncrements('id_akses_submenu');
+            $table->bigInteger('id_akses_menu');
+            $table->string('submenu');
             $table->timestamps();
         });
     }
@@ -29,6 +28,6 @@ class CreateAksesGroupsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('akses_groups');
+        Schema::dropIfExists('akses_submenus');
     }
 }

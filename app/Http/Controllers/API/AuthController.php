@@ -125,7 +125,7 @@ class AuthController extends BaseController
             ->where('id_pegawai', auth()->user()->id_pegawai)
             ->where('status', true)
             ->join('akses as a', 'a.id_akses', '=', 'au.id_akses')
-            ->select('a.id_akses_kategori', 'a.id_akses')
+            ->select('a.id_akses_submenu as id_akses_kategori', 'a.id_akses')
             ->get();
 
         $menu = [];

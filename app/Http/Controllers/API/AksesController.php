@@ -21,24 +21,13 @@ class AksesController extends Controller
      */
     public function index()
     {
-        $kategori = AksesKategori::with('akses')->orderBy('kategori', 'asc')->get();
+        $data = DB::table('f_data_pegawai as fdp')
+            ->join('f_login_pegawai as flp', 'fdp.id_pegawai', '=', 'flp.id_pegawai')
+            ->select('fdp.id_pegawai as key', 'fdp.nm_pegawai as nama', 'flp.user_pegawai as username')
+            ->orderBy('fdp.nm_pegawai')
+            ->get();
 
-        $data = [];
-        foreach ($kategori as $k) {
-            $obj = new stdClass();
-            $obj->id = 'ketegori' . $k->id_akses_kategori;
-            $obj->name = $k->kategori;
-            $obj->children = [];
-            foreach ($k->akses as $a) {
-                $chd = new stdClass();
-                $chd->id = $a->id_akses;
-                $chd->name = $a->akses;
-                array_push($obj->children, $chd);
-            }
-            array_push($data, $obj);
-        }
-
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(['status' => 'success', 'data' => $data], 200);
     }
 
     /**
