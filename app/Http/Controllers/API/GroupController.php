@@ -171,6 +171,8 @@ class GroupController extends Controller
         $data = Group::find($id);
         $data->delete();
 
+        DB::table('akses_groups')->where('id_group', $id)->delete();
+
         return response(['status' => 'success'], 201);
     }
 }
