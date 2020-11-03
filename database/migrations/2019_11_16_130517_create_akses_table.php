@@ -15,10 +15,8 @@ class CreateAksesTable extends Migration
     {
         Schema::create('akses', function (Blueprint $table) {
             $table->bigIncrements('id_akses');
-            $table->bigInteger('id_akses_kategori');
+            $table->bigInteger('id_akses_submenu');
             $table->string('akses');
-            $table->string('url');
-            $table->boolean('view');
             $table->timestamps();
         });
     }
