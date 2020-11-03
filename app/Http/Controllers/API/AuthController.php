@@ -118,27 +118,38 @@ class AuthController extends BaseController
     {
         $user = SIMDataPegawai::where('id_pegawai', auth()->user()->id_pegawai)
             ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
-            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama', 'f_data_pegawai.id_dept', 'f_data_pegawai.id_subdept')
+            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama')
             ->first();
 
-        $dataAkses = DB::table('akses_users as au')
-            ->where('id_pegawai', auth()->user()->id_pegawai)
-            ->where('status', true)
-            ->join('akses as a', 'a.id_akses', '=', 'au.id_akses')
-            ->select('a.id_akses_submenu as id_akses_kategori', 'a.id_akses')
+        $dataAkses = DB::table('users as us')
+            ->join('akses_groups as ag', 'ag.id_group', '=', 'us.id_group')
+            ->join('akses as ak', 'ak.id_akses', '=', 'ag.id_akses')
+            ->join('akses_submenus as asm', 'asm.id_akses_submenu', '=', 'ak.id_akses_submenu')
+            ->join('akses_menus as am', 'am.id_akses_menu', '=', 'asm.id_akses_menu')
+            ->select('am.id_akses_menu', 'asm.id_akses_submenu', 'ak.id_akses')
+            ->where('us.id_pegawai', auth()->user()->id_pegawai)
+            ->where('ag.status', true)
+            ->orderBy('id_akses_menu', 'asc')
+            ->orderBy('id_akses_submenu', 'asc')
+            ->orderBy('id_akses', 'asc')
             ->get();
 
         $menu = [];
+        $submenu = [];
         $akses = [];
 
         foreach ($dataAkses as $d) {
-            if (!in_array($d->id_akses_kategori, $menu)) {
-                array_push($menu, $d->id_akses_kategori);
+            if (!in_array($d->id_akses_menu, $menu)) {
+                array_push($menu, $d->id_akses_menu);
+            }
+            if (!in_array($d->id_akses_submenu, $submenu)) {
+                array_push($submenu, $d->id_akses_submenu);
             }
             array_push($akses, $d->id_akses);
         }
 
         $user->menu = $menu;
+        $user->submenu = $submenu;
         $user->akses = $akses;
         $user->nik = (int) $user->nik;
 

@@ -67,9 +67,14 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
      */
     public function collection()
     {
-        $query = DB::table('f_data_pegawai as dp')
-            ->whereRaw('\'' . $this->dept . '\' = ANY(dp.id_dept)')
-            ->where('is_active', true)
+        $query = DB::table('log_departemens as ld')
+            ->where('ld.id_dept', $this->dept)
+            ->where('ld.masuk', '<=', $this->lastday)
+            ->whereRaw('coalesce(ld.keluar, \'' . $this->lastday . '\') >= \'' . $this->firstday . '\'')
+            ->join('f_data_pegawai as dp', function ($query) {
+                $query->on('dp.id_pegawai', '=', 'ld.id_pegawai');
+                $query->where('dp.is_active', true);
+            })
             ->select('dp.id_pegawai', DB::raw('ROW_NUMBER () OVER (ORDER BY nik_pegawai) as no'), 'dp.nm_pegawai as nama')
             ->orderBy('nik_pegawai');
 

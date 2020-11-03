@@ -18,25 +18,33 @@ class GroupController extends Controller
      */
     public function index()
     {
-        $data = DB::select(
-            "SELECT id_group, label, array_to_json(array_agg(permission)) as permission, array_to_json(array_agg(DISTINCT akses)) as akses
-            FROM (
-                SELECT g.id_group, g.label, array_agg(a.id_akses) as perm, jsonb_build_object('menu', am.menu, 'akses', array_agg(a.akses ORDER BY a.akses)) as akses
-                FROM groups as g
-                JOIN akses_groups as ag ON g.id_group = ag.id_group
-                JOIN akses as a ON a.id_akses = ag.id_akses
-                JOIN akses_submenus as asm ON asm.id_akses_submenu = a.id_akses_submenu
-                JOIN akses_menus as am ON am.id_akses_menu = asm.id_akses_menu
-                WHERE ag.status = true
-                GROUP BY g.id_group, g.label, am.menu
-                ORDER BY am.menu
-            ) a, unnest(perm) as permission
-            GROUP BY a.id_group, a.label"
-        );
+        $data = null;
+        if ((int) request()->select === 1) {
+            if (request()->for === 'ant') {
+                $data = DB::table('groups')->select('id_group as value', 'label')->get();
+            }
+        } else {
 
-        foreach ($data as $key => $value) {
-            $data[$key]->permission = json_decode($data[$key]->permission);
-            $data[$key]->akses = json_decode($data[$key]->akses);
+            $data = DB::select(
+                "SELECT id_group, label, array_to_json(array_agg(permission)) as permission, array_to_json(array_agg(DISTINCT akses)) as akses
+                FROM (
+                    SELECT g.id_group, g.label, array_agg(a.id_akses) as perm, jsonb_build_object('menu', am.menu, 'akses', array_agg(a.akses ORDER BY a.akses)) as akses
+                    FROM groups as g
+                    LEFT JOIN akses_groups as ag ON g.id_group = ag.id_group
+                    JOIN akses as a ON a.id_akses = ag.id_akses
+                    JOIN akses_submenus as asm ON asm.id_akses_submenu = a.id_akses_submenu
+                    JOIN akses_menus as am ON am.id_akses_menu = asm.id_akses_menu
+                    WHERE ag.status = true
+                    GROUP BY g.id_group, g.label, am.menu
+                    ORDER BY am.menu
+                ) a, unnest(perm) as permission
+                GROUP BY a.id_group, a.label"
+            );
+
+            foreach ($data as $key => $value) {
+                $data[$key]->permission = json_decode($data[$key]->permission);
+                $data[$key]->akses = json_decode($data[$key]->akses);
+            }
         }
 
         return response(['status' => 'success', 'data' => $data], 200);
@@ -74,7 +82,7 @@ class GroupController extends Controller
             FROM (
                 SELECT g.id_group, g.label, array_agg(a.id_akses) as perm, jsonb_build_object('menu', am.menu, 'akses', array_agg(a.akses ORDER BY a.akses)) as akses
                 FROM groups as g
-                JOIN akses_groups as ag ON g.id_group = ag.id_group
+                LEFT JOIN akses_groups as ag ON g.id_group = ag.id_group
                 JOIN akses as a ON a.id_akses = ag.id_akses
                 JOIN akses_submenus as asm ON asm.id_akses_submenu = a.id_akses_submenu
                 JOIN akses_menus as am ON am.id_akses_menu = asm.id_akses_menu
