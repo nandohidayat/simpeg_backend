@@ -320,18 +320,18 @@ class PendapatanPegController extends Controller
         $mail = new PHPMailer(true);
         try {
             //Server settings
-            //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                      // Enable verbose debug output
+            //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                          // Enable verbose debug output
             $mail->isSMTP();
-            $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));                                  // Send using SMTP
-            $mail->Host       = gethostbyname('smtp.gmail.com');        // Set the SMTP server to send through
+            $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));     // Send using SMTP
+            $mail->Host       = gethostbyname('rsroemani.com');               // Set the SMTP server to send through
             $mail->SMTPAuth   = true;                                         // Enable SMTP authentication
-            $mail->Username   = 'rsroemaniv2@gmail.com';                     // SMTP username
-            $mail->Password   = 'rsroemanII';                               // SMTP password
+            $mail->Username   = 'no-reply@rsroemani.com';                     // SMTP username
+            $mail->Password   = 'rsr_12345';                                  // SMTP password
             $mail->SMTPSecure = "tls";
             $mail->Port       = 587;
 
             //Recipients
-            $mail->setFrom('rsroemaniv2@gmail.com', 'RS Roemani Muhammadiyah');
+            $mail->setFrom('no-reply@rsroemani.com', 'RS Roemani Muhammadiyah');
             $mail->addAddress($data->email_pegawai, $data->nm_pegawai);     // Add a recipient
             // $mail->addAddress('mattborgic@gmail.com', 'Nando Bruh');
 
