@@ -322,8 +322,8 @@ class PendapatanPegController extends Controller
             //Server settings
             //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                          // Enable verbose debug output
             $mail->isSMTP();
-            $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));     // Send using SMTP
-            $mail->Host       = gethostbyname('rsroemani.com');               // Set the SMTP server to send through
+            // $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));     // Send using SMTP
+            $mail->Host       = 'rsroemani.com';               // Set the SMTP server to send through
             $mail->SMTPAuth   = true;                                         // Enable SMTP authentication
             $mail->Username   = 'no-reply@rsroemani.com';                     // SMTP username
             $mail->Password   = 'rsr_12345';                                  // SMTP password
