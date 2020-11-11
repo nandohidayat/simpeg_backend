@@ -16,6 +16,7 @@ use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use stdClass;
+use Config;
 
 class PendapatanPegController extends Controller
 {
@@ -322,16 +323,16 @@ class PendapatanPegController extends Controller
             //Server settings
             //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                          // Enable verbose debug output
             $mail->isSMTP();
-            // $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));     // Send using SMTP
-            $mail->Host       = gethostbyname('rsroemani.com');               // Set the SMTP server to send through
+            $mail->SMTPOptions = array('ssl' => array('verify_peer_name' => false));     // Send using SMTP
+            $mail->Host       = gethostbyname(config('constant.mail_host'));               // Set the SMTP server to send through
             $mail->SMTPAuth   = true;                                         // Enable SMTP authentication
-            $mail->Username   = 'no-reply@rsroemani.com';                     // SMTP username
-            $mail->Password   = 'rsr_12345';                                  // SMTP password
+            $mail->Username   = config('constant.mail_username');                     // SMTP username
+            $mail->Password   = config('constant.mail_password');                                  // SMTP password
             $mail->SMTPSecure = "tls";
-            $mail->Port       = 587;
+            $mail->Port       = config('constant.mail_port');
 
             //Recipients
-            $mail->setFrom('no-reply@rsroemani.com', 'RS Roemani Muhammadiyah');
+            $mail->setFrom(config('constant.mail_from'), 'RS Roemani Muhammadiyah');
             $mail->addAddress($data->email_pegawai, $data->nm_pegawai);     // Add a recipient
             // $mail->addAddress('mattborgic@gmail.com', 'Nando Bruh');
 

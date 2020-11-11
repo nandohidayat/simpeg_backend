@@ -129,8 +129,6 @@ class KaryawanController extends Controller
             return response()->json(["status" => "error", 'message' => 'Duplicated NIK Pegawai'], 501);
         }
 
-        error_log(json_encode($input));
-
         DB::table('f_data_pegawai')
             ->where('id_pegawai', $id)
             ->update(
