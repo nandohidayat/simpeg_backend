@@ -21,24 +21,15 @@ class AksesController extends Controller
      */
     public function index()
     {
-        $kategori = AksesKategori::with('akses')->orderBy('kategori', 'asc')->get();
+        $data = DB::table('f_login_pegawai as flp')
+            ->join('f_data_pegawai as fdp', 'fdp.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('users as us', 'us.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('groups as gr', 'gr.id_group', '=', 'us.id_group')
+            ->select('fdp.id_pegawai', 'fdp.nm_pegawai as nama', 'flp.user_pegawai as username', 'gr.id_group', 'gr.label')
+            ->orderBy('fdp.nm_pegawai')
+            ->get();
 
-        $data = [];
-        foreach ($kategori as $k) {
-            $obj = new stdClass();
-            $obj->id = 'ketegori' . $k->id_akses_kategori;
-            $obj->name = $k->kategori;
-            $obj->children = [];
-            foreach ($k->akses as $a) {
-                $chd = new stdClass();
-                $chd->id = $a->id_akses;
-                $chd->name = $a->akses;
-                array_push($obj->children, $chd);
-            }
-            array_push($data, $obj);
-        }
-
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(['status' => 'success', 'data' => $data], 200);
     }
 
     /**
@@ -49,22 +40,24 @@ class AksesController extends Controller
      */
     public function store(Request $request)
     {
-        $input = $request->all();
-        $akses = Akses::all();
-        foreach ($akses as $a) {
-            $status = false;
-            $only = false;
-            if (in_array($a->id_akses, $input['semua'], true)) {
-                $status = true;
-            }
-            if (in_array($a->id_akses, $input['kepala'], true)) {
-                $only = true;
-            }
-
-            AksesDepartemen::updateOrCreate(['id_akses' => $a->id_akses, 'id_dept' => $input['dept']], ['status' => $status, 'only' => $only]);
+        if ($request->password !== $request->confirm) {
+            return response()->json(['status' => 'error', 'message' => 'Confirm is not the same with Password'], 501);
         }
 
-        return response()->json(["status" => "success"], 201);
+        DB::select('INSERT INTO f_login_pegawai (id_pegawai, user_pegawai, pass_pegawai) VALUES (\'' . $request->id_pegawai . '\', \'' . $request->username . '\',\'' . md5($request->password) . '\')');
+
+        DB::table('users')->insert(['id_pegawai' => $request->id_pegawai, 'id_group' => $request->id_group]);
+
+        $data = DB::table('f_login_pegawai as flp')
+            ->join('f_data_pegawai as fdp', 'fdp.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('users as us', 'us.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('groups as gr', 'gr.id_group', '=', 'us.id_group')
+            ->select('fdp.id_pegawai', 'fdp.nm_pegawai as nama', 'flp.user_pegawai as username', 'gr.id_group', 'gr.label')
+            ->where('flp.id_pegawai', $request->id_pegawai)
+            ->orderBy('fdp.nm_pegawai')
+            ->first();
+
+        return response()->json(["status" => "success", "data" => $data], 201);
     }
 
     /**
@@ -78,7 +71,7 @@ class AksesController extends Controller
         $akses = AksesUser::where(['id_pegawai' => $id, 'status' => 'true'])
             ->pluck('id_akses');
 
-        return response()->json(["status" => "success", "data" => ['akses' => $akses]], 200);
+        return response()->json(["status" => "success", "data" => $akses], 200);
     }
 
     /**
@@ -90,18 +83,28 @@ class AksesController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $input = $request->all();
-        $akses = Akses::all();
-        foreach ($akses as $a) {
-            $status = false;
-            if (in_array($a->id_akses, $input['akses'], true)) {
-                $status = true;
-            }
-
-            AksesUser::updateOrCreate(['id_akses' => $a->id_akses, 'id_pegawai' => $id], ['status' => $status]);
+        if ($request->password !== $request->confirm) {
+            return response()->json(['status' => 'error', 'message' => 'Confirm is not the same with Password'], 501);
         }
 
-        return response()->json(["status" => "success"], 201);
+        DB::table('f_login_pegawai')->where('id_pegawai', $id)->update(['user_pegawai' => $request->username]);
+
+        if ($request->password !== 'undefined' && strlen($request->password) > 0) {
+            DB::table('f_login_pegawai')->where('id_pegawai', $id)->update(['pass_pegawai' => md5($request->password)]);
+        }
+
+        DB::table('users')->updateOrInsert(['id_pegawai' => $id], ['id_group' => $request->id_group]);
+
+        $data = DB::table('f_login_pegawai as flp')
+            ->join('f_data_pegawai as fdp', 'fdp.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('users as us', 'us.id_pegawai', '=', 'flp.id_pegawai')
+            ->leftJoin('groups as gr', 'gr.id_group', '=', 'us.id_group')
+            ->select('fdp.id_pegawai', 'fdp.nm_pegawai as nama', 'flp.user_pegawai as username', 'gr.id_group', 'gr.label')
+            ->where('flp.id_pegawai', $id)
+            ->orderBy('fdp.nm_pegawai')
+            ->first();
+
+        return response()->json(["status" => "success", 'data' => $data], 201);
     }
 
     /**
@@ -112,6 +115,10 @@ class AksesController extends Controller
      */
     public function destroy($id)
     {
-        //
+        DB::table('f_login_pegawai')->where('id_pegawai', $id)->delete();
+
+        DB::table('users')->where('id_pegawai', $id)->delete();
+
+        return response(['status' => 'success'], 201);
     }
 }

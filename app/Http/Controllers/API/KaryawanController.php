@@ -24,11 +24,17 @@ class KaryawanController extends Controller
     {
         $query = DB::table('f_data_pegawai as fdp');
         if ((int)request()->select === 1) {
-            if (request()->dept) {
-                $query->whereRaw('\'' . request()->dept . '\' = ANY(fdp.id_dept)');
+            if (request()->for === 'ant') {
+                $query->leftJoin('f_login_pegawai as flp', 'flp.id_pegawai', '=', 'fdp.id_pegawai');
+                $query->whereNull('flp.user_pegawai');
+                $query->select('fdp.id_pegawai as value', 'fdp.nm_pegawai as label');
+            } else {
+                if (request()->dept) {
+                    $query->whereRaw('\'' . request()->dept . '\' = ANY(fdp.id_dept)');
+                }
+                $query->select('fdp.id_pegawai', 'fdp.nm_pegawai');
+                $query->orderBy('nik_pegawai');
             }
-            $query->select('fdp.id_pegawai', 'fdp.nm_pegawai');
-            $query->orderBy('nik_pegawai');
         } else {
             $query->leftJoin('f_department as fd', 'fd.id_dept', '=', DB::raw('ANY(fdp.id_dept)'));
             $query->select('fdp.id_pegawai', 'fdp.nik_pegawai as nik', 'fdp.nm_pegawai as nama', 'fdp.jenis_kelamin as kelamin', DB::raw('json_agg(fd.nm_dept) as dept'), DB::raw('case when fdp.is_active = true then \'Active\' else \'Non Active\' end as status'));
@@ -93,11 +99,10 @@ class KaryawanController extends Controller
     {
         $data = DB::table('f_data_pegawai as dp')
             ->whereRaw('dp.nik_pegawai = \'' . sprintf("%05d", (int) $id) . '\'')
-            ->leftjoin('f_login_pegawai as lp', 'lp.id_pegawai', '=', 'dp.id_pegawai')
             ->leftjoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dp.id_dept)'))
             ->leftjoin('f_sub_department as sd', 'sd.id_subdept', '=', DB::raw('ANY(dp.id_subdept)'))
-            ->select('dp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'lp.user_pegawai as username', 'dp.email_pegawai as email', DB::raw('json_agg(d.nm_dept) as dept'), DB::raw('json_agg(sd.nm_subdept) as subdept'), 'dp.is_active as status', 'dp.jenis_kelamin as kelamin', 'dp.alamat_pegawai as alamat', 'dp.no_telp as hp', 'dp.no_rekening as rekening')
-            ->groupBy('dp.id_pegawai', 'dp.nik_pegawai', 'dp.nm_pegawai', 'lp.user_pegawai', 'dp.email_pegawai', 'dp.is_active', 'dp.jenis_kelamin', 'dp.alamat_pegawai', 'dp.no_telp', 'dp.no_rekening')
+            ->select('dp.id_pegawai as id', 'dp.nik_pegawai as nik', 'dp.nm_pegawai as nama', 'dp.email_pegawai as email', DB::raw('json_agg(d.nm_dept) as dept'), DB::raw('json_agg(sd.nm_subdept) as subdept'), 'dp.is_active as status', 'dp.jenis_kelamin as kelamin', 'dp.alamat_pegawai as alamat', 'dp.no_telp as hp', 'dp.no_rekening as rekening')
+            ->groupBy('dp.id_pegawai', 'dp.nik_pegawai', 'dp.nm_pegawai', 'dp.email_pegawai', 'dp.is_active', 'dp.jenis_kelamin', 'dp.alamat_pegawai', 'dp.no_telp', 'dp.no_rekening')
             ->first();
 
         $data->nik = (int) $data->nik;
@@ -124,8 +129,6 @@ class KaryawanController extends Controller
             return response()->json(["status" => "error", 'message' => 'Duplicated NIK Pegawai'], 501);
         }
 
-        error_log(json_encode($input));
-
         DB::table('f_data_pegawai')
             ->where('id_pegawai', $id)
             ->update(
@@ -140,11 +143,6 @@ class KaryawanController extends Controller
                     'no_rekening' => $input['rekening']
                 ]
             );
-
-        DB::connection('pgsql2')
-            ->table('login_pegawai')
-            ->where('id_pegawai', $id)
-            ->update(['user_pegawai' => $input['username']]);
 
         return response()->json(["status" => "success"], 200);
     }

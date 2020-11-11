@@ -6,6 +6,7 @@ use App\AksesUser;
 use App\SIMDataPegawai;
 use App\SIMDepartment;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 
 class PublishAccess extends Command
 {
@@ -40,12 +41,18 @@ class PublishAccess extends Command
      */
     public function handle()
     {
-        $data = SIMDataPegawai::all();
-        $kepala = SIMDepartment::pluck('kepala_dept');
+        // 15 ADMIN
+        // 16 Kepala Bagian
+        // 18 Karyawan
+
+        // u-661 Nando
+
+        // 5 Edit Jadwal
+        $data = DB::table('akses_users')->where('id_akses', 5)->get();
+
         foreach ($data as $d) {
-            // AksesUser::updateOrCreate(['id_akses' => 2, 'id_pegawai' => $d->id_pegawai], ['status' => true]);
-            if (!in_array($d->id_pegawai, (array) $kepala)) {
-                AksesUser::updateOrCreate(['id_akses' => 5, 'id_pegawai' => $d->id_pegawai], ['status' => false]);
+            if ($d->id_pegawai !== 'u-661') {
+                DB::table('users')->insert(['id_pegawai' => $d->id_pegawai, 'id_group' => $d->status ? 16 : 18]);
             }
         }
     }

@@ -278,11 +278,11 @@ class ScheduleController extends Controller
     {
         $input = $request->all();
 
-        $query = 'INSERT INTO schedules (dept, pegawai, tgl, shift, job) VALUES ';
+        $query = 'INSERT INTO schedules (dept, pegawai, tgl, shift) VALUES ';
 
         for ($i = 0; $i < count($input['id']); $i++) {
             for ($j = 0; $j < count($input['shift'][0]); $j++) {
-                $query .= '(\'' . $id . '\', \'' . $input['id'][$i] . '\', \'' . Carbon::create($input['year'], $input['month'], $j + 1) . '\',' . (empty($input['shift'][$i][$j]) ? 'null' :  $input['shift'][$i][$j]) . ', ' . (empty($input['job'][$i][$j]) ? 'null' :  $input['job'][$i][$j]) . ')';
+                $query .= '(\'' . $id . '\', \'' . $input['id'][$i] . '\', \'' . Carbon::create($input['year'], $input['month'], $j + 1) . '\',' . (empty($input['shift'][$i][$j]) ? 'null' :  $input['shift'][$i][$j]) . ')';
 
                 if ($j !== count($input['shift'][0]) - 1) {
                     $query .= ', ';
@@ -293,7 +293,7 @@ class ScheduleController extends Controller
             }
         }
 
-        $query .= ' ON CONFLICT ON CONSTRAINT schedules_ukey DO UPDATE SET shift = excluded.shift, job = excluded.job';
+        $query .= ' ON CONFLICT ON CONSTRAINT schedules_ukey DO UPDATE SET shift = excluded.shift';
 
         DB::select($query);
 
