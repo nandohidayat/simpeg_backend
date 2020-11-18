@@ -4,8 +4,11 @@ namespace App\Http\Controllers\API;
 
 use App\Departemen;
 use App\Http\Controllers\Controller;
+use App\ScheduleAccess;
 use App\SIMDataPegawai;
 use App\SIMDepartment;
+use Carbon\Carbon;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -21,9 +24,41 @@ class DepartemenController extends Controller
         $query = DB::table('f_department')->orderBy('nm_dept', 'asc');
         $data = null;
 
-        if ((int)request()->select === 1) {
-            $query->select('nm_dept');
-            $data = $query->pluck('nm_dept');
+        $today = Carbon::now(new DateTimeZone('Asia/Jakarta'))->toDateString();
+
+        if ((int) request()->select === 1) {
+            if ((int) request()->schedule === 1) {
+                $semua = DB::table('users as us')
+                    ->join('akses_groups as ag', 'ag.id_group', '=', 'us.id_group')
+                    ->where('us.id_pegawai', auth()->user()->id_pegawai)
+                    ->where('ag.id_akses', 6)
+                    ->where('ag.status', true)
+                    ->first();
+
+                if ($semua) {
+                    $data = DB::table('f_department')->select('id_dept', 'nm_dept')->orderBy('nm_dept')->get();
+                } else {
+                    $query = DB::table('log_departemens as ld')
+                        ->where('ld.id_pegawai', auth()->user()->id_pegawai)
+                        ->whereRaw('ld.masuk <= \'' . $today . '\'')
+                        ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+                        ->join('f_department as fd', 'fd.id_dept', '=', 'ld.id_dept')
+                        ->select('fd.id_dept', 'fd.nm_dept');
+
+                    $child = DB::table('log_departemens as ld')
+                        ->where('ld.id_pegawai', auth()->user()->id_pegawai)
+                        ->whereRaw('ld.masuk <= \'' . $today . '\'')
+                        ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+                        ->rightJoin('schedule_accesses as sa', 'sa.access', '=', 'ld.id_dept')
+                        ->join('f_department as fd', 'fd.id_dept', '=', 'sa.dept')
+                        ->select('fd.id_dept', 'fd.nm_dept');
+
+                    $data = $query->union($child)->orderBy('nm_dept')->get();
+                }
+            } else {
+                $query->select('nm_dept');
+                $data = $query->pluck('nm_dept');
+            }
         } else {
             $query->select('id_dept', 'nm_dept');
             $data = $query->get();

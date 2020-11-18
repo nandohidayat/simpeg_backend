@@ -73,7 +73,7 @@ class AbsenController extends Controller
                     ->on([
                         ['b.pin', '=', 'a.pin'],
                         ['b.datetime', '>', DB::raw("(tanggal.tanggal + shf.mulai)")],
-                        ['b.datetime', '<', DB::raw("(case when shf.selesai > shf.mulai then tanggal.tanggal + interval '1 day' else tanggal.tanggal + interval '2 days' end)")]
+                        ['b.datetime', '<', DB::raw("(case when shf.selesai > shf.mulai then tanggal.tanggal + interval '23 hours 59 minutes' else tanggal.tanggal + interval '1 day 23 hours 59 minutes' end)")]
                     ])
                     ->where('b.status', '=', '1');
             })
@@ -84,8 +84,8 @@ class AbsenController extends Controller
                 'shf.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
                 DB::raw('cast(max(b.datetime) as time) as keluar'),
-                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') OR (cast(shf.mulai as time) = time '00:00') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
-                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND max(b.datetime) >= (tanggal.tanggal + shf.selesai) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
+                DB::raw("(case when (cast(shf.mulai as time) = time '00:00') then 'Libur' when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
+                DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND max(b.datetime) >= (case when shf.selesai > shf.mulai then tanggal.tanggal + shf.selesai else tanggal.tanggal + shf.selesai + interval '1 day' end) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
             ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai')
             ->get();
