@@ -15,6 +15,7 @@ use App\ScheduleOrder;
 use App\ScheduleRequest;
 use App\ShiftDepartemen;
 use App\SIMDepartment;
+use DateTimeZone;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -52,11 +53,12 @@ class ScheduleController extends Controller
         if (request()->year || request()->month) {
             $thisMonth = Carbon::create(request()->year, request()->month);
         } else {
-            $thisMonth = Carbon::now();
+            $thisMonth = Carbon::now(new DateTimeZone('Asia/Jakarta'));
         }
 
         $firstday = $thisMonth->copy()->firstOfMonth();
         $lastday = $thisMonth->copy()->lastOfMonth();
+        $today = Carbon::now(new DateTimeZone('Asia/Jakarta'))->toDateString();
 
         $dept = null;
 
@@ -68,26 +70,41 @@ class ScheduleController extends Controller
                 ->first()
                 ->order);
         } else {
-            if ((int) request()->semua === 1) {
-                $query = SIMDepartment::leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
+            $semua = DB::table('users as us')
+                ->join('akses_groups as ag', 'ag.id_group', '=', 'us.id_group')
+                ->where('us.id_pegawai', auth()->user()->id_pegawai)
+                ->where('ag.id_akses', 6)
+                ->where('ag.status', true)
+                ->first();
+
+            if ($semua) {
+                $data = DB::table('f_department')
+                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
                     ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
-                    ->orderBy('nm_dept', 'asc');
+                    ->orderBy('nm_dept', 'asc')
+                    ->get();
             } else {
-                $query = SIMDepartment::whereRaw('f_department.id_dept = ANY(\'' . auth()->user()->id_dept . '\')')
-                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
-                    ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
-                    ->orderBy('nm_dept', 'asc');
+                $query = DB::table('log_departemens as ld')
+                    ->where('ld.id_pegawai', auth()->user()->id_pegawai)
+                    ->whereRaw('ld.masuk <= \'' . $today . '\'')
+                    ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+                    ->join('f_department as fd', 'fd.id_dept', '=', 'ld.id_dept')
+                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'fd.id_dept')
+                    ->select('fd.id_dept', 'fd.nm_dept', 'so.order');
 
-                $child = ScheduleAccess::whereRaw('schedule_accesses.access = ANY(\'' . auth()->user()->id_dept . '\')')
-                    ->join('f_department', 'f_department.id_dept', '=', 'schedule_accesses.dept')
-                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'f_department.id_dept')
-                    ->select('f_department.id_dept', 'f_department.nm_dept', 'so.order')
-                    ->orderBy('f_department.nm_dept', 'asc');
+                $child = DB::table('log_departemens as ld')
+                    ->where('ld.id_pegawai', auth()->user()->id_pegawai)
+                    ->whereRaw('ld.masuk <= \'' . $today . '\'')
+                    ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+                    ->rightJoin('schedule_accesses as sa', 'sa.access', '=', 'ld.id_dept')
+                    ->join('f_department as fd', 'fd.id_dept', '=', 'sa.dept')
+                    ->leftJoin('schedule_orders as so', 'so.id_dept', '=', 'fd.id_dept')
+                    ->select('fd.id_dept', 'fd.nm_dept', 'so.order');
 
-                $query = $query->unionAll($child);
+                $data = $query->union($child)->orderBy('nm_dept')->get();
             }
 
-            $depts = $query->get();
+            $depts = $data;
             $dept = $depts[0]->id_dept;
             $order = explode(',', $depts[0]->order);
         }
