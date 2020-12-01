@@ -15,6 +15,7 @@ use App\SIMDataPegawai;
 use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
+use DateTimeZone;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,9 +117,15 @@ class AuthController extends BaseController
      */
     public function user()
     {
-        $user = SIMDataPegawai::where('id_pegawai', auth()->user()->id_pegawai)
-            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
-            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama')
+        $today = Carbon::now(new DateTimeZone('Asia/Jakarta'))->toDateString();
+
+        $user = DB::table('f_data_pegawai as fdp')
+            ->leftJoin('log_departemens as ld', 'ld.id_pegawai', '=', 'fdp.id_pegawai')
+            ->where('fdp.id_pegawai', auth()->user()->id_pegawai)
+            ->whereRaw('ld.masuk <= \'' . $today . '\'')
+            ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+            ->select('fdp.id_pegawai', 'fdp.nik_pegawai as nik', 'fdp.nm_pegawai as nama', DB::raw('jsonb_agg(ld.id_dept) as dept'))
+            ->groupBy('fdp.id_pegawai', 'nik', 'nama')
             ->first();
 
         $dataAkses = DB::table('users as us')
@@ -152,6 +159,7 @@ class AuthController extends BaseController
         $user->submenu = $submenu;
         $user->akses = $akses;
         $user->nik = (int) $user->nik;
+        $user->dept = json_decode($user->dept);
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
