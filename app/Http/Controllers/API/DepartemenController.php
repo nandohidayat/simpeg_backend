@@ -60,7 +60,8 @@ class DepartemenController extends Controller
                 $data = $query->pluck('nm_dept');
             }
         } else {
-            $query->select('id_dept', 'nm_dept');
+            $query->leftJoin('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_department.kepala_dept');
+            $query->select('f_department.id_dept', 'nm_dept', 'nm_jabatan', 'nm_pegawai', 'nm_folder', 'id_pegawai');
             $data = $query->get();
         }
 
@@ -75,17 +76,25 @@ class DepartemenController extends Controller
      */
     public function store(Request $request)
     {
-        // $departemen = Departemen::where('id_bagian', '=', $request['id_bagian'])->orderBy('tingkat', 'desc')->first();
+        $id_dept = DB::table('fi_id_dept_seq')->first()->id_dept;
 
-        // if ($departemen != null) {
-        //     $tingkat = $departemen->tingkat;
-        // } else {
-        //     $tingkat = 0;
-        // }
-        // $request['tingkat'] = $tingkat + 1;
+        $dept = DB::table('f_department')
+            ->insertGetId(
+                [
+                    'id_dept' => $id_dept,
+                    'nm_dept' => $request->nama,
+                    'nm_jabatan' => $request->jabatan,
+                    'kepala_dept' => $request->id_pegawai,
+                    'parent_code' => 0,
+                    'is_active' => true
+                ],
+                'id_dept'
+            );
 
-        $input = $request->all();
-        $data = Departemen::create($input);
+        $data = DB::table('f_department')->where('f_department.id_dept', $dept)
+            ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_department.kepala_dept')
+            ->select('f_department.id_dept', 'nm_dept', 'nm_jabatan', 'nm_pegawai', 'nm_folder', 'id_pegawai')
+            ->first();
 
         return response()->json(["status" => "success", "data" => $data], 201);
     }
@@ -112,10 +121,22 @@ class DepartemenController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $data = Departemen::updateOrCreate(['id_departemen' => $id], $request->all());
+        error_log($request->folder);
+        $dept = DB::table('f_department')->where('id_dept', $id)
+            ->update(
+                [
+                    'nm_dept' => $request->nama,
+                    'nm_jabatan' => $request->jabatan,
+                    'nm_folder' => $request->folder
+                ]
+            );
 
-        if ($data === null) return response()->json(["status" => "failed"], 501);
-        return response()->json(["status" => "success"], 201);
+        $data = DB::table('f_department')->where('f_department.id_dept', $id)
+            ->join('f_data_pegawai', 'f_data_pegawai.id_pegawai', '=', 'f_department.kepala_dept')
+            ->select('f_department.id_dept', 'nm_dept', 'nm_jabatan', 'nm_pegawai', 'nm_folder', 'id_pegawai')
+            ->first();
+
+        return response()->json(["status" => "success", "data" => $data], 201);
     }
 
     /**
@@ -126,10 +147,10 @@ class DepartemenController extends Controller
      */
     public function destroy($id)
     {
-        $data = Departemen::find($id);
-        if ($data === null) return response()->json(["status" => "not found"], 404);
+        $data = DB::table('f_department')->where('id_dept', $id)->delete();
 
-        $data->delete();
+        if ($data === 0) return response()->json(["status" => "error", "message" => "Data not found!"], 404);
+
         return response()->json(["status" => "success"], 201);
     }
 }
