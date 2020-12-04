@@ -362,8 +362,8 @@ class PendapatanPegController extends Controller
             ->leftJoin('f_department as d', 'd.id_dept', '=', DB::raw('ANY(dg.id_dept)'))
             ->select('pg.*', 'pp.nama_pendapatan', DB::raw("to_char(pg.bulan_kirim, 'MM-YYYY') AS bulan_kirim2"), 'dg.nm_pegawai', DB::raw("string_agg(d.nm_dept,':') AS nm_dept"), 'dg.no_rekening')
             ->where("pg.id_profilp", '1')
-            ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '03-2020'")
-            ->whereRaw("pg.id_pendapatan = '13556'")
+            ->whereRaw("to_char(bulan_kirim, 'MM-YYYY') = '11-2020'")
+            ->whereRaw("pg.id_pendapatan = '15276'")
             ->groupBy('pg.id_pendapatan', 'dg.nm_pegawai', 'dg.no_rekening', 'dg.nik_pegawai', 'pp.nama_pendapatan')
             ->orderBy('dg.nik_pegawai', 'asc')
             ->get();

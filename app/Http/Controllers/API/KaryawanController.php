@@ -25,8 +25,10 @@ class KaryawanController extends Controller
         $query = DB::table('f_data_pegawai as fdp');
         if ((int)request()->select === 1) {
             if (request()->for === 'ant') {
+                if ((int)request()->user === 1) {
+                    $query->whereNull('flp.user_pegawai');
+                }
                 $query->leftJoin('f_login_pegawai as flp', 'flp.id_pegawai', '=', 'fdp.id_pegawai');
-                $query->whereNull('flp.user_pegawai');
                 $query->select('fdp.id_pegawai as value', 'fdp.nm_pegawai as label');
             } else {
                 if (request()->dept) {
