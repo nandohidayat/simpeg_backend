@@ -119,7 +119,7 @@ class SchedulesExport implements FromCollection, WithHeadings, WithEvents
                     array_push($order, $i);
                 }
             } else if ($max > $count - 1) {
-                while ($max !== $count) {
+                while ($max !== $count - 1) {
                     unset($order[array_search($max, $order)]);
                     $max = max(array_map('intval', $order));
                 }

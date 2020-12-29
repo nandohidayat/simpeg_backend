@@ -191,7 +191,7 @@ class ScheduleController extends Controller
                     array_push($order, $i);
                 }
             } else if ($max > $count - 1) {
-                while ($max !== $count) {
+                while ($max !== $count - 1) {
                     unset($order[array_search($max, $order)]);
                     $max = max(array_map('intval', $order));
                 }
@@ -337,7 +337,7 @@ class ScheduleController extends Controller
         $data = json_decode($data);
 
         foreach ($data as $key => $value) {
-            if ($key === 'created-at') continue;
+            if ($key === 'created-at' || strpos($value->deskripsi, 'Cuti Bersama') !== false) continue;
 
             $year = substr($key, 0, 4);
             $month = substr($key, 4, 2);
