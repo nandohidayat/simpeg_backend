@@ -133,7 +133,7 @@ class AuthController extends BaseController
             ->join('akses as ak', 'ak.id_akses', '=', 'ag.id_akses')
             ->join('akses_submenus as asm', 'asm.id_akses_submenu', '=', 'ak.id_akses_submenu')
             ->join('akses_menus as am', 'am.id_akses_menu', '=', 'asm.id_akses_menu')
-            ->select('am.id_akses_menu', 'asm.id_akses_submenu', 'ak.id_akses')
+            ->select('am.id_akses_menu', 'asm.id_akses_submenu', 'ak.id_akses', DB::raw('(case when ag.id_group = 15 then true else false end) as admin'))
             ->where('us.id_pegawai', auth()->user()->id_pegawai)
             ->where('ag.status', true)
             ->orderBy('id_akses_menu', 'asc')
@@ -155,6 +155,7 @@ class AuthController extends BaseController
             array_push($akses, $d->id_akses);
         }
 
+        $user->admin = $dataAkses[0]->admin;
         $user->menu = $menu;
         $user->submenu = $submenu;
         $user->akses = $akses;
