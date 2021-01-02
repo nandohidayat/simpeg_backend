@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Route;
 use App\Imports\PendapatanPegImport;
 use App\Exports\PendapatanPegExport;
 use App\Exports\TemplatePegExport;
+use App\Imports\PendapatanImport;
 use Maatwebsite\Excel\Facades\Excel;
 use DOMDocument;
 use Illuminate\Http\Request;
@@ -42,83 +43,87 @@ class PendapatanPegController extends Controller
 
     public function importPendapatanPeg()
     {
-        /**
-         * 1. Saat upload file excel ada pilihan personalia / keuangan
-         * 2. Saat upload ada proses pengecekan apakah bulan dan tipe profil sudah ada di tabel
-         * 3. Jika sudah ada datanya dilakukan update
-         * 4. Jika belum dilakukan proses insert
-         */
+        // /**
+        //  * 1. Saat upload file excel ada pilihan personalia / keuangan
+        //  * 2. Saat upload ada proses pengecekan apakah bulan dan tipe profil sudah ada di tabel
+        //  * 3. Jika sudah ada datanya dilakukan update
+        //  * 4. Jika belum dilakukan proses insert
+        //  */
 
-        $file = request()->file('file');
-        $id_profilp = request()->post('id_profilp');
-        $bulan_kirim = request()->post('bulan_kirim');
+        // $file = request()->file('file');
+        // $id_profilp = request()->post('id_profilp');
+        // $bulan_kirim = request()->post('bulan_kirim');
 
-        if (request()->post('tipe_form') == 'format_personalia') {
-            $tipe_form = "detail_personalia";
-        }
-        if (request()->post('tipe_form') == 'format_keuangan') {
-            $tipe_form = 'detail_keuangan';
-        }
+        // if (request()->post('tipe_form') == 'format_personalia') {
+        //     $tipe_form = "detail_personalia";
+        // }
+        // if (request()->post('tipe_form') == 'format_keuangan') {
+        //     $tipe_form = 'detail_keuangan';
+        // }
 
-        $hasil_import = Excel::toArray(new PendapatanPegImport, $file);
+        // $hasil_import = Excel::toArray(new PendapatanPegImport, $file);
 
-        $query = "INSERT INTO pendapatan_pegawai (id_profilp, id_pegawai, nik_pegawai, bulan_kirim, " . $tipe_form . ") VALUES ";
+        // $query = "INSERT INTO pendapatan_pegawai (id_profilp, id_pegawai, nik_pegawai, bulan_kirim, " . $tipe_form . ") VALUES ";
 
-        foreach ($hasil_import as $key => $row) {
+        // foreach ($hasil_import as $key => $row) {
 
-            /**
-             * unset($row) untuk menghapus header dalam hasil import excel,
-             * yang selanjutnya menyisakan row data gaji pegawai (tanpa header)
-             */
+        //     /**
+        //      * unset($row) untuk menghapus header dalam hasil import excel,
+        //      * yang selanjutnya menyisakan row data gaji pegawai (tanpa header)
+        //      */
 
-            $head = $row[0];
-            unset($row[0]);
-            unset($row[1]);
+        //     $head = $row[0];
+        //     unset($row[0]);
+        //     unset($row[1]);
 
-            foreach ($row as $key2 => $value) {
+        //     foreach ($row as $key2 => $value) {
 
-                $pegawai = new stdClass();
-                for ($i = 0; $i <= 2; $i++) {
-                    $obj = $head[$i];
-                    $pegawai->$obj = $value[$i];
-                }
+        //         $pegawai = new stdClass();
+        //         for ($i = 0; $i <= 2; $i++) {
+        //             $obj = $head[$i];
+        //             $pegawai->$obj = $value[$i];
+        //         }
 
-                /**
-                 * fungsi loop for diatas untuk mengambil nik pegawai
-                 * dan selanjutnya diteruskan kedalam parameter query dibawah
-                 */
+        //         /**
+        //          * fungsi loop for diatas untuk mengambil nik pegawai
+        //          * dan selanjutnya diteruskan kedalam parameter query dibawah
+        //          */
 
-                $id_pegawai = DB::table('f_data_pegawai')->where('nik_pegawai', $pegawai->NIK)->value('id_pegawai');
+        //         $id_pegawai = DB::table('f_data_pegawai')->where('nik_pegawai', $pegawai->NIK)->value('id_pegawai');
 
-                if (!is_null($id_pegawai)) {
-                    $data = new stdClass();
+        //         if (!is_null($id_pegawai)) {
+        //             $data = new stdClass();
 
-                    for ($i = 2; $i <= count($head) - 1; $i++) {
-                        $obj = $head[$i];
-                        $data->$obj = $value[$i];
-                    }
+        //             for ($i = 2; $i <= count($head) - 1; $i++) {
+        //                 $obj = $head[$i];
+        //                 $data->$obj = $value[$i];
+        //             }
 
-                    $data = json_encode($data);
+        //             $data = json_encode($data);
 
-                    /**
-                     * jika tidak ada id_profilp dan bulan kirim, maka lakukan insert
-                     * jika ada id_profilp dan bulan kirim, maka lakukan update sesuai dengan tipe form
-                     */
+        //             /**
+        //              * jika tidak ada id_profilp dan bulan kirim, maka lakukan insert
+        //              * jika ada id_profilp dan bulan kirim, maka lakukan update sesuai dengan tipe form
+        //              */
 
-                    $query .= '(' . $id_profilp . ', \'' . $id_pegawai . '\', \'' . $pegawai->NIK . '\', TO_DATE(\'' . $bulan_kirim . '\', \'MM-YYYY\'), \'' . $data . '\')';
+        //             $query .= '(' . $id_profilp . ', \'' . $id_pegawai . '\', \'' . $pegawai->NIK . '\', TO_DATE(\'' . $bulan_kirim . '\', \'MM-YYYY\'), \'' . $data . '\')';
 
-                    if ($key2 <= count($row)) {
-                        $query .= ', ';
-                    }
-                }
-            }
-        }
+        //             if ($key2 <= count($row)) {
+        //                 $query .= ', ';
+        //             }
+        //         }
+        //     }
+        // }
 
-        $query .= ' ON CONFLICT ON CONSTRAINT pendapatan_pegawai_ukey DO UPDATE SET ' . $tipe_form . ' = excluded.' . $tipe_form . '';
+        // $query .= ' ON CONFLICT ON CONSTRAINT pendapatan_pegawai_ukey DO UPDATE SET ' . $tipe_form . ' = excluded.' . $tipe_form . '';
 
-        DB::select($query);
+        // DB::select($query);
 
-        return response()->json(["status" => "success"], 201);
+        // return response()->json(["status" => "success"], 201);
+
+        Excel::import(new PendapatanImport(request()->bulan, request()->profil, request()->tipe), request()->file('file'));
+
+        return response()->json(["status" => "success"], 200);
     }
 
     public function buatEmail(Request $request)

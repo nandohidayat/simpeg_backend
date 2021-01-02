@@ -19,6 +19,12 @@ class PendapatanImport implements WithMultipleSheets
 
     public function sheets(): array
     {
+        if ($this->type === 'format_personalia') {
+            return [
+                new PdptPersonaliaImport($this->bulan, $this->profil)
+            ];
+        }
+
         return [];
     }
 }
