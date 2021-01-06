@@ -18,63 +18,63 @@ const label = {
 const position = {
     BANK: {
         sheet: 1,
-        column: "L",
+        column: 11,
     },
     KOPERASI: {
         sheet: 1,
-        column: "K",
+        column: 10,
     },
     KANTOR: {
         sheet: 1,
-        column: "M",
+        column: 12,
     },
     OPNAME: {
         sheet: 4,
-        column: "E",
+        column: 4,
     },
     OBAT: {
         sheet: 4,
-        column: "F",
+        column: 5,
     },
     LABORAT: {
         sheet: 4,
-        column: "G",
+        column: 6,
     },
     RADIOLOGI: {
         sheet: 4,
-        column: "H",
+        column: 7,
     },
     POLI: {
         sheet: 4,
-        column: "I",
+        column: 8,
     },
     BKIA: {
         sheet: 4,
-        column: "J",
+        column: 9,
     },
     SERAGAM: {
         sheet: 4,
-        column: "K",
+        column: 10,
     },
     "CHEQ UP": {
         sheet: 4,
-        column: "L",
+        column: 11,
     },
     ORGANISASI: {
         sheet: 1,
-        column: "N",
+        column: 13,
     },
     LAIN2: {
         sheet: 1,
-        column: "O",
+        column: 14,
     },
     "JUMLAH POTONGAN": {
         sheet: 1,
-        column: "P",
+        column: 15,
     },
     "JUMLAH DITERIMA": {
         sheet: 1,
-        column: "Q",
+        column: 16,
     },
 };
 
