@@ -84,7 +84,7 @@ class KaryawanController extends Controller
                     'no_telp' => $input['hp'],
                     'is_active' => $input['status'],
                     'email_pegawai' => $input['email'],
-                    'no_rekening' => $input['rekening']
+                    'no_rekening' => $input['rekening'] ?? ''
                 ],
             );
 
