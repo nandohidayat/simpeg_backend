@@ -337,7 +337,7 @@ class ScheduleController extends Controller
         $data = json_decode($data);
 
         foreach ($data as $key => $value) {
-            if ($key === 'created-at') continue;
+            if ($key === 'created-at' || strpos($value->deskripsi, 'Cuti Bersama') !== false) continue;
 
             $year = substr($key, 0, 4);
             $month = substr($key, 4, 2);
