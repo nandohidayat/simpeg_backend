@@ -16,6 +16,14 @@ const label = {
     "JUMLAH DITERIMA": "Penyerahan Gaji",
 };
 const position = {
+    NIK: {
+        sheet: 1,
+        column: 1,
+    },
+    NAMA: {
+        sheet: 1,
+        column: 2,
+    },
     BANK: {
         sheet: 1,
         column: 11,
@@ -27,6 +35,30 @@ const position = {
     KANTOR: {
         sheet: 1,
         column: 12,
+    },
+    ORGANISASI: {
+        sheet: 1,
+        column: 13,
+    },
+    LAIN2: {
+        sheet: 1,
+        column: 14,
+    },
+    "JUMLAH POTONGAN": {
+        sheet: 1,
+        column: 15,
+    },
+    "JUMLAH DITERIMA": {
+        sheet: 1,
+        column: 16,
+    },
+    "NIK RUMAH SAKIT": {
+        sheet: 4,
+        column: 1,
+    },
+    "JUMLAH ANGSURAN": {
+        sheet: 4,
+        column: 3,
     },
     OPNAME: {
         sheet: 4,
@@ -59,22 +91,6 @@ const position = {
     "CHEQ UP": {
         sheet: 4,
         column: 11,
-    },
-    ORGANISASI: {
-        sheet: 1,
-        column: 13,
-    },
-    LAIN2: {
-        sheet: 1,
-        column: 14,
-    },
-    "JUMLAH POTONGAN": {
-        sheet: 1,
-        column: 15,
-    },
-    "JUMLAH DITERIMA": {
-        sheet: 1,
-        column: 16,
     },
 };
 

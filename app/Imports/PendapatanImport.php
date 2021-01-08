@@ -24,7 +24,10 @@ class PendapatanImport implements WithMultipleSheets
                 new PdptPersonaliaImport($this->bulan, $this->profil)
             ];
         } else if ($this->type === 'format_keuangan') {
-            return [];
+            return [
+                1 => new PdptKeuanganImport($this->profil),
+                4 => new PdptKRumahSakitImport($this->profil)
+            ];
         }
 
         return [];

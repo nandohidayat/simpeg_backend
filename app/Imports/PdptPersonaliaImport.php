@@ -37,7 +37,7 @@ class PdptPersonaliaImport implements ToCollection
             $format = new stdClass();
 
             foreach ($position as $k => $v) {
-                $format->$k = $row[$v->column];
+                $format->$k = $row[$v->column] ?? null;
             }
 
             $nik = (int) explode('.', $format->NIK)[0];
@@ -55,8 +55,8 @@ class PdptPersonaliaImport implements ToCollection
         }
 
         $query = rtrim($query, ", ");
-        $query .= " ON CONFLICT ON CONSTRAINT pendapatan_pegawai_pkey DO UPDATE SET bulan = excluded.bulan, personalia = excluded.personalia";
 
+        DB::select('DELETE FROM pendapatan_pegawai');
         DB::select($query);
     }
 }

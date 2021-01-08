@@ -28,7 +28,7 @@ Route::get('pendapatanpeg/pendapatan', 'API\PendapatanPegController@exportPendap
 Route::post('pendapatanpeg/pendapatan', 'API\PendapatanPegController@importPendapatanPeg');
 Route::get('pendapatanpeg/profil', 'API\PendapatanPegController@getProfil');
 
-Route::get('email/test', 'API\PendapatanPegController@testTemplate');
+Route::get('email/test', 'API\PendapatanEmailController@test');
 Route::get('email/kirim', 'API\PendapatanPegController@kirimEmail');
 Route::post('email/buat', 'API\PendapatanPegController@buatEmail');
 

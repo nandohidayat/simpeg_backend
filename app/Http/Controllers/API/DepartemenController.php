@@ -121,7 +121,6 @@ class DepartemenController extends Controller
      */
     public function update(Request $request, $id)
     {
-        error_log($request->folder);
         $dept = DB::table('f_department')->where('id_dept', $id)
             ->update(
                 [

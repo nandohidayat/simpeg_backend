@@ -60,7 +60,5 @@ class SchedulesImport implements ToCollection
         $query .= ' ON CONFLICT ON CONSTRAINT schedules_ukey DO UPDATE SET shift = excluded.shift';
 
         DB::select($query);
-
-        // error_log(json_encode($query));
     }
 }

@@ -6,10 +6,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\ToCollection;
-use Maatwebsite\Excel\Concerns\WithCalculatedFormulas;
 use stdClass;
 
-class PdptKeuanganImport implements ToCollection
+class PdptKRumahSakitImport implements ToCollection
 {
     protected $profil;
 
@@ -31,7 +30,11 @@ class PdptKeuanganImport implements ToCollection
 
         $position = json_decode($position);
 
-        $query = DB::raw("INSERT INTO pendapatan_pegawai (id_pegawai, keuangan) VALUES ");
+        $keuangan = DB::table('pendapatan_pegawai')
+            ->select('id_pegawai', 'keuangan')
+            ->get();
+
+        $query = DB::raw("UPDATE pendapatan_pegawai AS pp SET keuangan = c.keuangan FROM ( VALUES ");
 
         $i = 0;
 
@@ -39,15 +42,13 @@ class PdptKeuanganImport implements ToCollection
             $format = new stdClass();
 
             foreach ($position as $k => $v) {
-                if ((int)$v->sheet === 1) {
+                if ((int)$v->sheet === 4) {
                     $format->$k = $row[$v->column] ?? 0;
-                } else {
-                    $format->$k = 0;
                 }
             }
 
-            $nik = (int) $format->NIK;
-            $jml = (int) $format->{"JUMLAH DITERIMA"};
+            $nik = (int) $format->{"NIK RUMAH SAKIT"};
+            $jml = (int) $format->{"JUMLAH ANGSURAN"};
 
             if ($nik < 5 || $jml === 0) {
                 continue;
@@ -59,11 +60,21 @@ class PdptKeuanganImport implements ToCollection
                 ->first()
                 ->id_pegawai;
 
-            $query .= '(\'' . $id_pegawai . '\',\'' . json_encode($format, JSON_HEX_APOS) . '\'), ';
+            $item = null;
+            foreach ($keuangan as $struct) {
+                if ($id_pegawai === $struct->id_pegawai) {
+                    $item = $struct;
+                    break;
+                }
+            }
+
+            $format = (object) array_merge((array) json_decode($item->keuangan), (array) $format);
+
+            $query .= '(\'' . $id_pegawai . '\',\'' . json_encode($format, JSON_HEX_APOS) . '\'::json), ';
         }
 
         $query = rtrim($query, ", ");
-        $query .= " ON CONFLICT ON CONSTRAINT pendapatan_pegawai_pkey DO UPDATE SET keuangan = excluded.keuangan";
+        $query .= " ) AS c ( id_pegawai, keuangan ) WHERE c.id_pegawai = pp.id_pegawai";
 
         DB::select($query);
     }
