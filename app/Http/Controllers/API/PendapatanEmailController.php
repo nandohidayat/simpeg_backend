@@ -16,6 +16,7 @@ class PendapatanEmailController extends Controller
         $data->personalia = json_decode($data->personalia);
         $data->keuangan = json_decode($data->keuangan);
 
+
         return view('email/slip_gaji', ['data' => $data]);
         // return response()->json(['data' => $data]);
     }
