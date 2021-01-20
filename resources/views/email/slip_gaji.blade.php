@@ -799,7 +799,6 @@
                                                 font-size: 12px;
                                                 line-height: 14px;
                                             ">
-                                        Sosial
                                     </td>
                                     <td align="right" width="30%" style="
                                                 padding: 6px 12px;
@@ -819,7 +818,6 @@
                                                 font-size: 12px;
                                                 line-height: 14px;
                                             ">
-                                        Obat-obatan
                                     </td>
                                     <td align="right" width="30%" style="
                                                 padding: 6px 12px;

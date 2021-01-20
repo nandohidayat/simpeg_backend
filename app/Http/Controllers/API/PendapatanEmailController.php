@@ -12,7 +12,7 @@ class PendapatanEmailController extends Controller
 {
     public function test()
     {
-        $data = DB::table('pendapatan_pegawai')->where('id_pegawai', 'u-661')->first();
+        $data = DB::table('pendapatan_pegawai')->where('id_pegawai', 'u-71')->first();
         $data->personalia = json_decode($data->personalia);
         $data->keuangan = json_decode($data->keuangan);
 
