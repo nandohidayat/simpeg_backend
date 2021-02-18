@@ -15,7 +15,12 @@ class PdptProfilController extends Controller
      */
     public function index()
     {
-        $data = PendapatanProfil::all();
+        $data = [];
+        if ((int)request()->select === 1) {
+            $data = PendapatanProfil::select('id_pendapatan_profil as value', 'title as label')->where('active', true)->get();
+        } else {
+            $data = PendapatanProfil::all();
+        }
         return response()->json(['status' => 'success', 'data' => $data]);
     }
 
@@ -30,6 +35,9 @@ class PdptProfilController extends Controller
         $data = new PendapatanProfil();
         $data->title = $request->title;
         $data->view = $request->view;
+        $data->personalia = $request->personalia;
+        $data->keuangan = $request->keuangan;
+        $data->active = $request->active;
         $data->save();
 
         return response()->json(['status' => 'success', 'data' => $data]);
@@ -60,6 +68,9 @@ class PdptProfilController extends Controller
         $data = PendapatanProfil::find($id);
         $data->title = $request->title;
         $data->view = $request->view;
+        $data->personalia = $request->personalia;
+        $data->keuangan = $request->keuangan;
+        $data->active = $request->active;
         $data->save();
 
         return response()->json(['status' => 'success', 'data' => $data]);

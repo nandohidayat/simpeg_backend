@@ -41,157 +41,160 @@ const label = {
 
 const position = {
     NIK: {
-        sheet: 0,
-        column: 2,
+        hide: true,
     },
     NAMA: {
-        sheet: 0,
-        column: 3,
+        hide: true,
     },
     BAGIAN: {
-        sheet: 0,
-        column: 4,
+        hide: true,
     },
     GOLONGAN: {
-        sheet: 0,
-        column: 7,
+        hide: false,
     },
     KETPTKP: {
-        sheet: 0,
-        column: 6,
+        hide: false,
     },
     PTKP: {
-        sheet: 0,
-        column: 9,
+        hide: false,
     },
     MASAKER: {
-        sheet: 0,
-        column: 8,
+        hide: false,
     },
     PDPT01: {
-        sheet: 0,
-        column: 10,
+        hide: false,
     },
     PROSEN02: {
-        sheet: 0,
-        column: 11,
+        hide: false,
     },
     PDPT02: {
-        sheet: 0,
-        column: 12,
+        hide: false,
     },
     PROSEN03: {
-        sheet: 0,
-        column: 13,
+        hide: false,
     },
     PDPT03: {
-        sheet: 0,
-        column: 14,
+        hide: false,
     },
     PDPT04: {
-        sheet: 0,
-        column: 16,
+        hide: false,
     },
     PDPT05: {
-        sheet: 0,
-        column: 17,
+        hide: false,
     },
     PDPT06: {
-        sheet: 0,
-        column: 18,
+        hide: false,
     },
     PDPT07: {
-        sheet: 0,
-        column: 19,
+        hide: false,
     },
     PDPT08: {
-        sheet: 0,
-        column: 20,
+        hide: false,
     },
     PDPT09: {
-        sheet: 0,
-        column: 21,
+        hide: false,
     },
     PDPT10: {
-        sheet: 0,
-        column: 22,
+        hide: false,
     },
     PDPT11: {
-        sheet: 0,
-        column: 23,
+        hide: false,
     },
     PDPT12: {
-        sheet: 0,
-        column: 24,
+        hide: false,
     },
     JUMLAHPDPT: {
-        sheet: 0,
-        column: 25,
+        hide: false,
     },
     PROSEN01A: {
-        sheet: 0,
-        column: 26,
+        hide: false,
     },
     POT01: {
-        sheet: 0,
-        column: 27,
+        hide: false,
     },
     PROSEN02A: {
-        sheet: 0,
-        column: 28,
+        hide: false,
     },
     POT02: {
-        sheet: 0,
-        column: 29,
+        hide: false,
     },
     PROSEN03A: {
-        sheet: 0,
-        column: 30,
+        hide: false,
     },
     POT03: {
-        sheet: 0,
-        column: 31,
+        hide: false,
     },
     POT04: {
-        sheet: 0,
-        column: 32,
+        hide: false,
     },
     POT05: {
-        sheet: 0,
-        column: 33,
+        hide: false,
     },
     POT06: {
-        sheet: 0,
-        column: 34,
+        hide: false,
     },
     POT07: {
-        sheet: 0,
-        column: 35,
+        hide: false,
     },
     POT08: {
-        sheet: 0,
-        column: 36,
+        hide: false,
     },
     POT09: {
-        sheet: 0,
-        column: 37,
+        hide: false,
     },
     POT10: {
-        sheet: 0,
-        column: 38,
+        hide: false,
     },
     POT11: {
-        sheet: 0,
-        column: 39,
+        hide: false,
     },
     JUMLAHPOT: {
-        sheet: 0,
-        column: 41,
+        hide: false,
     },
     DITERIMA: {
-        sheet: 0,
-        column: 42,
+        hide: false,
     },
 };
+
+const array = [
+    "NIK",
+    "NAMA",
+    "BAGIAN",
+    "GOLONGAN",
+    "KETPTKP",
+    "PTKP",
+    "MASAKER",
+    "PDPT01",
+    "PROSEN02",
+    "PDPT02",
+    "PROSEN03",
+    "PDPT03",
+    "PDPT04",
+    "PDPT05",
+    "PDPT06",
+    "PDPT07",
+    "PDPT08",
+    "PDPT09",
+    "PDPT10",
+    "PDPT11",
+    "PDPT12",
+    "JUMLAHPDPT",
+    "PROSEN01A",
+    "POT01",
+    "PROSEN02A",
+    "POT02",
+    "PROSEN03A",
+    "POT03",
+    "POT04",
+    "POT05",
+    "POT06",
+    "POT07",
+    "POT08",
+    "POT09",
+    "POT10",
+    "POT11",
+    "JUMLAHPOT",
+    "DITERIMA",
+];
 
 console.log(JSON.stringify(position));
