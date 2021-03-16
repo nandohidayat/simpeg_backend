@@ -91,7 +91,38 @@ class PendapatanController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $date = Carbon::createFromFormat('m-Y', $request->month)->addMonth()->lastOfMonth()->day();
+        $tipe = $request->tipe;
+        $profil = (int) $request->profil;
+
+        $column = DB::table('pendapatan_profils')->select($tipe)->where('id_pendapatan_profil', $profil)->first();
+        $column = json_decode($column->$tipe) ?? [];
+
+        $query = 'INSERT INTO pendapatans (month, id_pegawai ,label, value) VALUES ';
+
+        foreach ($request->pendapatan as $p) {
+            foreach ($column as $key => $value) {
+                if ($value->hide) {
+                    continue;
+                }
+
+                $c = strtolower($key);
+
+                $query .= '(\'' . $date . '\',\'' . $p['id_pegawai'] . '\', \'' . $c . '\', ';
+                if ($p[$c]) {
+                    $query .= '\'' . $p[$c] . '\'), ';
+                } else {
+                    $query .= 'null), ';
+                }
+            }
+        }
+
+        $query = substr($query, 0, -2);
+        $query .= ' ON CONFLICT ON CONSTRAINT pendapatans_ukey DO UPDATE SET value = excluded.value';
+
+        DB::select($query);
+
+        return response()->json(["status" => "success"], 201);
     }
 
     /**
