@@ -21,6 +21,7 @@ class PendapatanController extends Controller
 
         $tipe = request()->tipe;
         $profil = (int) request()->profil;
+        $list = (int) request()->list;
 
         $column = DB::table('pendapatan_profils')->select($tipe)->where('id_pendapatan_profil', $profil)->first();
         $column = json_decode($column->$tipe) ?? [];
@@ -39,12 +40,24 @@ class PendapatanController extends Controller
             }
 
             $c = strtolower($key);
-            $query->leftJoin('pendapatans as t_' . $c, function ($query) use ($c, $date) {
+
+            if ($c === 'pjk1') {
+                if ($date->month !== 1) {
+                    $query->addSelect(DB::raw("(SELECT cast(t_$c.value AS DECIMAL) from pendapatans as t_$c where t_$c.label = '$c' AND t_$c.month = '" . $date->subMonth() . "' AND t_$c.id_pegawai = fdp.id_pegawai)"));
+                }
+                continue;
+            }
+
+            $query->leftJoin('pendapatans as t_' . $c, function ($query) use ($c, $list) {
+                $query->where('t_' . $c . '.id_pendapatan_list', $list);
                 $query->where('t_' . $c . '.label', $c);
-                $query->where('t_' . $c . '.month', $date);
                 $query->on('t_' . $c . '.id_pegawai', '=', 'fdp.id_pegawai');
-            })
-                ->addSelect('t_' . $c . '.value as ' . $c);
+            });
+            if ($value->number) {
+                $query->addSelect(DB::raw('cast(t_' . $c . '.value AS DECIMAL) as ' . $c));
+            } else {
+                $query->addSelect('t_' . $c . '.value as ' . $c);
+            }
 
             array_push($c_array, $c);
         }
@@ -57,7 +70,7 @@ class PendapatanController extends Controller
             return $d;
         });
 
-        return response()->json(["status" => "success", "data" => $data], 200);
+        return response()->json(["status" => "success", "data" => $data], 200)->setEncodingOptions(JSON_NUMERIC_CHECK);
     }
 
     /**
@@ -68,7 +81,6 @@ class PendapatanController extends Controller
      */
     public function store(Request $request)
     {
-        //
     }
 
     /**
@@ -94,6 +106,7 @@ class PendapatanController extends Controller
         $date = Carbon::createFromFormat('m-Y', $request->month)->addMonth()->lastOfMonth()->day();
         $tipe = $request->tipe;
         $profil = (int) $request->profil;
+        $list = (int) $request->list;
 
         $column = DB::table('pendapatan_profils')->select($tipe)->where('id_pendapatan_profil', $profil)->first();
         $column = json_decode($column->$tipe) ?? [];
@@ -108,7 +121,7 @@ class PendapatanController extends Controller
 
                 $c = strtolower($key);
 
-                $query .= '(\'' . $date . '\',\'' . $p['id_pegawai'] . '\', \'' . $c . '\', ';
+                $query .= '(\'' . $list . '\',\'' . $p['id_pegawai'] . '\', \'' . $c . '\', ';
                 if ($p[$c]) {
                     $query .= '\'' . $p[$c] . '\'), ';
                 } else {
@@ -133,6 +146,5 @@ class PendapatanController extends Controller
      */
     public function destroy($id)
     {
-        //
     }
 }

@@ -65,9 +65,10 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('schedule', 'API\ScheduleController');
     Route::apiResource('shift', 'API\ShiftController');
     Route::apiResource('job', 'API\JobController');
-    Route::apiResource('pendapatan/profil', 'API\PdptProfilController');
-    Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
     Route::apiResource('pendapatan/email', 'API\PendapatanEmailController');
+    Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
+    Route::apiResource('pendapatan/list', 'API\PendapatanListController');
+    Route::apiResource('pendapatan/profil', 'API\PdptProfilController');
     Route::apiResource('pendapatan', 'API\PendapatanController');
     Route::apiResource('log/departemen', 'API\LogDepartemenController');
 });
