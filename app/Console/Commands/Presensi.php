@@ -56,7 +56,7 @@ class Presensi extends Command
      */
     public function handle()
     {
-        $ip_key = array('192.168.0.251' => '12345', '192.168.0.252' => '0', '192.168.0.229' => '0');
+        $ip_key = array('192.168.0.251' => '12345', '192.168.0.252' => '0', '192.168.0.229' => '0', '192.168.0.253' => '0');
 
         foreach ($ip_key as $ip => $key) {
             $Connect = fsockopen($ip, "80", $errno, $errstr, 1);
