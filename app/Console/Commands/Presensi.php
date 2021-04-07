@@ -64,6 +64,7 @@ class Presensi extends Command
                 $Connect = fsockopen($ip, "80", $errno, $errstr, 1);
             } catch (Exception $e) {
                 echo $e->getMessage();
+                continue;
             }
 
             if ($Connect) {
