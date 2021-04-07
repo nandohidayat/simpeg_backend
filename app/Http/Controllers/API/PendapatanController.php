@@ -17,14 +17,19 @@ class PendapatanController extends Controller
      */
     public function index()
     {
-        $date = Carbon::createFromFormat('m-Y', request()->month)->addMonth()->lastOfMonth()->day();
 
         $tipe = request()->tipe;
-        $profil = (int) request()->profil;
         $list = (int) request()->list;
 
-        $column = DB::table('pendapatan_profils')->select($tipe)->where('id_pendapatan_profil', $profil)->first();
-        $column = json_decode($column->$tipe) ?? [];
+        $data = DB::table('pendapatan_lists as pl')
+            ->where('pl.id_pendapatan_list', $list)
+            ->join('pendapatan_profils as pp', 'pp.id_pendapatan_profil', '=', 'pl.id_pendapatan_profil')
+            ->select($tipe, 'pl.month', 'pl.id_pendapatan_profil as profil')
+            ->first();
+
+        $column = json_decode($data->$tipe) ?? [];
+        $date = Carbon::createFromFormat('Y-m-d', $data->month)->lastOfMonth()->day();
+        $profil = $data->profil;
 
         $query = DB::table('f_data_pegawai as fdp')
             ->leftJoin('log_departemens as ld', 'fdp.id_pegawai', '=', 'ld.id_pegawai')
@@ -41,12 +46,12 @@ class PendapatanController extends Controller
 
             $c = strtolower($key);
 
-            if ($c === 'pjk1') {
-                if ($date->month !== 1) {
-                    $query->addSelect(DB::raw("(SELECT cast(t_$c.value AS DECIMAL) from pendapatans as t_$c where t_$c.label = '$c' AND t_$c.month = '" . $date->subMonth() . "' AND t_$c.id_pegawai = fdp.id_pegawai)"));
-                }
-                continue;
-            }
+            // if ($c === 'pjk1') {
+            //     if ($date->month !== 1) {
+            //         $query->addSelect(DB::raw("(SELECT cast(t_$c.value AS DECIMAL) from pendapatans as t_$c where t_$c.label = '$c' AND t_$c.month = '" . $date->subMonth() . "' AND t_$c.id_pegawai = fdp.id_pegawai)"));
+            //     }
+            //     continue;
+            // }
 
             $query->leftJoin('pendapatans as t_' . $c, function ($query) use ($c, $list) {
                 $query->where('t_' . $c . '.id_pendapatan_list', $list);
@@ -70,7 +75,7 @@ class PendapatanController extends Controller
             return $d;
         });
 
-        return response()->json(["status" => "success", "data" => $data], 200)->setEncodingOptions(JSON_NUMERIC_CHECK);
+        return response()->json(["status" => "success", "data" => ['pendapatan' => $data, 'profil' => $profil]], 200)->setEncodingOptions(JSON_NUMERIC_CHECK);
     }
 
     /**

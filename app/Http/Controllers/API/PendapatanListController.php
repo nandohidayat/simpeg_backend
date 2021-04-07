@@ -16,17 +16,20 @@ class PendapatanListController extends Controller
      */
     public function index()
     {
-        if ((int)request()->select === 1) {
-        }
 
         $first = Carbon::create(request()->year)->firstOfYear();
         $last = Carbon::create(request()->year)->lastOfYear();
-        $data = DB::table('pendapatan_lists as pl')
+        $query = DB::table('pendapatan_lists as pl')
             ->leftJoin('pendapatan_profils as pp', 'pl.id_pendapatan_profil', '=', 'pp.id_pendapatan_profil')
             ->where('pl.distribution', '>=', $first)
-            ->where('pl.distribution', '<=', $last)
-            ->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution')
-            ->orderBy('distribution')
+            ->where('pl.distribution', '<=', $last);
+
+        if ((int)request()->select === 1) {
+            $query->select('pl.id_pendapatan_list as value', DB::raw('concat_ws(\' \', to_char(pl.month, \'YYYY-MM\'), pp.title) as label'));
+        } else {
+            $query->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution');
+        }
+        $data = $query->orderBy('distribution')
             ->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
