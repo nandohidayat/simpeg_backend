@@ -27,7 +27,7 @@ class PendapatanListController extends Controller
         if ((int)request()->select === 1) {
             $query->select('pl.id_pendapatan_list as value', DB::raw('concat_ws(\' \', to_char(pl.month, \'YYYY-MM\'), pp.title) as label'));
         } else {
-            $query->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution');
+            $query->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution', 'pl.locked');
         }
         $data = $query->orderBy('distribution')
             ->get();
@@ -50,7 +50,8 @@ class PendapatanListController extends Controller
             ->insert([
                 'id_pendapatan_profil' => $request->id_pendapatan_profil,
                 'month' => $month,
-                'distribution' => $distribution
+                'distribution' => $distribution,
+                'locked' => false
             ]);
 
         return response()->json(["status" => "success"], 200);
@@ -76,21 +77,26 @@ class PendapatanListController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $month = Carbon::createFromFormat('Y-m-d', $request->month . '-01');
-        $distribution = Carbon::createFromFormat('Y-m-d', $request->distribution);
+        $query = DB::table('pendapatan_lists')
+            ->where('id_pendapatan_list', $id);
 
-        DB::table('pendapatan_lists')
-            ->where('id_pendapatan_list', $request->id_pendapatan_list)
-            ->update([
+        if ((int)request()->lock === 1) {
+            $query->update(['locked' => $request->locked]);
+        } else {
+            $month = Carbon::createFromFormat('Y-m-d', $request->month . '-01');
+            $distribution = Carbon::createFromFormat('Y-m-d', $request->distribution);
+
+            $query->update([
                 'id_pendapatan_profil' => $request->id_pendapatan_profil,
                 'month' => $month,
                 'distribution' => $distribution
             ]);
+        }
 
         $data = DB::table('pendapatan_lists as pl')
             ->leftJoin('pendapatan_profils as pp', 'pl.id_pendapatan_profil', '=', 'pp.id_pendapatan_profil')
-            ->where('pl.id_pendapatan_list', $request->id_pendapatan_list)
-            ->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution')
+            ->where('pl.id_pendapatan_list', $id)
+            ->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution', 'pl.locked')
             ->first();
 
         return response()->json(["status" => "success", "data" => $data], 200);

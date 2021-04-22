@@ -35,8 +35,7 @@ class PdptProfilController extends Controller
         $data = new PendapatanProfil();
         $data->title = $request->title;
         $data->view = $request->view;
-        $data->personalia = $request->personalia;
-        $data->keuangan = $request->keuangan;
+        $data->column = $request->column;
         $data->active = $request->active;
         $data->save();
 
@@ -68,8 +67,7 @@ class PdptProfilController extends Controller
         $data = PendapatanProfil::find($id);
         $data->title = $request->title;
         $data->view = $request->view;
-        $data->personalia = $request->personalia;
-        $data->keuangan = $request->keuangan;
+        $data->column = $request->column;
         $data->active = $request->active;
         $data->save();
 
