@@ -50,8 +50,7 @@ class PendapatanController extends Controller
             array_push($c_array, $c);
 
             if (!$locked) {
-
-                if ($locked && $c === 'pjk1') {
+                if ($c === 'pjk1') {
                     $query->leftJoin(DB::raw("(SELECT pen.label, pen.value, pl.distribution, pen.id_pegawai, row_number() over (order by pl.distribution desc) as rn from pendapatans as pen LEFT JOIN pendapatan_lists as pl ON pl.id_pendapatan_list = pen.id_pendapatan_list) t_pjk1"), function ($query) use ($first, $firstOfYear) {
                         $query->where('t_pjk1.rn', 1);
                         $query->where('t_pjk1.label', 'pjk7');
