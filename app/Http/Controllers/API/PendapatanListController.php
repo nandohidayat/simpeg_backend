@@ -79,8 +79,19 @@ class PendapatanListController extends Controller
     {
         $query = DB::table('pendapatan_lists')
             ->where('id_pendapatan_list', $id);
-
-        if ((int)request()->lock === 1) {
+        if (request()->edit) {
+            if ((int) request()->edit === 1) {
+                $already = DB::table('pendapatan_lists as pl')->leftJoin('f_data_pegawai as fdp', 'pl.edit', '=', 'fdp.id_pegawai')->where('id_pendapatan_list', $id)->select('pl.edit', 'fdp.nm_pegawai')->first();
+                if ($already->edit) {
+                    return response()->json([
+                        'message' => 'Error, currently edited by ' . $already->nm_pegawai
+                    ], 500);
+                }
+                $query->update(['edit' => auth()->user()->id_pegawai]);
+            } else {
+                $query->update(['edit' => null]);
+            }
+        } else if ((int)request()->lock === 1) {
             $query->update(['locked' => $request->locked]);
         } else {
             $month = Carbon::createFromFormat('Y-m-d', $request->month . '-01');

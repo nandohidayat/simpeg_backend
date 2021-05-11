@@ -22,8 +22,13 @@ class PendapatanController extends Controller
         $data = DB::table('pendapatan_lists as pl')
             ->where('pl.id_pendapatan_list', $list)
             ->join('pendapatan_profils as pp', 'pp.id_pendapatan_profil', '=', 'pl.id_pendapatan_profil')
-            ->select('pp.column', 'pl.month', 'pl.distribution as distri', 'pl.id_pendapatan_profil as profil', 'pl.locked')
+            ->select('pp.column', 'pl.month', 'pl.distribution as distri', 'pl.id_pendapatan_profil as profil', 'pl.locked', 'pl.edit')
             ->first();
+
+        $edit = $data->edit;
+        if ($data->edit) {
+            $edit = DB::table('f_data_pegawai')->where('id_pegawai', $data->edit)->select('id_pegawai', 'nm_pegawai')->first();
+        }
 
         $column = json_decode($data->column) ?? [];
         $date = Carbon::createFromFormat('Y-m-d', $data->month)->lastOfMonth();
@@ -126,30 +131,32 @@ class PendapatanController extends Controller
                 $pen->pjk14 = - ($pen->pjk12);
                 $pen->pjk15 = $pen->pjk12 - $pen->pjk13;
 
-                $pen->pot1 = - ($pen->pjk15);
-                $pen->pot10 = $pen->pjk15;
+                if (property_exists($pen, 'jmlhgaji')) {
+                    $pen->pot1 = - ($pen->pjk15);
+                    $pen->pot10 = $pen->pjk15;
 
-                $pen->jmlhpotongan = $pen->pot1
-                    + $pen->pot2
-                    + $pen->pot3
-                    + $pen->pot4
-                    + $pen->pot5
-                    + $pen->pot6
-                    + $pen->pot7
-                    + $pen->pot8
-                    + $pen->pot9
-                    + $pen->pot10;
+                    $pen->jmlhpot = $pen->pot1
+                        + $pen->pot2
+                        + $pen->pot3
+                        + $pen->pot4
+                        + $pen->pot5
+                        + $pen->pot6
+                        + $pen->pot7
+                        + $pen->pot8
+                        + $pen->pot9
+                        + $pen->pot10;
 
-                $pen->sebelumzakat = $pen->jmlhgaji + $pen->jmlhpot;
-                $pen->pot11 = - ($pen->sebelumzakat * 0.025);
-                $pen->diterima = $pen->sebelumzakat + $pen->pot11;
-                $pen->penyerahan = $pen->diterima + $pen->jmlhpotg;
+                    $pen->sebelumzakat = $pen->jmlhgaji + $pen->jmlhpot;
+                    $pen->pot11 = - ($pen->sebelumzakat * 0.025);
+                    $pen->diterima = $pen->sebelumzakat + $pen->pot11;
+                    $pen->penyerahan = $pen->diterima + $pen->jmlhpotg;
+                }
 
                 $data[$key] = $pen;
             }
         }
 
-        return response()->json(["status" => "success", "data" => ['pendapatan' => $data, 'profil' => $profil]], 200)->setEncodingOptions(JSON_NUMERIC_CHECK);
+        return response()->json(["status" => "success", "data" => ['pendapatan' => $data, 'profil' => $profil, 'date' => $last, 'edit' => $edit]], 200)->setEncodingOptions(JSON_NUMERIC_CHECK);
     }
 
     /**
