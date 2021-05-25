@@ -98,6 +98,9 @@ class PendapatanController extends Controller
                     $query->addSelect(DB::raw('cast(t_pjk13.value as DECIMAL) as pjk13'));
                     continue;
                 }
+
+                if ($c === 'premi3') {
+                }
             }
             $query->leftJoin('pendapatans as t_' . $c, function ($query) use ($c, $list) {
                 $query->where('t_' . $c . '.id_pendapatan_list', $list);
