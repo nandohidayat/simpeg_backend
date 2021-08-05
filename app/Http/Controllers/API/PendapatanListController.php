@@ -27,7 +27,7 @@ class PendapatanListController extends Controller
         if ((int)request()->select === 1) {
             $query->select('pl.id_pendapatan_list as value', DB::raw('concat_ws(\' \', to_char(pl.month, \'YYYY-MM\'), pp.title) as label'));
         } else {
-            $query->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution', 'pl.locked');
+            $query->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pl.month', 'pl.title', 'pp.title as profil', 'pl.distribution', 'pl.locked');
         }
         $data = $query->orderBy('distribution')
             ->get();
@@ -48,6 +48,7 @@ class PendapatanListController extends Controller
 
         DB::table('pendapatan_lists')
             ->insert([
+                'title' => $request->title,
                 'id_pendapatan_profil' => $request->id_pendapatan_profil,
                 'month' => $month,
                 'distribution' => $distribution,
@@ -77,27 +78,16 @@ class PendapatanListController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $query = DB::table('pendapatan_lists')
-            ->where('id_pendapatan_list', $id);
-        if (request()->edit) {
-            if ((int) request()->edit === 1) {
-                $already = DB::table('pendapatan_lists as pl')->leftJoin('f_data_pegawai as fdp', 'pl.edit', '=', 'fdp.id_pegawai')->where('id_pendapatan_list', $id)->select('pl.edit', 'fdp.nm_pegawai')->first();
-                if ($already->edit) {
-                    return response()->json([
-                        'message' => 'Error, currently edited by ' . $already->nm_pegawai
-                    ], 500);
-                }
-                $query->update(['edit' => auth()->user()->id_pegawai]);
-            } else {
-                $query->update(['edit' => null]);
-            }
-        } else if ((int)request()->lock === 1) {
+        $query = DB::table('pendapatan_lists')->where('id_pendapatan_list', $id);
+
+        if ((int)request()->lock === 1) {
             $query->update(['locked' => $request->locked]);
         } else {
             $month = Carbon::createFromFormat('Y-m-d', $request->month . '-01');
             $distribution = Carbon::createFromFormat('Y-m-d', $request->distribution);
 
             $query->update([
+                'title' => $request->title,
                 'id_pendapatan_profil' => $request->id_pendapatan_profil,
                 'month' => $month,
                 'distribution' => $distribution
@@ -107,7 +97,7 @@ class PendapatanListController extends Controller
         $data = DB::table('pendapatan_lists as pl')
             ->leftJoin('pendapatan_profils as pp', 'pl.id_pendapatan_profil', '=', 'pp.id_pendapatan_profil')
             ->where('pl.id_pendapatan_list', $id)
-            ->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pp.title', 'pl.month', 'pl.distribution', 'pl.locked')
+            ->select('pl.id_pendapatan_list', 'pl.id_pendapatan_profil', 'pl.month', 'pl.title', 'pp.title as profil', 'pl.distribution', 'pl.locked')
             ->first();
 
         return response()->json(["status" => "success", "data" => $data], 200);

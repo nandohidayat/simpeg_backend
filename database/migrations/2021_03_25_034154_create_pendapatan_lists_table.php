@@ -18,6 +18,8 @@ class CreatePendapatanListsTable extends Migration
             $table->bigInteger('id_pendapatan_profil');
             $table->date('month');
             $table->date('distribution');
+            $table->boolean('locked');
+            $table->string('title');
             $table->timestamps();
         });
     }

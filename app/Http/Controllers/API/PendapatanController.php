@@ -244,6 +244,7 @@ class PendapatanController extends Controller
                     $pen->penyerahan = $pen->diterima + $pen->jmlhpotg;
                 }
 
+                return response()->json(['data' => $profil]);
                 if ((int)$profil === 1) {
                     $pen->pjk3 = $pen->pjk3 + $pen->jmlhgaji;
                     $pen->pjk8 = $pen->pjk8 - ($pen->pjk3 * 0.05);
