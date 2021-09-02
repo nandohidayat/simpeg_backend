@@ -9,9 +9,9 @@ use App\Http\Controllers\API\BaseController as BaseController;
 use App\Pegawai;
 use App\SIMDataPegawai;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Mockery\Undefined;
 use stdClass;
-use Validator;
 
 
 class PegawaiController extends BaseController
@@ -29,11 +29,17 @@ class PegawaiController extends BaseController
             if (request()->dept) {
                 $query->whereRaw('\'' . request()->dept . '\' = ANY(id_dept)');
             }
+
             $query->where('is_active', true);
-            $query->select('id_pegawai', 'nm_pegawai');
+
+            if ((int) request()->ant === 1) {
+                $query->select('id_pegawai as value', 'nm_pegawai as label');
+            } else {
+                $query->select('id_pegawai', 'nm_pegawai');
+            }
         }
 
-        $data = $query->orderBy('nm_pegawai')->get();
+        $data = $query->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
