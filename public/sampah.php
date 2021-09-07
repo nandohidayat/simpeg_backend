@@ -2,15 +2,12 @@
 
 namespace App\Http\Controllers\API;
 
-use App\Exports\AbsenExport;
 use App\Http\Controllers\Controller;
 use App\Presensi;
 use App\Schedule;
-use App\SIMDepartment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
-use Maatwebsite\Excel\Facades\Excel;
 
 class AbsenController extends Controller
 {
@@ -128,12 +125,5 @@ class AbsenController extends Controller
     public function destroy($id)
     {
         //
-    }
-
-    public function export()
-    {
-        $dept = SIMDepartment::where('id_dept', request()->dept)->first();
-        $month = Carbon::createFromFormat('Y-m-d', request()->month);
-        return Excel::download(new AbsenExport(request()->month, request()->dept, request()->pegawai, request()->detail, request()->terlambat), 'Laporan Kehadiran ' . str_replace('/', ' ', $dept ? $dept->nm_dept : '') . '(' . $month->format('Y-m') . ').xlsx');
     }
 }

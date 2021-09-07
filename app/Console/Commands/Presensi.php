@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Presensi as AppPresensi;
+use Exception;
 use Illuminate\Console\Command;
 
 class Presensi extends Command
@@ -56,10 +57,15 @@ class Presensi extends Command
      */
     public function handle()
     {
-        $ip_key = array('192.168.0.251' => '12345', '192.168.0.252' => '0', '192.168.0.229' => '0');
+        $ip_key = array('192.168.0.251' => '12345', '192.168.0.252' => '0', '192.168.0.229' => '0', '192.168.0.253' => '0', '192.168.0.254' => '0');
 
         foreach ($ip_key as $ip => $key) {
-            $Connect = fsockopen($ip, "80", $errno, $errstr, 1);
+            try {
+                $Connect = fsockopen($ip, "80", $errno, $errstr, 1);
+            } catch (Exception $e) {
+                echo $e->getMessage();
+                continue;
+            }
 
             if ($Connect) {
                 $soap_request = "<GetAttLog><ArgComKey xsi:type=\"xsd:integer\">" . $key . "</ArgComKey><Arg><PIN xsi:type=\"xsd:integer\">All</PIN></Arg></GetAttLog>";

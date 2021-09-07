@@ -36,24 +36,40 @@ class DepartemenController extends Controller
                     ->first();
 
                 if ($semua) {
-                    $data = DB::table('f_department')->select('id_dept', 'nm_dept')->orderBy('nm_dept')->get();
+                    $query = DB::table('f_department as fd');
+                    if ((int) request()->ant === 1) {
+                        $query->select('fd.id_dept as value', 'fd.nm_dept as label')->orderBy('label');
+                    } else {
+                        $query->select('fd.id_dept', 'fd.nm_dept')->orderBy('nm_dept');
+                    }
+                    $data = $query->get();
                 } else {
                     $query = DB::table('log_departemens as ld')
                         ->where('ld.id_pegawai', auth()->user()->id_pegawai)
                         ->whereRaw('ld.masuk <= \'' . $today . '\'')
                         ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
-                        ->join('f_department as fd', 'fd.id_dept', '=', 'ld.id_dept')
-                        ->select('fd.id_dept', 'fd.nm_dept');
+                        ->join('f_department as fd', 'fd.id_dept', '=', 'ld.id_dept');
+
+                    if ((int) request()->ant === 1) {
+                        $query->select('fd.id_dept as value', 'fd.nm_dept as label');
+                    } else {
+                        $query->select('fd.id_dept', 'fd.nm_dept');
+                    }
 
                     $child = DB::table('log_departemens as ld')
                         ->where('ld.id_pegawai', auth()->user()->id_pegawai)
                         ->whereRaw('ld.masuk <= \'' . $today . '\'')
                         ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
                         ->rightJoin('schedule_accesses as sa', 'sa.access', '=', 'ld.id_dept')
-                        ->join('f_department as fd', 'fd.id_dept', '=', 'sa.dept')
-                        ->select('fd.id_dept', 'fd.nm_dept');
+                        ->join('f_department as fd', 'fd.id_dept', '=', 'sa.dept');
 
-                    $data = $query->union($child)->orderBy('nm_dept')->get();
+                    if ((int) request()->ant === 1) {
+                        $child->select('fd.id_dept as value', 'fd.nm_dept as label')->orderBy('label');
+                    } else {
+                        $child->select('fd.id_dept', 'fd.nm_dept')->orderBy('nm_dept');
+                    }
+
+                    $data = $query->union($child)->get();
                 }
             } else {
                 $query->select('nm_dept');
