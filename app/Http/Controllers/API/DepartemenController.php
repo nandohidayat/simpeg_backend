@@ -38,11 +38,11 @@ class DepartemenController extends Controller
                 if ($semua) {
                     $query = DB::table('f_department as fd');
                     if ((int) request()->ant === 1) {
-                        $query->select('fd.id_dept as value', 'fd.nm_dept as label');
+                        $query->select('fd.id_dept as value', 'fd.nm_dept as label')->orderBy('label');
                     } else {
-                        $query->select('fd.id_dept', 'fd.nm_dept');
+                        $query->select('fd.id_dept', 'fd.nm_dept')->orderBy('nm_dept');
                     }
-                    $data = $query->orderBy('nm_dept')->get();
+                    $data = $query->get();
                 } else {
                     $query = DB::table('log_departemens as ld')
                         ->where('ld.id_pegawai', auth()->user()->id_pegawai)
@@ -64,12 +64,12 @@ class DepartemenController extends Controller
                         ->join('f_department as fd', 'fd.id_dept', '=', 'sa.dept');
 
                     if ((int) request()->ant === 1) {
-                        $query->select('fd.id_dept as value', 'fd.nm_dept as label');
+                        $child->select('fd.id_dept as value', 'fd.nm_dept as label')->orderBy('label');
                     } else {
-                        $query->select('fd.id_dept', 'fd.nm_dept');
+                        $child->select('fd.id_dept', 'fd.nm_dept')->orderBy('nm_dept');
                     }
 
-                    $data = $query->union($child)->orderBy('nm_dept')->get();
+                    $data = $query->union($child)->get();
                 }
             } else {
                 $query->select('nm_dept');
