@@ -30,7 +30,7 @@ Route::get('pendapatanpeg/pendapatan', 'API\PendapatanPegController@exportPendap
 Route::post('pendapatanpeg/pendapatan', 'API\PendapatanPegController@importPendapatanPeg');
 Route::get('pendapatanpeg/profil', 'API\PendapatanPegController@getProfil');
 
-Route::get('email/test', 'API\PendapatanPegController@testTemplate');
+Route::get('email/test', 'API\PendapatanEmailController@test');
 Route::get('email/kirim', 'API\PendapatanPegController@kirimEmail');
 Route::post('email/buat', 'API\PendapatanPegController@buatEmail');
 
@@ -69,6 +69,9 @@ Route::middleware('auth:api')->group(function () {
     Route::apiResource('job', 'API\JobController');
     Route::apiResource('pendapatan/email', 'API\PendapatanEmailController');
     Route::apiResource('pendapatan/harian', 'API\PendapatanHarianController');
-    Route::apiResource('pendapatan/profil', 'API\ProfilPendapatanController');
+    Route::apiResource('pendapatan/list', 'API\PendapatanListController');
+    Route::apiResource('pendapatan/makan', 'API\PendapatanMakanController');
+    Route::apiResource('pendapatan/profil', 'API\PdptProfilController');
+    Route::apiResource('pendapatan', 'API\PendapatanController');
     Route::apiResource('log/departemen', 'API\LogDepartemenController');
 });

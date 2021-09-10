@@ -16,11 +16,14 @@ class ProfilPendapatanController extends Controller
      */
     public function index()
     {
-        $data = [];
+        $profils = [];
 
         if ((int) request()->select === 1) {
-            $data = ProfilPendapatan::select('id_profilp as value', 'nama_pendapatan as text')->orderBy('text')->get();
+            $profils = ProfilPendapatan::select('id_profilp as value', 'nama_pendapatan as label')->orderBy('label')->get();
         }
+
+        $data = ['profils' => $profils, 'profil' => 1];
+
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
