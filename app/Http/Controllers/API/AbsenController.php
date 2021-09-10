@@ -84,10 +84,9 @@ class AbsenController extends Controller
             ->leftJoin('pendapatan_makans as pm', function ($join) {
                 $join->on('pm.tgl', '=', DB::raw('(SELECT MAX(pm_t.tgl) FROM pendapatan_makans as pm_t WHERE pm_t.tgl <= tanggal)'));
             })
-            ->orderBy('tanggal')
             ->select(
-                DB::raw('tanggal::date'),
-                'fd.nm_dept as dept',
+                DB::raw("DISTINCT ON (tanggal::date) tanggal::date"),
+                DB::raw('fd.nm_dept as dept'),
                 'shf.kode as shift',
                 DB::raw('cast(a.datetime as time) as masuk'),
                 DB::raw('cast(b.datetime as time) as keluar'),
@@ -95,6 +94,9 @@ class AbsenController extends Controller
                 DB::raw("(case when (cast(shf.mulai as time) <> time '00:00') AND (a.datetime < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND b.datetime >= (case when shf.selesai > shf.mulai then tanggal.tanggal + shf.selesai else tanggal.tanggal + shf.selesai + interval '1 day' end)) then ph.pendapatan else 0 end) as harian"),
                 DB::raw("(case when (cast(shf.mulai as time) <> time '00:00') AND (a.datetime IS NOT NULL OR b.datetime IS NOT NULL) then pm.pendapatan else 0 end) as makan")
             )
+            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai', 'shf.keterangan', 'a.datetime', 'b.datetime', 'ph.pendapatan', 'pm.pendapatan')
+            ->orderBy('tanggal')
+            ->orderBy(DB::raw("CASE WHEN keterangan = 'Tidak Terlambat' THEN 1 WHEN keterangan = 'Terlambat' THEN 2 WHEN keterangan = 'Libur' THEN 3 END"))
             ->get();
 
         $harian = 0;
