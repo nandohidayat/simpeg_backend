@@ -17,6 +17,8 @@ class CreatePendapatanProfilsTable extends Migration
             $table->bigIncrements('id_pendapatan_profil');
             $table->string('title');
             $table->string('view');
+            $table->jsonb('column');
+            $table->boolean('active');
             $table->timestamps();
         });
     }
