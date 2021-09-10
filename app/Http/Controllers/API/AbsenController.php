@@ -80,17 +80,18 @@ class AbsenController extends Controller
                     ])
                     ->where('b.status', '=', '1');
             })
-            ->orderBy('tanggal')
             ->select(
-                DB::raw('tanggal::date'),
-                'fd.nm_dept as dept',
+                DB::raw("DISTINCT ON (tanggal::date) tanggal::date"),
+                DB::raw('fd.nm_dept as dept'),
                 'shf.kode as shift',
                 DB::raw('cast(min(a.datetime) as time) as masuk'),
                 DB::raw('cast(max(b.datetime) as time) as keluar'),
                 DB::raw("(case when (cast(shf.mulai as time) = time '00:00') then 'Libur' when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') then 'Tidak Terlambat' else 'Terlambat' end) as keterangan"),
                 DB::raw("(case when min(a.datetime) < (tanggal.tanggal + shf.mulai + interval '6 minutes') AND max(b.datetime) >= (case when shf.selesai > shf.mulai then tanggal.tanggal + shf.selesai else tanggal.tanggal + shf.selesai + interval '1 day' end) then (SELECT ph.pendapatan FROM pendapatan_harians as ph WHERE ph.tgl <= tanggal ORDER BY ph.tgl DESC LIMIT 1) else 0 end) as pendapatan")
             )
-            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai')
+            ->groupBy('tanggal.tanggal', 'fd.nm_dept', 'shf.kode', 'shf.mulai', 'shf.selesai', 'shf.keterangan')
+            ->orderBy('tanggal')
+            ->orderBy(DB::raw("CASE WHEN keterangan = 'Tidak Terlambat' THEN 1 WHEN keterangan = 'Terlambat' THEN 2 WHEN keterangan = 'Libur' THEN 3 END"))
             ->get();
 
         $sum = 0;
